@@ -4,7 +4,6 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
-import FloatingActionButton from "@/components/FloatingActionButton";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
