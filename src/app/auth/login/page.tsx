@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import LoginForm from '@/components/auth/LoginForm'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')

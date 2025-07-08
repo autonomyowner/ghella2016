@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import TeamFlipCard from '@/components/TeamFlipCard';
+import founders from '@/components/foundersData';
 
 export default function AboutPage() {
   return (
@@ -110,79 +112,16 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 relative z-10">
           <h2 className="text-5xl font-bold text-center mb-20 gradient-text">مؤسسو الشركة</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            
-            {/* Founder 1 - Islam */}
-            <div className="flip-card animate-slide-in-right" style={{animationDelay: '0.1s'}}>
-              <div className="flip-card-inner">
-                <div className="flip-card-front">
-                  <img src="/assets/islam.jpg" alt="إسلام" className="owner-image" />
-                  <h3 className="text-2xl font-bold mb-2">إسلام</h3>
-                  <p className="text-lg opacity-90">المؤسس والرئيس التنفيذي</p>
-                  <p className="text-sm opacity-75 mt-2">اضغط لمعرفة المزيد</p>
-                </div>
-                <div className="flip-card-back">
-                  <h3 className="text-xl font-bold mb-4">إسلام</h3>
-                  <p className="text-sm leading-relaxed mb-4">
-                    مؤسس ورئيس تنفيذي للشركة، يتمتع بخبرة 15 عاماً في مجال الزراعة والتكنولوجيا الزراعية.
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <p>🌱 خبير في الزراعة المستدامة</p>
-                    <p>💡 مبتكر في التقنيات الزراعية</p>
-                    <p>🤝 قائد في بناء العلاقات</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Founder 2 - Placeholder */}
-            <div className="flip-card animate-slide-in-right" style={{animationDelay: '0.3s'}}>
-              <div className="flip-card-inner">
-                <div className="flip-card-front">
-                  <div className="placeholder-image">
-                    <span className="text-4xl">👤</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">المؤسس الثاني</h3>
-                  <p className="text-lg opacity-90">في انتظار الصورة</p>
-                  <p className="text-sm opacity-75 mt-2">اضغط لمعرفة المزيد</p>
-                </div>
-                <div className="flip-card-back">
-                  <h3 className="text-xl font-bold mb-4">المؤسس الثاني</h3>
-                  <p className="text-sm leading-relaxed mb-4">
-                    شريك مؤسس في الشركة، متخصص في تطوير الأعمال والتسويق الزراعي.
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <p>📈 خبير في تطوير الأعمال</p>
-                    <p>🎯 متخصص في التسويق الزراعي</p>
-                    <p>🌍 خبرة في الأسواق الدولية</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Founder 3 - Placeholder */}
-            <div className="flip-card animate-slide-in-right" style={{animationDelay: '0.5s'}}>
-              <div className="flip-card-inner">
-                <div className="flip-card-front">
-                  <div className="placeholder-image">
-                    <span className="text-4xl">👤</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">المؤسس الثالث</h3>
-                  <p className="text-lg opacity-90">في انتظار الصورة</p>
-                  <p className="text-sm opacity-75 mt-2">اضغط لمعرفة المزيد</p>
-                </div>
-                <div className="flip-card-back">
-                  <h3 className="text-xl font-bold mb-4">المؤسس الثالث</h3>
-                  <p className="text-sm leading-relaxed mb-4">
-                    شريك مؤسس في الشركة، متخصص في التكنولوجيا والحلول الرقمية للزراعة.
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <p>💻 خبير في التكنولوجيا الزراعية</p>
-                    <p>🔧 متخصص في الحلول الرقمية</p>
-                    <p>🚀 مبتكر في الابتكارات التقنية</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {founders.map((founder, idx) => (
+              <TeamFlipCard
+                key={founder.name}
+                name={founder.name}
+                role={founder.role}
+                image={founder.image}
+                bio={founder.bio}
+                skills={founder.skills}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -342,4 +281,4 @@ export default function AboutPage() {
       </section>
     </div>
   );
-} 
+}

@@ -10,18 +10,20 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.3",
+    "@tanstack/react-query": "^5.0.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^11.0.0",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "framer-motion": "^11.0.0",
-    "react-intersection-observer": "^9.8.0",
-    "react-hot-toast": "^2.4.1",
-    "@tanstack/react-query": "^5.0.0",
     "react-hook-form": "^7.50.0",
-    "date-fns": "^3.6.0",
-    "clsx": "^2.1.1",
+    "react-hot-toast": "^2.4.1",
+    "react-intersection-observer": "^9.8.0",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {

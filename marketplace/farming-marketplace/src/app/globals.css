@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-white text-gray-800;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold;
+}
+
+a {
+  @apply text-blue-600 hover:text-blue-800;
+}
+
+button {
+  @apply bg-green-500 text-white font-semibold py-2 px-4 rounded;
+}
+
+input, textarea {
+  @apply border border-gray-300 rounded-md p-2;
+}
+
+.container {
+  @apply mx-auto px-4;
+}
+
+.flex-center {
+  @apply flex justify-center items-center;
+}
+
+.hidden {
+  @apply hidden;
+}
+
+.visible {
+  @apply block;
+}

@@ -381,6 +381,47 @@ export default function HomePage() {
 					</motion.div>
 				</motion.div>
 			</div>
+			{/* --- 4 Big Cards Section Only --- */}
+			<section className="w-full py-16 px-2 md:px-0">
+				<div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+					{/* Card 1: Bee Keeping */}
+					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-amber-400">
+						<img src="/assets/n7l1.webp" alt="تربية النحل" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+						<div className="relative z-10 p-8 md:p-12 text-amber-100 w-full">
+							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-amber-300">كل ما تحتاجه لتربية النحل</h3>
+							<p className="text-base md:text-lg font-medium">معدات، خلايا، عسل طبيعي، وكل ما يلزمك لمشروع ناجح.</p>
+						</div>
+					</div>
+					{/* Card 2: Plants */}
+					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-green-400">
+						<img src="/assets/n7l2.webp" alt="شتلات ونباتات" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+						<div className="relative z-10 p-8 md:p-12 text-green-100 w-full">
+							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-green-300">شتلات ونباتات زراعية</h3>
+							<p className="text-base md:text-lg font-medium">أفضل الشتلات، البذور، والنباتات لمزارعك وحديقتك.</p>
+						</div>
+					</div>
+					{/* Card 3: Cows */}
+					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-lime-400">
+						<img src="/assets/cows1.jpg" alt="أبقار ومواشي" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+						<div className="relative z-10 p-8 md:p-12 text-lime-100 w-full">
+							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-lime-300">أبقار ومواشي</h3>
+							<p className="text-base md:text-lg font-medium">حيوانات صحية، إنتاجية عالية، وخدمات بيطرية متكاملة.</p>
+						</div>
+					</div>
+					{/* Card 4: Machinery */}
+					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-orange-400">
+						<img src="/assets/pexels-timmossholder-974314.jpg" alt="معدات وآلات زراعية" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+						<div className="relative z-10 p-8 md:p-12 text-orange-100 w-full">
+							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-orange-300">معدات وآلات زراعية</h3>
+							<p className="text-base md:text-lg font-medium">أحدث المعدات، الجرارات، والآلات لمزارع حديثة وفعالة.</p>
+						</div>
+					</div>
+				</div>
+			</section>
 		</div>
 	);
 }

@@ -265,27 +265,88 @@ body {
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Professional Inputs */
-.input {
+/* Glassmorphic flipping card styles for TeamFlipCard */
+.flip-card {
+  perspective: 1200px;
+  min-height: 340px;
+  position: relative;
+}
+.flip-card-inner {
+  position: relative;
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: var(--radius-lg);
-  color: var(--foreground);
-  font-size: 0.875rem;
-  transition: all var(--transition-normal);
+  height: 100%;
+  transition: transform 0.7s var(--transition-normal);
+  transform-style: preserve-3d;
 }
-
-.input:focus {
-  outline: none;
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-  background: rgba(15, 23, 42, 0.8);
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }
-
-.input::placeholder {
-  color: var(--neutral-400);
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 1.5rem;
+  box-shadow: var(--glass-shadow);
+  background: var(--glass-gradient);
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  transition: box-shadow 0.3s, border 0.3s;
+}
+.flip-card-front {
+  z-index: 2;
+}
+.flip-card-back {
+  z-index: 3;
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #1de78233 0%, #ff914d22 100%);
+  border: 1.5px solid var(--glass-cta-border);
+  box-shadow: var(--glass-cta-shadow);
+}
+.glassmorphic-card {
+  background: var(--glass-gradient);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+}
+.owner-image {
+  width: 7rem;
+  height: 7rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 4px solid #1de78299;
+  box-shadow: 0 4px 24px #1de78233;
+}
+.placeholder-image {
+  width: 7rem;
+  height: 7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #1de78222;
+  border: 4px solid #1de78233;
+  margin-bottom: 1rem;
+}
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+.gradient-text-light {
+  background: var(--gradient-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+@media (max-width: 768px) {
+  .flip-card {
+    min-height: 320px;
+  }
 }
 
 /* Professional Animations */
