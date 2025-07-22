@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 import { Equipment } from '@/types/equipment';
 
 const EquipmentDetailPage = () => {
@@ -14,17 +14,21 @@ const EquipmentDetailPage = () => {
     const fetchEquipment = async () => {
       if (!id) return;
 
-      const { data, error } = await supabase
-        .from('Equipment')
-        .select('*')
-        .eq('id', id)
-        .single();
+      // Note: This is a placeholder - you'll need to configure firebase properly
+      // const firebase = createClient(process.env.NEXT_PUBLIC_firebase_URL!, process.env.NEXT_PUBLIC_firebase_ANON_KEY!);
+      // const { data, error } = await firebase
+      //   .from('Equipment')
+      //   .select('*')
+      //   .eq('id', id)
+      //   .single();
 
-      if (error) {
-        setError('Failed to load equipment details.');
-      } else {
-        setEquipment(data);
-      }
+      // if (error) {
+      //   setError('Failed to load equipment details.');
+      // } else {
+      //   setEquipment(data);
+      // }
+      
+      setError('Database not configured for this marketplace');
       setLoading(false);
     };
 

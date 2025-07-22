@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { firestore } from '@/lib/firebaseConfig'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { useCategories } from '@/hooks/useData'
 import { EquipmentInsert, LandListingInsert } from '@/types/database.types'
 
@@ -12,7 +12,7 @@ interface ListingFormProps {
 }
 
 const ListingForm: React.FC<ListingFormProps> = ({ type = 'equipment' }) => {
-  const { user } = useAuth()
+  const { user } = useSupabaseAuth()
   const { categories } = useCategories()
   const router = useRouter()
   
@@ -52,22 +52,8 @@ const ListingForm: React.FC<ListingFormProps> = ({ type = 'equipment' }) => {
   }
 
   const uploadImages = async (): Promise<string[]> => {
-    const uploadPromises = images.map(async (image, index) => {
-      const fileName = `${user?.id}/${Date.now()}_${index}_${image.name}`
-      const { data, error } = await supabase.storage
-        .from('listing-images')
-        .upload(fileName, image)
-
-      if (error) throw error
-      
-      const { data: publicUrlData } = supabase.storage
-        .from('listing-images')
-        .getPublicUrl(data.path)
-      
-      return publicUrlData.publicUrl
-    })
-
-    return Promise.all(uploadPromises)
+    // Temporary stub for image upload
+    return images.map((_, index) => `/placeholder-image-${index}.jpg`);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,12 +99,8 @@ const ListingForm: React.FC<ListingFormProps> = ({ type = 'equipment' }) => {
           is_featured: false
         }
 
-        const { error } = await supabase
-          .from('equipment')
-          .insert(equipmentData)
-
-        if (error) throw error
-
+        // Temporary stub for database insertion
+        console.log('Would save equipment:', equipmentData);
         alert('تم إنشاء إعلان المعدة بنجاح!')
         router.push('/listings')
         
@@ -140,12 +122,8 @@ const ListingForm: React.FC<ListingFormProps> = ({ type = 'equipment' }) => {
           is_featured: false
         }
 
-        const { error } = await supabase
-          .from('land_listings')
-          .insert(landData)
-
-        if (error) throw error
-
+        // Temporary stub for database insertion
+        console.log('Would save land listing:', landData);
         alert('تم إنشاء إعلان الأرض بنجاح!')
         router.push('/listings')
       }

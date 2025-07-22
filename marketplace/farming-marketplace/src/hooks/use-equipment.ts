@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase/client';
+import { collection, getDocs } from 'firebase/firestore';
+import { firestore } from '../lib/firebaseConfig';
 import { Equipment } from '../types/equipment';
 
 const useEquipment = () => {
@@ -8,24 +9,29 @@ const useEquipment = () => {
     const [error, setError] = useState<string | null>(null);
 
     const fetchEquipment = async () => {
+        try {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('Equipment')
-            .select('*');
+            const equipmentRef = collection(firestore, 'equipment');
+            const querySnapshot = await getDocs(equipmentRef);
+            
+            const data = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Equipment[];
 
-        if (error) {
-            setError(error.message);
-        } else {
             setEquipmentList(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error fetching equipment');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
         fetchEquipment();
     }, []);
 
-    return { equipmentList, loading, error };
+    return { equipmentList, loading, error, refetch: fetchEquipment };
 };
 
 export default useEquipment;

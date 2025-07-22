@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { firestore } from '@/lib/firebaseConfig';
 import { Equipment, LandListing, Category, Profile } from '@/types/database.types'
 
 // Hook for fetching equipment listings
@@ -9,7 +10,7 @@ export function useEquipment(filters?: {
   category?: string
   location?: string
   priceRange?: [number, number]
-  condition?: string
+  condition?: 'new' | 'excellent' | 'good' | 'fair' | 'poor'
 }) {
   const [equipment, setEquipment] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
@@ -18,43 +19,61 @@ export function useEquipment(filters?: {
   const fetchEquipment = async () => {
     try {
       setLoading(true)
-      let query = supabase
-        .from('equipment')
-        .select(`
-          *,
-          profiles:user_id (full_name, location, phone),
-          categories:category_id (name, name_ar, icon)
-        `)
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
+      const equipmentRef = collection(firestore, 'equipment');
+      let q = query(equipmentRef, where('is_available', '==', true), orderBy('created_at', 'desc'));
 
       if (filters?.category) {
-        query = query.eq('category_id', filters.category)
-      }
-
-      if (filters?.location) {
-        query = query.ilike('location', `%${filters.location}%`)
+        q = query(q, where('category_id', '==', filters.category));
       }
 
       if (filters?.condition) {
-        query = query.eq('condition', filters.condition)
+        q = query(q, where('condition', '==', filters.condition));
+      }
+
+      const querySnapshot = await getDocs(q);
+      let data = querySnapshot.docs.map(doc => {
+        const docData = doc.data();
+        return {
+          id: doc.id,
+          created_at: docData.created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+          updated_at: docData.updated_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+          user_id: docData.user_id || '',
+          title: docData.title || '',
+          description: docData.description || null,
+          price: docData.price || 0,
+          currency: docData.currency || 'USD',
+          category_id: docData.category_id || '',
+          condition: docData.condition || 'new',
+          images: docData.images || [],
+          location: docData.location || null,
+          is_available: docData.is_available || true,
+          view_count: docData.view_count || 0,
+          year: docData.year || null,
+          brand: docData.brand || '',
+          model: docData.model || '',
+          hours_used: docData.hours_used || 0,
+          coordinates: docData.coordinates || null,
+          is_featured: docData.is_featured || false,
+        };
+      });
+
+      // Client-side filtering for location and price range
+      if (filters?.location) {
+        data = data.filter(item => 
+          item.location?.toLowerCase().includes(filters.location!.toLowerCase())
+        );
       }
 
       if (filters?.priceRange) {
-        query = query
-          .gte('price', filters.priceRange[0])
-          .lte('price', filters.priceRange[1])
+        data = data.filter(item => 
+          item.price >= filters.priceRange![0] && item.price <= filters.priceRange![1]
+        );
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setEquipment(data || [])
-      }
+      setEquipment(data);
     } catch (err) {
       setError('حدث خطأ في تحميل البيانات')
+      console.error('Error fetching equipment:', err);
     } finally {
       setLoading(false)
     }
@@ -81,44 +100,62 @@ export function useLandListings(filters?: {
   const fetchLandListings = async () => {
     try {
       setLoading(true)
-      let query = supabase
-        .from('land_listings')
-        .select(`
-          *,
-          profiles:user_id (full_name, location, phone)
-        `)
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
+      const landRef = collection(firestore, 'land_listings');
+      let q = query(landRef, where('is_available', '==', true), orderBy('created_at', 'desc'));
 
       if (filters?.type) {
-        query = query.eq('listing_type', filters.type)
+        q = query(q, where('listing_type', '==', filters.type));
       }
 
+      const querySnapshot = await getDocs(q);
+      let data = querySnapshot.docs.map(doc => {
+        const docData = doc.data();
+        return {
+          id: doc.id,
+          created_at: docData.created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+          updated_at: docData.updated_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+          user_id: docData.user_id || '',
+          title: docData.title || '',
+          description: docData.description || null,
+          price: docData.price || 0,
+          currency: docData.currency || 'USD',
+          listing_type: docData.listing_type || 'sale',
+          area_size: docData.area_size || 0,
+          images: docData.images || [],
+          location: docData.location || null,
+          is_available: docData.is_available || true,
+          coordinates: docData.coordinates || null,
+          area_unit: docData.area_unit || 'sqft',
+          soil_type: docData.soil_type || null,
+          water_source: docData.water_source || null,
+          is_featured: docData.is_featured || false,
+          view_count: docData.view_count || 0,
+        };
+      });
+
+      // Client-side filtering
       if (filters?.location) {
-        query = query.ilike('location', `%${filters.location}%`)
+        data = data.filter(item => 
+          item.location?.toLowerCase().includes(filters.location!.toLowerCase())
+        );
       }
 
       if (filters?.priceRange) {
-        query = query
-          .gte('price', filters.priceRange[0])
-          .lte('price', filters.priceRange[1])
+        data = data.filter(item => 
+          item.price >= filters.priceRange![0] && item.price <= filters.priceRange![1]
+        );
       }
 
       if (filters?.areaRange) {
-        query = query
-          .gte('area_size', filters.areaRange[0])
-          .lte('area_size', filters.areaRange[1])
+        data = data.filter(item => 
+          item.area_size >= filters.areaRange![0] && item.area_size <= filters.areaRange![1]
+        );
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setLandListings(data || [])
-      }
+      setLandListings(data);
     } catch (err) {
       setError('حدث خطأ في تحميل البيانات')
+      console.error('Error fetching land listings:', err);
     } finally {
       setLoading(false)
     }
@@ -141,18 +178,28 @@ export function useCategories() {
     async function fetchCategories() {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('sort_order', { ascending: true })
+        const categoriesRef = collection(firestore, 'categories');
+        const q = query(categoriesRef, orderBy('sort_order', 'asc'));
 
-        if (error) {
-          setError(error.message)
-        } else {
-          setCategories(data || [])
-        }
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            created_at: docData.created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+            name: docData.name || '',
+            name_ar: docData.name_ar || '',
+            description: docData.description || null,
+            icon: docData.icon || '',
+            parent_id: docData.parent_id || null,
+            sort_order: docData.sort_order || 0,
+          };
+        });
+
+        setCategories(data);
       } catch (err) {
         setError('حدث خطأ في تحميل الفئات')
+        console.error('Error fetching categories:', err);
       } finally {
         setLoading(false)
       }
@@ -179,19 +226,32 @@ export function useProfile(userId?: string) {
 
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
+        const profileRef = collection(firestore, 'profiles');
+        const q = query(profileRef, where('id', '==', userId));
 
-        if (error) {
-          setError(error.message)
-        } else {
-          setProfile(data)
-        }
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            created_at: docData.created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+            updated_at: docData.updated_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+            full_name: docData.full_name || '',
+            phone: docData.phone || null,
+            location: docData.location || null,
+            avatar_url: docData.avatar_url || null,
+            user_type: docData.user_type || 'farmer',
+            is_verified: docData.is_verified || false,
+            bio: docData.bio || null,
+            website: docData.website || null,
+            social_links: docData.social_links || {},
+          };
+        });
+
+        setProfile(data[0] || null);
       } catch (err) {
         setError('حدث خطأ في تحميل الملف الشخصي')
+        console.error('Error fetching profile:', err);
       } finally {
         setLoading(false)
       }
@@ -201,30 +261,4 @@ export function useProfile(userId?: string) {
   }, [userId])
 
   return { profile, loading, error }
-}
-
-// Simple auth hook (deprecated - use AuthContext instead)
-export function useSimpleAuth() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  return { user, loading }
 }

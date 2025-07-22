@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -14,16 +14,15 @@ const RegisterPage = () => {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    // Note: This is a placeholder - you'll need to configure firebase properly
+    // const firebase = createClient(process.env.NEXT_PUBLIC_firebase_URL!, process.env.NEXT_PUBLIC_firebase_ANON_KEY!);
+    // const { error } = await firebase.auth.signUp({
+    //   email,
+    //   password,
+    // });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push('/login');
-    }
+    // For now, just show an error
+    setError('Authentication not configured for this marketplace');
     setLoading(false);
   };
 

@@ -1,84 +1,110 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus, MessageCircle, Phone, Search, Filter } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Tractor, MapPin, X } from 'lucide-react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useRouter } from 'next/navigation';
 
-const FloatingActionButton: React.FC = () => {
+const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useSupabaseAuth();
+  const router = useRouter();
+
+  const handleAddClick = () => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      router.push('/auth/login');
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
 
   const actions = [
     {
-      icon: Plus,
-      label: 'إضافة إعلان',
-      href: '/listings/new',
-      color: 'bg-green-500 hover:bg-green-600'
+      icon: <Tractor className="w-5 h-5" />,
+      label: 'إضافة معدات',
+      href: '/equipment/new',
+      color: 'from-emerald-500 to-green-500'
     },
     {
-      icon: Search,
-      label: 'البحث',
-      href: '/listings',
-      color: 'bg-blue-500 hover:bg-blue-600'
-    },
-    {
-      icon: MessageCircle,
-      label: 'المحادثات',
-      href: '/messages',
-      color: 'bg-purple-500 hover:bg-purple-600'
-    },
-    {
-      icon: Phone,
-      label: 'اتصل بنا',
-      href: '/contact',
-      color: 'bg-orange-500 hover:bg-orange-600'
+      icon: <MapPin className="w-5 h-5" />,
+      label: 'إضافة أرض',
+      href: '/land/new',
+      color: 'from-blue-500 to-cyan-500'
     }
   ];
 
   return (
-    <div className="fixed bottom-24 left-4 z-40 md:hidden">
-      {/* Action Buttons */}
-      <div className={`flex flex-col-reverse gap-3 mb-4 transition-all duration-300 ${
-        isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-      }`}>
-        {actions.map((action, index) => {
-          const IconComponent = action.icon;
-          return (
-            <Link
-              key={action.label}
-              href={action.href}
-              className={`flex items-center gap-3 ${action.color} text-white px-4 py-3 rounded-full shadow-lg 
-                        transition-all duration-300 hover:scale-105 hover:shadow-xl group ${
-                isOpen ? 'animate-slide-up' : ''
-              }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-              onClick={() => setIsOpen(false)}
-            >
-              <IconComponent size={20} />
-              <span className="text-sm font-medium whitespace-nowrap">{action.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <div className="fixed bottom-6 right-6 z-50">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute bottom-16 right-0 space-y-3"
+          >
+            {actions.map((action, index) => (
+              <motion.div
+                key={action.href}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Link href={action.href}>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center space-x-3 rtl:space-x-reverse px-4 py-3 bg-gradient-to-r ${action.color} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group`}
+                  >
+                    <span className="text-sm font-medium">{action.label}</span>
+                    <div className="group-hover:scale-110 transition-transform duration-200">
+                      {action.icon}
+                    </div>
+                  </button>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Main FAB Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full 
-                   shadow-lg flex items-center justify-center transition-all duration-300 
-                   hover:scale-110 hover:shadow-xl active:scale-95 ${
-          isOpen ? 'rotate-45' : 'rotate-0'
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={handleAddClick}
+        className={`w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center ${
+          isOpen 
+            ? 'bg-red-500 hover:bg-red-600' 
+            : 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600'
         }`}
       >
-        <Plus size={24} className="transition-transform duration-300" />
-      </button>
-
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm -z-10"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+        <AnimatePresence mode="wait">
+          {isOpen ? (
+            <motion.div
+              key="close"
+              initial={{ rotate: -90 }}
+              animate={{ rotate: 0 }}
+              exit={{ rotate: 90 }}
+              transition={{ duration: 0.2 }}
+            >
+              <X className="w-6 h-6 text-white" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="add"
+              initial={{ rotate: 90 }}
+              animate={{ rotate: 0 }}
+              exit={{ rotate: -90 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Plus className="w-6 h-6 text-white" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
     </div>
   );
 };

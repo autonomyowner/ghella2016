@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 import { Land } from '@/types/land';
 
 const LandPage: React.FC = () => {
@@ -11,7 +11,7 @@ const LandPage: React.FC = () => {
     useEffect(() => {
         const fetchLands = async () => {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await firebase
                     .from('land')
                     .select('*');
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 import { Land } from '@/types/land';
 
 const LandDetailPage = () => {
@@ -14,7 +14,7 @@ const LandDetailPage = () => {
     const fetchLandDetails = async () => {
       if (!id) return;
 
-      const { data, error } = await supabase
+      const { data, error } = await firebase
         .from('land')
         .select('*')
         .eq('id', id)

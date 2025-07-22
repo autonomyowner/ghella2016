@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 
 interface LoginFormProps {
   onSuccess?: () => void
@@ -15,7 +15,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null)
   
   const router = useRouter()
-  const supabase = createClient()
+  const { signIn } = useSupabaseAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,20 +23,17 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setError(null)
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error: signInError } = await signIn(email, password)
 
-      if (signInError) throw signInError
+      if (signInError) {
+        throw signInError
+      }
 
-      if (data.user) {
-        if (onSuccess) {
-          onSuccess()
-        } else {
-          router.push('/dashboard')
-          router.refresh()
-        }
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push('/dashboard')
+        router.refresh()
       }
     } catch (error) {
       console.error('Login error:', error)

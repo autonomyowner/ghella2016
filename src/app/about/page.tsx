@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import TeamFlipCard from '@/components/TeamFlipCard';
 import founders from '@/components/foundersData';
 
@@ -49,6 +50,27 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Founders Section with Flipping Cards */}
+      <section className="py-32 gradient-bg-secondary relative overflow-hidden">
+        <div className="absolute inset-0 animate-gradient-shift opacity-30"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-5xl font-bold text-center mb-20 gradient-text">مؤسسو الشركة</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-7xl mx-auto items-start">
+            {founders.map((founder, idx) => (
+              <TeamFlipCard
+                key={founder.name}
+                name={founder.name}
+                role={founder.role}
+                image={founder.image}
+                bio={founder.bio}
+                skills={founder.skills}
+                roleDescription={founder.roleDescription}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Our Story Section */}
       <section className="py-32 relative overflow-hidden">
         {/* Background Image Overlay */}
@@ -58,22 +80,22 @@ export default function AboutPage() {
         {/* Floating elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="floating-element" style={{left: '10%', top: '10%'}}>
-            <img src="/assets/islam.jpg" alt="" className="w-16 h-16 rounded-full opacity-20" />
+            <Image src="/assets/islam.jpg" alt="" width={64} height={64} className="w-16 h-16 rounded-full opacity-20" />
           </div>
           <div className="floating-element" style={{right: '15%', top: '20%'}}>
-            <img src="/assets/n7l2.webp" alt="" className="w-12 h-12 rounded-full opacity-20" />
+            <Image src="/assets/n7l2.webp" alt="" width={48} height={48} className="w-12 h-12 rounded-full opacity-20" />
           </div>
           <div className="floating-element" style={{left: '20%', bottom: '30%'}}>
-            <img src="/assets/pexels-pixabay-158827.jpg" alt="" className="w-20 h-20 rounded-full opacity-20" />
+            <Image src="/assets/pexels-pixabay-158827.jpg" alt="" width={80} height={80} className="w-20 h-20 rounded-full opacity-20" />
           </div>
           <div className="floating-element" style={{right: '10%', bottom: '20%'}}>
-            <img src="/assets/pexels-timmossholder-974314.jpg" alt="" className="w-14 h-14 rounded-full opacity-20" />
+            <Image src="/assets/pexels-timmossholder-974314.jpg" alt="" width={56} height={56} className="w-14 h-14 rounded-full opacity-20" />
           </div>
           <div className="floating-element" style={{left: '5%', top: '50%'}}>
-            <img src="/assets/pexels-tomfisk-1595104.jpg" alt="" className="w-18 h-18 rounded-full opacity-20" />
+            <Image src="/assets/pexels-tomfisk-1595104.jpg" alt="" width={72} height={72} className="w-18 h-18 rounded-full opacity-20" />
           </div>
           <div className="floating-element" style={{right: '5%', top: '60%'}}>
-            <img src="/assets/pexels-cottonbro-4921204.jpg" alt="" className="w-16 h-16 rounded-full opacity-20" />
+            <Image src="/assets/pexels-cottonbro-4921204.jpg" alt="" width={64} height={64} className="w-16 h-16 rounded-full opacity-20" />
           </div>
         </div>
 
@@ -102,26 +124,6 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Founders Section with Flipping Cards */}
-      <section className="py-32 gradient-bg-secondary relative overflow-hidden">
-        <div className="absolute inset-0 animate-gradient-shift opacity-30"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <h2 className="text-5xl font-bold text-center mb-20 gradient-text">مؤسسو الشركة</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {founders.map((founder, idx) => (
-              <TeamFlipCard
-                key={founder.name}
-                name={founder.name}
-                role={founder.role}
-                image={founder.image}
-                bio={founder.bio}
-                skills={founder.skills}
-              />
-            ))}
           </div>
         </div>
       </section>

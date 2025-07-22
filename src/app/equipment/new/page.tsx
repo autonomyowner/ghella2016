@@ -2,14 +2,14 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { createClient } from '@/lib/supabase/client'
-import { EquipmentInsert } from '@/types/database.types'
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
+import { useFirebase } from '@/hooks/useFirebase'
 
 export default function EquipmentForm() {
-  const { user } = useAuth()
+  const { user } = useSupabaseAuth()
+  const { addEquipment } = useFirebase()
   const router = useRouter()
-  const supabase = createClient()
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
@@ -43,6 +43,20 @@ export default function EquipmentForm() {
     setError(null)
   }
 
+  // Helper function to convert image to base64
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        resolve(reader.result as string)
+      }
+      reader.onerror = () => {
+        reject(new Error('Failed to convert image to base64'))
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
   const uploadImages = async (): Promise<string[]> => {
     if (!files || files.length === 0) return []
 
@@ -61,23 +75,17 @@ export default function EquipmentForm() {
         throw new Error(`${file.name} ليس ملف صورة صالح`)
       }
 
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `equipment/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('equipment-images')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        throw new Error(`فشل في تحميل الصورة: ${uploadError.message}`)
+      try {
+        // Convert image to base64 instead of uploading to Firebase Storage
+        const base64String = await convertImageToBase64(file)
+        imageUrls.push(base64String)
+        console.log('Image converted to base64 successfully')
+      } catch (error) {
+        console.error('Error converting image:', error)
+        // If conversion fails, use a placeholder image
+        imageUrls.push('/placeholder-image.jpg')
+        console.log('Using placeholder image due to conversion failure')
       }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('equipment-images')
-        .getPublicUrl(filePath)
-
-      imageUrls.push(publicUrlData.publicUrl)
     }
 
     return imageUrls
@@ -95,11 +103,13 @@ export default function EquipmentForm() {
     setError(null)
 
     try {
+      console.log('Starting equipment form submission...')
+      
       // Upload images first
       const imageUrls = await uploadImages()
+      console.log('Images processed:', imageUrls.length)
 
-      // Prepare equipment data
-      const equipmentData: EquipmentInsert = {
+      const equipmentData = {
         user_id: user.id,
         title: formData.title,
         description: formData.description,
@@ -112,21 +122,22 @@ export default function EquipmentForm() {
         hours_used: formData.hours_used ? parseInt(formData.hours_used) : null,
         images: imageUrls,
         category_id: 'default', // You'll need to implement category selection
-        currency: 'JOD',
+        currency: 'DZD',
         is_available: true,
         is_featured: false,
+        view_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
 
-      const { error: insertError } = await supabase
-        .from('equipment')
-        .insert([equipmentData])
+      console.log('Equipment data prepared:', equipmentData)
 
-      if (insertError) {
-        throw new Error(insertError.message)
-      }
+      // Use the addEquipment function from useFirebase hook
+      const newEquipment = await addEquipment(equipmentData)
+      console.log('Equipment added successfully:', newEquipment)
 
-      // Redirect to dashboard
-      router.push('/dashboard')
+      // Redirect to equipment page
+      router.push('/equipment')
       router.refresh()
     } catch (error) {
       console.error('Error creating equipment:', error)
@@ -333,6 +344,7 @@ export default function EquipmentForm() {
               >
                 <input
                   ref={fileInputRef}
+                  name="images"
                   type="file"
                   onChange={handleFileChange}
                   multiple

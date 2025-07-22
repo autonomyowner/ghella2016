@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 import EquipmentForm from '@/components/forms/equipment-form';
 
 const CreateEquipmentPage = () => {
@@ -12,7 +12,7 @@ const CreateEquipmentPage = () => {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase
+    const { error } = await firebase
       .from('Equipment')
       .insert([
         {

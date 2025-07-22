@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase/client';
+import { firebase } from '../../lib/firebase/client';
 import { Equipment } from '../../types/equipment';
 
 const EquipmentForm: React.FC<{ existingEquipment?: Equipment; onSubmit: () => void }> = ({ existingEquipment, onSubmit }) => {
@@ -23,14 +23,14 @@ const EquipmentForm: React.FC<{ existingEquipment?: Equipment; onSubmit: () => v
         try {
             if (existingEquipment) {
                 // Update existing equipment
-                const { data, error } = await supabase
+                const { data, error } = await firebase
                     .from('Equipment')
                     .update({ title, description, price, category })
                     .eq('id', existingEquipment.id);
                 if (error) throw error;
             } else {
                 // Create new equipment
-                const { data, error } = await supabase
+                const { data, error } = await firebase
                     .from('Equipment')
                     .insert([{ title, description, price, category }]);
                 if (error) throw error;

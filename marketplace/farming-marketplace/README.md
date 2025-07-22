@@ -15,8 +15,8 @@ This marketplace allows users to:
 ## Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Backend**: Supabase (Database, Auth, Storage)
-- **State Management**: React hooks, Supabase realtime
+- **Backend**: firebase (Database, Auth, Storage)
+- **State Management**: React hooks, firebase realtime
 - **Deployment**: Vercel
 
 ## Key Features
@@ -62,8 +62,8 @@ farming-marketplace
 
 3. Set up your environment variables in `.env.local`:
    ```
-   SUPABASE_URL=<your-supabase-url>
-   SUPABASE_ANON_KEY=<your-supabase-anon-key>
+   firebase_URL=<your-firebase-url>
+   firebase_ANON_KEY=<your-firebase-anon-key>
    ```
 
 4. Run the development server:

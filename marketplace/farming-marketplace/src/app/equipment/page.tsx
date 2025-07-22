@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@firebase/firebase-js';
 import EquipmentCard from '@/components/ui/equipment-card';
 
 const EquipmentPage = () => {
@@ -10,7 +10,7 @@ const EquipmentPage = () => {
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await firebase
           .from('Equipment')
           .select('*');
 

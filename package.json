@@ -3,20 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "analyze": "ANALYZE=true next build",
+    "build:prod": "NODE_ENV=production next build",
+    "start:prod": "NODE_ENV=production next start",
+    "performance": "next build && next start",
+    "optimize": "npm run build:prod && npm run analyze"
   },
   "dependencies": {
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.50.3",
+    "@firebase/auth": "^1.11.0",
+    "@firebase/firestore": "^4.9.0",
+    "@firebase/storage": "^0.14.0",
+    "@supabase/supabase-js": "^2.52.0",
     "@tanstack/react-query": "^5.0.0",
     "clsx": "^2.1.1",
+    "critters": "^0.0.23",
     "date-fns": "^3.6.0",
-    "framer-motion": "^11.0.0",
+    "firebase": "^12.0.0",
+    "framer-motion": "^11.18.2",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
     "react": "^19.0.0",
@@ -24,7 +33,9 @@
     "react-hook-form": "^7.50.0",
     "react-hot-toast": "^2.4.1",
     "react-intersection-observer": "^9.8.0",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.6.0",
+    "web-vitals": "^3.5.2",
+    "workbox-webpack-plugin": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -32,9 +43,22 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "compression-webpack-plugin": "^11.1.0",
+    "css-minimizer-webpack-plugin": "^6.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+    "terser-webpack-plugin": "^5.3.10",
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.10.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "browserslist": [
+    ">0.3%",
+    "not dead",
+    "not op_mini all"
+  ]
 }

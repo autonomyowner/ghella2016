@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { ProfileInsert } from '@/types/database.types'
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 
 interface SignupFormProps {
   onSuccess?: () => void
@@ -20,7 +19,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
   const [message, setMessage] = useState<string | null>(null)
   
   const router = useRouter()
-  const supabase = createClient()
+  const { signUp } = useSupabaseAuth()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,49 +28,24 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     setMessage(null)
 
     try {
-      // Sign up the user
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            phone: phone,
-            location: location,
-          },
-        },
+      // Sign up the user with profile data
+      const { error: signUpError } = await signUp(email, password, {
+        full_name: fullName,
+        phone: phone,
       })
 
-      if (signUpError) throw signUpError
+      if (signUpError) {
+        throw signUpError
+      }
 
-      if (data.user) {
-        // Create profile
-        const profileData: ProfileInsert = {
-          id: data.user.id,
-          full_name: fullName,
-          phone: phone,
-          location: location,
-          user_type: 'farmer', // Default to farmer
-        }
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([profileData])
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          // Don't throw here, profile might be created by trigger
-        }
-
-        setMessage('تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني للتأكيد.')
-        
-        if (onSuccess) {
-          onSuccess()
-        } else {
-          setTimeout(() => {
-            router.push('/auth/login')
-          }, 2000)
-        }
+      setMessage('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.')
+      
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        setTimeout(() => {
+          router.push('/auth/login')
+        }, 2000)
       }
     } catch (error) {
       console.error('Signup error:', error)

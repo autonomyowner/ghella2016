@@ -1,0 +1,284 @@
+/* Performance Optimizations */
+
+/* Optimize animations for better performance */
+* {
+  will-change: auto;
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize scroll performance */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Loading skeleton animation */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Optimized loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize images */
+img {
+  max-width: 100%;
+  height: auto;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Lazy loading placeholder */
+.lazy-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* Optimized transitions */
+.transition-optimized {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+/* Performance-focused hover effects */
+.hover-optimized {
+  transition: transform 0.2s ease-out;
+}
+
+.hover-optimized:hover {
+  transform: translateY(-2px);
+}
+
+/* Optimized focus states */
+.focus-optimized:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  transition: outline 0.1s ease;
+}
+
+/* Responsive performance optimizations */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    will-change: auto;
+  }
+  
+  .mobile-optimized * {
+    animation-duration: 0.2s !important;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* High contrast mode optimizations */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Dark mode performance optimizations */
+@media (prefers-color-scheme: dark) {
+  .dark-optimized {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+}
+
+/* Optimized grid layouts */
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  contain: layout style;
+}
+
+/* Optimized flexbox layouts */
+.performance-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  contain: layout style;
+}
+
+/* Optimized text rendering */
+.text-optimized {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimized shadows */
+.shadow-optimized {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  will-change: box-shadow;
+}
+
+/* Optimized borders */
+.border-optimized {
+  border: 1px solid transparent;
+  will-change: border-color;
+}
+
+/* Optimized backgrounds */
+.bg-optimized {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: background-image;
+}
+
+/* Optimized transforms */
+.transform-optimized {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimized opacity */
+.opacity-optimized {
+  will-change: opacity;
+}
+
+/* Optimized visibility */
+.visibility-optimized {
+  will-change: visibility, opacity;
+}
+
+/* Optimized position */
+.position-optimized {
+  will-change: transform;
+}
+
+/* Optimized size */
+.size-optimized {
+  will-change: width, height;
+}
+
+/* Optimized color */
+.color-optimized {
+  will-change: color, background-color;
+}
+
+/* Optimized filter */
+.filter-optimized {
+  will-change: filter;
+}
+
+/* Optimized backdrop-filter */
+.backdrop-optimized {
+  will-change: backdrop-filter;
+}
+
+/* Optimized clip-path */
+.clip-optimized {
+  will-change: clip-path;
+}
+
+/* Optimized mask */
+.mask-optimized {
+  will-change: mask;
+}
+
+/* Optimized shape */
+.shape-optimized {
+  will-change: shape-outside;
+}
+
+/* Optimized paint */
+.paint-optimized {
+  will-change: paint-order;
+}
+
+/* Optimized layout */
+.layout-optimized {
+  will-change: layout;
+}
+
+/* Optimized style */
+.style-optimized {
+  will-change: auto;
+}
+
+/* Optimized size */
+.size-optimized {
+  will-change: size;
+}
+
+/* Optimized inline-size */
+.inline-size-optimized {
+  will-change: inline-size;
+}
+
+/* Optimized block-size */
+.block-size-optimized {
+  will-change: block-size;
+}
+
+/* Optimized min-inline-size */
+.min-inline-size-optimized {
+  will-change: min-inline-size;
+}
+
+/* Optimized max-inline-size */
+.max-inline-size-optimized {
+  will-change: max-inline-size;
+}
+
+/* Optimized min-block-size */
+.min-block-size-optimized {
+  will-change: min-block-size;
+}
+
+/* Optimized max-block-size */
+.max-block-size-optimized {
+  will-change: max-block-size;
+} 

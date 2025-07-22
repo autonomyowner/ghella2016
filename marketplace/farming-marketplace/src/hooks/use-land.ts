@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase/client';
+import { collection, getDocs } from 'firebase/firestore';
+import { firestore } from '../lib/firebaseConfig';
 import { Land } from '../types/land';
 
 const useLand = () => {
@@ -10,11 +11,17 @@ const useLand = () => {
   const fetchLands = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('land').select('*');
-      if (error) throw error;
+      const landRef = collection(firestore, 'land_listings');
+      const querySnapshot = await getDocs(landRef);
+      
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Land[];
+
       setLands(data);
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error fetching lands');
     } finally {
       setLoading(false);
     }
@@ -24,7 +31,7 @@ const useLand = () => {
     fetchLands();
   }, []);
 
-  return { lands, loading, error };
+  return { lands, loading, error, refetch: fetchLands };
 };
 
 export default useLand;

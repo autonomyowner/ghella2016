@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase/client';
+import { firebase } from '../../lib/firebase/client';
 import { Land } from '../../types/land';
 
 const LandForm: React.FC<{ onSubmit: (land: Land) => void }> = ({ onSubmit }) => {
@@ -17,7 +17,7 @@ const LandForm: React.FC<{ onSubmit: (land: Land) => void }> = ({ onSubmit }) =>
         setError(null);
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await firebase
                 .from('land')
                 .insert([{ title, description, price, location, size }]);
 

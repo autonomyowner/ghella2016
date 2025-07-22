@@ -1,427 +1,270 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { LucideUsers, LucideTractor, LucideGift, LucideGlobe, LucideTruck, LucideLeaf, LucideBarChart, LucideFileText, Menu, X, Loader2, ChevronRight, Star } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
+import React, { useState, useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useWebsiteSettings } from '@/lib/websiteSettings';
 
-const services = [
-	{ icon: <LucideUsers size={32} />, label: "خدمة العملاء المميزة", description: "خدمة عملاء على مدار الساعة" },
-	{ icon: <LucideTractor size={32} />, label: "آلات الخدمات الحديثة", description: "أحدث المعدات الزراعية" },
-	{ icon: <LucideLeaf size={32} />, label: "خضار من المنتجات الطازجة", description: "منتجات عضوية طازجة" },
-	{ icon: <LucideBarChart size={32} />, label: "خدمات التصدير", description: "تصدير عالمي" },
-	{ icon: <LucideGift size={32} />, label: "عرض جلسة", description: "عروض خاصة" },
-	{ icon: <LucideTruck size={32} />, label: "التوصيل", description: "توصيل سريع" },
-	{ icon: <LucideGlobe size={32} />, label: "خدمات التحليل والدراسات", description: "دراسات متخصصة" },
-	{ icon: <LucideFileText size={32} />, label: "كرب الأراضي الزراعية", description: "استشارات زراعية" },
-];
+// Lazy load heavy components
+const VideoBackground = dynamic(() => import('@/components/VideoBackground'), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-black/60 animate-pulse" />
+});
 
-const navLinks = [
-	{ href: "/", label: "الرئيسية" },
-	{ href: "/listings", label: "القوائم" },
-	{ href: "/about", label: "من نحن" },
-	{ href: "/contact", label: "اتصل بنا" },
-];
+const SocialMediaIcons = dynamic(() => import('@/components/SocialMediaIcons'), {
+  ssr: false,
+  loading: () => <div className="w-12 h-12 bg-white/10 rounded-full animate-pulse" />
+});
 
-// Floating particles component
-const FloatingParticles = () => {
-	return (
-		<div className="absolute inset-0 overflow-hidden pointer-events-none">
-			{[...Array(20)].map((_, i) => (
-				<motion.div
-					key={i}
-					className="absolute w-2 h-2 bg-emerald-400/30 rounded-full"
-					initial={{
-						x: Math.random() * window.innerWidth,
-						y: Math.random() * window.innerHeight,
-					}}
-					animate={{
-						y: [null, -100, -200],
-						opacity: [0, 1, 0],
-					}}
-					transition={{
-						duration: Math.random() * 10 + 10,
-						repeat: Infinity,
-						ease: "linear",
-						delay: Math.random() * 5,
-					}}
-				/>
-			))}
-		</div>
-	);
-};
-
-// Enhanced button component with loading state
-const LoadingButton = ({ 
-	children, 
-	onClick, 
-	loading = false, 
-	className = "", 
-	...props 
-}: {
-	children: React.ReactNode;
-	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-	loading?: boolean;
-	className?: string;
-	[key: string]: any;
-}) => {
-	return (
-		<motion.button
-			whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(16, 185, 129, 0.3)" }}
-			whileTap={{ scale: 0.95 }}
-			className={cn(
-				"rounded-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 relative overflow-hidden",
-				className
-			)}
-			onClick={onClick}
-			disabled={loading}
-			{...props}
-		>
-			<AnimatePresence mode="wait">
-				{loading ? (
-					<motion.div
-						key="loading"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						className="flex items-center justify-center gap-2"
-					>
-						<Loader2 className="w-4 h-4 animate-spin" />
-						جاري التحميل...
-					</motion.div>
-				) : (
-					<motion.div
-						key="content"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-					>
-						{children}
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</motion.button>
-	);
-};
+// Loading component
+const LoadingSpinner = () => (
+  <div className="h-screen w-full relative overflow-hidden bg-black flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-emerald-300 font-semibold">جاري التحميل...</p>
+    </div>
+  </div>
+);
 
 export default function HomePage() {
-	const [mobileNavOpen, setMobileNavOpen] = useState(false);
-	const [showLogin, setShowLogin] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [rememberMe, setRememberMe] = useState(false);
-	
-	const heroRef = useRef(null);
-	const { scrollYProgress } = useScroll({
-		target: heroRef,
-		offset: ["start start", "end start"]
-	});
-	
-	const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-	const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-	const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const { user, signOut, profile } = useSupabaseAuth();
+  const { settings, loading } = useWebsiteSettings();
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
-	// Handle login submission
-	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setIsLoading(true);
-		
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 2000));
-		
-		setIsLoading(false);
-		// Handle login logic here
-	};
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
-	// Keyboard navigation for mobile nav
-	useEffect(() => {
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				setMobileNavOpen(false);
-				setShowLogin(false);
-			}
-		};
+  // Prevent hydration mismatch by not rendering until hydrated
+  if (!isHydrated) {
+    return <LoadingSpinner />;
+  }
 
-		document.addEventListener("keydown", handleEscape);
-		return () => document.removeEventListener("keydown", handleEscape);
-	}, []);
+  return (
+    <div className="h-screen w-full relative overflow-hidden bg-black">
+      {/* Optimized Video Background */}
+      <Suspense fallback={<div className="absolute inset-0 bg-black/60 animate-pulse" />}>
+        <VideoBackground />
+      </Suspense>
 
-	return (
-		<div className="min-h-screen bg-gradient-to-br from-[#0a2b24] via-[#155e4d] to-[#2db48b] relative overflow-hidden" dir="rtl">
-			<FloatingParticles />
-			
-			{/* Hero Section with Video */}
-			<div ref={heroRef} className="relative flex flex-col md:flex-row items-center justify-center min-h-screen pt-32 pb-12">
-				{/* Video BG */}
-				<video
-					autoPlay
-					muted
-					loop
-					playsInline
-					className="absolute inset-0 w-full h-full object-cover z-0"
-				>
-					<source src="/assets/Videoplayback2.mp4" type="video/mp4" />
-				</video>
-				
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ duration: 1.2 }}
-					className="absolute inset-0 bg-gradient-to-br from-black/70 via-green-900/40 to-black/80 z-10"
-				/>
+      {/* Main Content */}
+      <div className="relative z-10 h-full flex flex-col">
+        
+        {/* Top Banner */}
+        {settings.announcement_enabled && (
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white py-3 px-4 text-center text-sm font-semibold relative overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="relative z-10"
+            >
+              {settings.announcement_text} | 
+              <Link href="/equipment/new" className="underline hover:no-underline ml-2 font-bold text-yellow-300 hover:text-yellow-200 transition-colors">
+                أضف إعلانك الآن
+              </Link>
+            </motion.div>
+            {/* Animated background elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-teal-600/20 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}></div>
+          </div>
+        )}
 
-				{/* Login Card (desktop) or Modal (mobile) */}
-				<AnimatePresence>
-					{(showLogin || typeof window === "undefined" || window.innerWidth >= 768) && (
-						<motion.div
-							initial={{ y: 40, opacity: 0, rotateY: -15 }}
-							animate={{ y: 0, opacity: 1, rotateY: 0 }}
-							exit={{ y: 40, opacity: 0, rotateY: -15 }}
-							transition={{ type: "spring", stiffness: 120, damping: 18 }}
-							whileHover={{ rotateY: 2, scale: 1.02 }}
-							className={cn(
-								"z-20 p-6 flex flex-col gap-4 glass backdrop-blur-2xl border border-emerald-400/20 shadow-2xl",
-								"w-full max-w-xs md:w-80 md:absolute md:left-8 md:top-1/2 md:-translate-y-1/2 md:max-w-xs",
-								showLogin && "fixed bottom-0 left-0 right-0 mx-auto my-8 md:static md:my-0"
-							)}
-							role="dialog"
-							aria-modal="true"
-							aria-label="تسجيل الدخول"
-						>
-							<motion.h3 
-								initial={{ opacity: 0, y: -20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.2 }}
-								className="text-xl font-bold text-emerald-300 mb-2 text-center"
-							>
-								تسجيل الدخول
-							</motion.h3>
-							
-							<form onSubmit={handleLogin} className="flex flex-col gap-4">
-								<motion.input 
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.3 }}
-									className="input" 
-									placeholder="البريد الإلكتروني" 
-									type="email" 
-									aria-label="البريد الإلكتروني"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									required
-								/>
-								<motion.input 
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.4 }}
-									className="input" 
-									placeholder="كلمة المرور" 
-									type="password" 
-									aria-label="كلمة المرور"
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									required
-								/>
-								
-								<motion.div 
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.5 }}
-									className="flex items-center gap-2 text-sm text-white/80"
-								>
-									<input 
-										type="checkbox" 
-										id="remember" 
-										className="accent-emerald-500" 
-										checked={rememberMe}
-										onChange={(e) => setRememberMe(e.target.checked)}
-									/>
-									<label htmlFor="remember">تذكرني | نسيت كلمة المرور</label>
-								</motion.div>
-								
-								<LoadingButton 
-									type="submit"
-									loading={isLoading}
-									aria-label="دخول"
-								>
-									دخول
-								</LoadingButton>
-							</form>
-							
-							<motion.div 
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.6 }}
-								className="text-center text-emerald-400 text-sm mt-2"
-							>
-								مستخدم جديد؟ <a href="/auth/signup" className="underline hover:text-emerald-300 transition-colors">إنشاء حساب</a>
-							</motion.div>
-							
-							{/* Close button for mobile modal */}
-							<motion.button
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.7 }}
-								className="md:hidden mt-4 text-sm text-white/70 underline focus:outline-none hover:text-white transition-colors"
-								onClick={() => setShowLogin(false)}
-								aria-label="إغلاق تسجيل الدخول"
-							>
-								إغلاق
-							</motion.button>
-						</motion.div>
-					)}
-				</AnimatePresence>
-				
-				{/* Show login button on mobile */}
-				<motion.button
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.8 }}
-					whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(16, 185, 129, 0.4)" }}
-					whileTap={{ scale: 0.95 }}
-					className="md:hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-30 rounded-full px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-					onClick={() => setShowLogin(true)}
-					aria-label="تسجيل الدخول"
-				>
-					تسجيل الدخول
-				</motion.button>
+        {/* Header with User Profile or Login/Signup */}
+        <div className="flex justify-between items-center p-4 md:p-6">
+          {/* User Profile (if logged in) or Login/Signup (if not logged in) */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+            className="flex items-center space-x-2 space-x-reverse md:space-x-4"
+          >
+            {loading ? (
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <div className="w-8 h-8 bg-emerald-600 rounded-lg animate-pulse"></div>
+                <span className="text-white text-sm">جاري التحميل...</span>
+              </div>
+            ) : user ? (
+              <div className="flex items-center space-x-3 space-x-reverse">
+                {/* User Avatar */}
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg">
+                  {profile?.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+                </div>
+                {/* User Info */}
+                <div className="text-right">
+                  <p className="text-white font-bold text-sm md:text-base">
+                    {profile?.full_name || 'مرحباً بك'}
+                  </p>
+                  <p className="text-emerald-300 text-xs md:text-sm">
+                    {user.email}
+                  </p>
+                </div>
+                {/* Sign Out Button */}
+                <button
+                  onClick={handleSignOut}
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 font-semibold text-sm md:text-base"
+                >
+                  تسجيل الخروج
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="px-3 py-1.5 md:px-6 md:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300 font-semibold text-sm md:text-base"
+                >
+                  تسجيل الدخول
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="px-3 py-1.5 md:px-6 md:py-2 bg-transparent border-2 border-emerald-500 hover:bg-emerald-500 text-emerald-300 hover:text-white rounded-lg transition-all duration-300 font-semibold text-sm md:text-base"
+                >
+                  إنشاء حساب
+                </Link>
+              </>
+            )}
+          </motion.div>
 
-				{/* Hero Content with Parallax */}
-				<motion.div 
-					style={{ y, opacity, scale }}
-					className="relative z-20 flex flex-col items-center justify-center text-center w-full px-4"
-				>
-					<motion.h1
-						initial={{ y: 40, opacity: 0 }}
-						animate={{ y: 0, opacity: 1 }}
-						transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
-						className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 mt-8"
-					>
-						الغلة
-					</motion.h1>
-					
-					<motion.h2
-						initial={{ y: 40, opacity: 0 }}
-						animate={{ y: 0, opacity: 1 }}
-						transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
-						className="text-xl md:text-2xl lg:text-3xl font-bold text-white bg-emerald-700/80 px-6 py-3 rounded-lg inline-block mb-4 backdrop-blur-sm"
-					>
-						منتجات طبيعية خدمات زراعية و استشارية
-					</motion.h2>
-					
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ delay: 0.6, duration: 0.8 }}
-						className="text-emerald-300 text-lg md:text-xl font-bold mb-8 flex items-center gap-2"
-					>
-						<Star className="w-5 h-5" />
-						استكشف موقعنا الغلة
-						<Star className="w-5 h-5" />
-					</motion.div>
+          {/* Logo and Name on Right */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="flex items-center space-x-3 space-x-reverse md:space-x-4"
+          >
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
+              <i className="fas fa-seedling text-white text-xl md:text-2xl"></i>
+            </div>
+            <div className="text-right">
+              <h1 className="text-lg md:text-2xl font-black text-white">{settings.site_title}</h1>
+              <p className="text-xs md:text-sm text-emerald-300">{settings.site_description}</p>
+            </div>
+          </motion.div>
+        </div>
 
-					{/* Service Grid (responsive, animated) */}
-					<motion.div
-						initial="hidden"
-						animate="visible"
-						variants={{
-							hidden: {},
-							visible: {
-								transition: { staggerChildren: 0.08, delayChildren: 0.7 },
-							},
-						}}
-						className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto mt-8 w-full"
-						role="list"
-						aria-label="الخدمات"
-					>
-						{services.map((service, i) => (
-							<motion.div
-								key={i}
-								variants={{
-									hidden: { y: 40, opacity: 0, scale: 0.8 },
-									visible: { 
-										y: 0, 
-										opacity: 1, 
-										scale: 1,
-										transition: { type: "spring", stiffness: 120, damping: 18 }
-									},
-								}}
-								whileHover={{ 
-									scale: 1.08, 
-									boxShadow: "0 0 24px #10b98155",
-									rotateY: 5,
-									z: 10
-								}}
-								whileTap={{ scale: 0.97 }}
-								tabIndex={0}
-								className="group flex flex-col items-center gap-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 p-4 rounded-xl transition-all duration-300"
-								role="listitem"
-								aria-label={service.label}
-							>
-								<motion.div 
-									className="w-20 h-20 rounded-full glass flex items-center justify-center mb-2 border border-emerald-400/30 shadow-lg bg-white/10 group-hover:bg-white/20 transition-all duration-300"
-									whileHover={{ rotate: 360 }}
-									transition={{ duration: 0.6 }}
-								>
-									{service.icon}
-								</motion.div>
-								<div className="text-white/90 text-base font-medium text-center leading-tight">
-									{service.label}
-								</div>
-								<motion.div
-									initial={{ opacity: 0, height: 0 }}
-									whileHover={{ opacity: 1, height: "auto" }}
-									className="text-emerald-300 text-sm text-center overflow-hidden"
-								>
-									{service.description}
-								</motion.div>
-							</motion.div>
-						))}
-					</motion.div>
-				</motion.div>
-			</div>
-			{/* --- 4 Big Cards Section Only --- */}
-			<section className="w-full py-16 px-2 md:px-0">
-				<div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-					{/* Card 1: Bee Keeping */}
-					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-amber-400">
-						<img src="/assets/n7l1.webp" alt="تربية النحل" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-						<div className="relative z-10 p-8 md:p-12 text-amber-100 w-full">
-							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-amber-300">كل ما تحتاجه لتربية النحل</h3>
-							<p className="text-base md:text-lg font-medium">معدات، خلايا، عسل طبيعي، وكل ما يلزمك لمشروع ناجح.</p>
-						</div>
-					</div>
-					{/* Card 2: Plants */}
-					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-green-400">
-						<img src="/assets/n7l2.webp" alt="شتلات ونباتات" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-						<div className="relative z-10 p-8 md:p-12 text-green-100 w-full">
-							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-green-300">شتلات ونباتات زراعية</h3>
-							<p className="text-base md:text-lg font-medium">أفضل الشتلات، البذور، والنباتات لمزارعك وحديقتك.</p>
-						</div>
-					</div>
-					{/* Card 3: Cows */}
-					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-lime-400">
-						<img src="/assets/cows1.jpg" alt="أبقار ومواشي" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-						<div className="relative z-10 p-8 md:p-12 text-lime-100 w-full">
-							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-lime-300">أبقار ومواشي</h3>
-							<p className="text-base md:text-lg font-medium">حيوانات صحية، إنتاجية عالية، وخدمات بيطرية متكاملة.</p>
-						</div>
-					</div>
-					{/* Card 4: Machinery */}
-					<div className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-end group shadow-2xl border-2 border-orange-400">
-						<img src="/assets/pexels-timmossholder-974314.jpg" alt="معدات وآلات زراعية" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-						<div className="relative z-10 p-8 md:p-12 text-orange-100 w-full">
-							<h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-orange-300">معدات وآلات زراعية</h3>
-							<p className="text-base md:text-lg font-medium">أحدث المعدات، الجرارات، والآلات لمزارع حديثة وفعالة.</p>
-						</div>
-					</div>
-				</div>
-			</section>
-		</div>
-	);
+        {/* Center Content */}
+        <div className="flex-1 flex items-center justify-center px-4 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="text-center max-w-4xl"
+          >
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-white mb-4 md:mb-6 leading-tight">
+              {settings.homepage_title}
+            </h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-emerald-300 mb-6 md:mb-8 leading-relaxed px-4">
+              {settings.homepage_subtitle}
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-center items-center space-x-4 space-x-reverse md:space-x-8 px-4 md:px-6 pb-4 md:pb-8 relative z-20">
+          {/* خدمات السوق */}
+          <Link
+            href="/marketplace"
+            onClick={() => console.log('Marketplace clicked')}
+            className="group flex flex-col items-center space-y-3 md:space-y-4 p-4 md:p-8 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl md:rounded-3xl hover:from-white/25 hover:to-white/15 transition-all duration-500 border-2 border-white/30 hover:border-emerald-400/60 shadow-2xl hover:shadow-emerald-500/20 transform hover:scale-105 hover:-translate-y-2 cursor-pointer"
+          >
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-2xl md:rounded-3xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-xl group-hover:shadow-2xl group-hover:shadow-emerald-500/30">
+              <i className="fas fa-store text-white text-xl md:text-3xl group-hover:rotate-12 transition-transform duration-500"></i>
+            </div>
+            <div className="text-center">
+              <span className="text-white font-black text-base md:text-xl block">خدمات السوق</span>
+              <span className="text-emerald-300 text-xs md:text-sm opacity-80">تسويق وبيع المنتجات</span>
+            </div>
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
+          </Link>
+
+          {/* Divider */}
+          <div className="w-px h-16 md:h-24 bg-gradient-to-b from-white/40 via-white/20 to-transparent"></div>
+          
+          {/* خدمات التشغيل */}
+          <Link
+            href="/services"
+            onClick={() => console.log('Services clicked')}
+            className="group flex flex-col items-center space-y-3 md:space-y-4 p-4 md:p-8 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl md:rounded-3xl hover:from-white/25 hover:to-white/15 transition-all duration-500 border-2 border-white/30 hover:border-emerald-400/60 shadow-2xl hover:shadow-emerald-500/20 transform hover:scale-105 hover:-translate-y-2 cursor-pointer"
+          >
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-2xl md:rounded-3xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-xl group-hover:shadow-2xl group-hover:shadow-emerald-500/30">
+              <i className="fas fa-cogs text-white text-xl md:text-3xl group-hover:rotate-12 transition-transform duration-500"></i>
+            </div>
+            <div className="text-center">
+              <span className="text-white font-black text-base md:text-xl block">خدمات التشغيل</span>
+              <span className="text-emerald-300 text-xs md:text-sm opacity-80">إدارة وتشغيل المزرعة</span>
+            </div>
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
+          </Link>
+
+          {/* Divider */}
+          <div className="w-px h-16 md:h-24 bg-gradient-to-b from-white/40 via-white/20 to-transparent"></div>
+
+          {/* خدمات الدعم */}
+          <Link
+            href="/VAR"
+            onClick={() => console.log('VAR clicked')}
+            className="group flex flex-col items-center space-y-3 md:space-y-4 p-4 md:p-8 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl md:rounded-3xl hover:from-white/25 hover:to-white/15 transition-all duration-500 border-2 border-white/30 hover:border-emerald-400/60 shadow-2xl hover:shadow-emerald-500/20 transform hover:scale-105 hover:-translate-y-2 cursor-pointer"
+          >
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-2xl md:rounded-3xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-xl group-hover:shadow-2xl group-hover:shadow-emerald-500/30">
+              <i className="fas fa-hands-helping text-white text-xl md:text-3xl group-hover:rotate-12 transition-transform duration-500"></i>
+            </div>
+            <div className="text-center">
+              <span className="text-white font-black text-base md:text-xl block">خدمات الدعم</span>
+              <span className="text-emerald-300 text-xs md:text-sm opacity-80">استشارات ومساعدة</span>
+            </div>
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          className="px-4 md:px-6 pb-4 md:pb-6"
+        >
+          <div className="text-center">
+            <div className="flex flex-wrap justify-center items-center space-x-4 space-x-reverse text-xs md:text-sm text-white/80 mb-2">
+              <Link href="/terms" className="hover:text-emerald-300 transition-colors">
+                شروط الاستخدام
+              </Link>
+              <span className="text-white/50">•</span>
+              <Link href="/privacy" className="hover:text-emerald-300 transition-colors">
+                سياسة الخصوصية
+              </Link>
+              <span className="text-white/50">•</span>
+              <Link href="/help" className="hover:text-emerald-300 transition-colors">
+                مركز المساعدة
+              </Link>
+            </div>
+            <div className="text-xs md:text-sm text-white/60">
+              حقوق النشر 2025 © {settings.site_title} جميع الحقوق محفوظة
+            </div>
+            <div className="text-xs text-white/50 mt-1">
+              تم التصميم و التطوير بواسطة autonomy
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Social Media Icons */}
+        <Suspense fallback={<div className="w-12 h-12 bg-white/10 rounded-full animate-pulse" />}>
+          <SocialMediaIcons settings={settings} />
+        </Suspense>
+      </div>
+    </div>
+  );
 }
