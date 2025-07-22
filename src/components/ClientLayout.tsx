@@ -25,21 +25,9 @@ const AdvancedPerformanceOptimizer = dynamic(() => import("@/components/Advanced
   ssr: false
 });
 
-const UltraPerformanceOptimizer = dynamic(() => import("@/components/UltraPerformanceOptimizer"), {
-  ssr: false
-});
 
-const PerformanceMonitor = dynamic(() => import("@/components/PerformanceMonitor"), {
-  ssr: false
-});
 
-const BundleAnalyzer = dynamic(() => import("@/components/BundleAnalyzer"), {
-  ssr: false
-});
 
-const UltraBundleAnalyzer = dynamic(() => import("@/components/UltraBundleAnalyzer"), {
-  ssr: false
-});
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -50,13 +38,11 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
     <SupabaseAuthProvider>
       <PerformanceOptimizer />
       <AdvancedPerformanceOptimizer />
-      <UltraPerformanceOptimizer />
       <ConditionalHeader />
       <main className="min-h-screen">
         {children}
       </main>
       <ServiceWorkerRegistration />
-      <PerformanceMonitor />
 
     </SupabaseAuthProvider>
   );
