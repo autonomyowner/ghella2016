@@ -1,67 +1,70 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const VideoBackground: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentVideo, setCurrentVideo] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const videos = [
-    '/assets/Videoplayback1.mp4',
-    '/assets/Videoplayback2.mp4',
-    '/assets/Videoplayback3.mp4'
-  ];
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Simulate image loading with a small delay for smooth transition
+    const timer = setTimeout(() => {
+      if (!hasError) {
+        setIsLoaded(true);
+      }
+    }, 200);
 
-    const handleLoadedData = () => {
-      setIsLoaded(true);
-    };
+    return () => clearTimeout(timer);
+  }, [hasError]);
 
-    const handleEnded = () => {
-      setCurrentVideo((prev) => (prev + 1) % videos.length);
-    };
-
-    video.addEventListener('loadeddata', handleLoadedData);
-    video.addEventListener('ended', handleEnded);
-
-    return () => {
-      video.removeEventListener('loadeddata', handleLoadedData);
-      video.removeEventListener('ended', handleEnded);
-    };
-  }, [videos.length]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.src = videos[currentVideo];
-      video.load();
-    }
-  }, [currentVideo, videos]);
+  // Fallback background if image fails to load
+  if (hasError) {
+    return (
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/30 via-transparent to-emerald-900/30"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 z-0">
+      {/* Loading state */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-black/60 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 animate-pulse" />
       )}
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className={`w-full h-full object-cover transition-opacity duration-1000 ${
-          isLoaded ? 'opacity-60' : 'opacity-0'
-        }`}
-        preload="metadata"
-      >
-        <source src={videos[currentVideo]} type="video/mp4" />
-      </video>
+      
+      {/* Static Image Background using Next.js Image for optimization */}
+      <div className={`absolute inset-0 transition-opacity duration-1000 ${
+        isLoaded ? 'opacity-60' : 'opacity-0'
+      }`}>
+        <Image
+          src="/assets/n7l1.webp"
+          alt="Agricultural background"
+          fill
+          priority
+          quality={85}
+          className="object-cover"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(true);
+          }}
+        />
+      </div>
+      
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/40"></div>
+      
+      {/* Additional gradient overlay for better visual appeal */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-900/30 via-transparent to-emerald-900/30"></div>
+      
+      {/* Subtle animated overlay for visual interest */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
+      </div>
     </div>
   );
 };

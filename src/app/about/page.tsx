@@ -8,17 +8,17 @@ import founders from '@/components/foundersData';
 export default function AboutPage() {
   return (
     <div className="overflow-hidden">
-      {/* Hero Section with Video Background */}
+      {/* Hero Section with Field GIF Background */}
       <section className="relative h-screen w-full overflow-hidden">
-        <video
-          autoPlay
-          muted
-          loop
+        <div 
           className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/assets/Videoplayback1.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+          style={{
+            backgroundImage: 'url(/assets/field.gif)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
         
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/50"></div>

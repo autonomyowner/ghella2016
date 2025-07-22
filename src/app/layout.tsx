@@ -4,6 +4,7 @@ import { Cairo } from 'next/font/google'
 import "./globals.css";
 import "./performance.css";
 import ClientLayout from "@/components/ClientLayout";
+import FirebaseStatus from "@/components/FirebaseStatus";
 
 type Viewport = {
   themeColor: string
@@ -111,14 +112,12 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable} font-sans`} suppressHydrationWarning>
       <head>
-        {/* Critical resource preloading */}
-        <link rel="preload" href="/assets/Videoplayback1.mp4" as="video" type="video/mp4" fetchPriority="high" />
+        {/* Critical resource preloading - optimized for image background */}
         <link rel="preload" href="/assets/n7l1.webp" as="image" type="image/webp" fetchPriority="high" />
-        <link rel="preload" href="/assets/n7l2.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/assets/n7l2.webp" as="image" type="image/webp" fetchPriority="low" />
         
         {/* Font preloading with optimized loading */}
         <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" as="style" />
-        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" />
         
         {/* Load Font Awesome for icons */}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -167,16 +166,14 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-tap-highlight" content="no" />
         
-        {/* Resource hints for better performance */}
+        {/* Resource hints for better performance - reduced for better performance */}
         <link rel="prefetch" href="/marketplace" />
-        <link rel="prefetch" href="/equipment" />
-        <link rel="prefetch" href="/land" />
-        <link rel="prefetch" href="/services" />
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <ClientLayout>
           {children}
         </ClientLayout>
+        <FirebaseStatus />
       </body>
     </html>
   );

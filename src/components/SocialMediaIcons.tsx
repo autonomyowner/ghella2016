@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface WebsiteSettings {
   social_linkedin?: string;
@@ -67,30 +66,37 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ settings }) => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 1, delay: 1 }}
-      className="absolute right-4 md:right-6 top-1/2 transform -translate-y-1/2 flex flex-col space-y-3 md:space-y-4"
-    >
+    <div className="absolute right-4 md:right-6 top-1/2 transform -translate-y-1/2 flex flex-col space-y-3 md:space-y-4">
       {socialLinks.map((link, index) => (
-        <motion.a
+        <a
           key={link.key}
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
           className={`group w-10 h-10 md:w-12 md:h-12 bg-white/10 backdrop-blur-lg rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 border border-white/20 ${link.hoverClass}`}
           title={link.title}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1.2 + index * 0.1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          style={{
+            animationDelay: `${1.2 + index * 0.1}s`,
+            animation: 'fadeInScale 0.5s ease-out forwards'
+          }}
         >
           <i className={`${link.icon} text-white text-sm md:text-lg group-hover:text-white`}></i>
-        </motion.a>
+        </a>
       ))}
-    </motion.div>
+      
+      <style jsx>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 
