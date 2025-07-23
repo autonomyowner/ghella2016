@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Image from 'next/image';
@@ -36,7 +36,7 @@ interface AnimalListing {
 }
 
 const AnimalsListingsPage: React.FC = () => {
-  const { getAnimals, isOnline, isWithinLimits } = useFirebase(); // Use getAnimals for animal data
+  const { getAnimals, isOnline, isWithinLimits } = useSupabaseData(); // Use getAnimals for animal data
   const [listings, setListings] = useState<AnimalListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

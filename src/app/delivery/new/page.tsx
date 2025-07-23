@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Image from 'next/image';
 
 const DeliveryFormPage: React.FC = () => {
   const router = useRouter();
-  const { addDelivery, isOnline, isWithinLimits } = useFirebase();
+  const { addDelivery, isOnline, isWithinLimits } = useSupabaseData();
   const { user } = useSupabaseAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -566,9 +567,11 @@ const DeliveryFormPage: React.FC = () => {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                     {formData.images.map((image, index) => (
                       <div key={index} className="relative">
-                        <img
+                        <Image
                           src={image}
                           alt={`صورة ${index + 1}`}
+                          width={100}
+                          height={50}
                           className="w-full h-24 object-cover rounded-lg"
                         />
                         <button

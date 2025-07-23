@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 
 interface AnimalListing {
   id: string;
@@ -46,7 +46,7 @@ interface Profile {
 const AnimalDetailPage: React.FC = () => {
   const params = useParams();
   const animalId = params.id as string;
-  const { getAnimals, isOnline, isWithinLimits } = useFirebase();
+  const { getAnimals, isOnline, isWithinLimits } = useSupabaseData();
   
   const [animal, setAnimal] = useState<AnimalListing | null>(null);
   const [seller, setSeller] = useState<Profile | null>(null);

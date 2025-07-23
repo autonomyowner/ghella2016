@@ -3,14 +3,14 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const AddLandPage: React.FC = () => {
   const router = useRouter();
   const { user } = useSupabaseAuth();
-  const { addLand } = useFirebase();
+  const { addLand } = useSupabaseData();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);

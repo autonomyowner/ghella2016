@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 const NewVegetableListingPage: React.FC = () => {
   const router = useRouter();
-  const { addVegetable } = useFirebase();
+  const { addVegetable } = useSupabaseData();
   const { user } = useSupabaseAuth();
   
   const [formData, setFormData] = useState({
@@ -159,7 +160,7 @@ const NewVegetableListingPage: React.FC = () => {
       // Redirect to marketplace
       router.push('/VAR/marketplace');
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding vegetable:', error);
       setError('حدث خطأ في إضافة الخضار. يرجى المحاولة مرة أخرى.');
     } finally {
@@ -167,35 +168,9 @@ const NewVegetableListingPage: React.FC = () => {
     }
   };
 
-  const getVegetableTypeLabel = (type: string) => {
-    const labels: { [key: string]: string } = {
-      tomatoes: 'طماطم',
-      potatoes: 'بطاطس',
-      onions: 'بصل',
-      carrots: 'جزر',
-      cucumbers: 'خيار',
-      peppers: 'فلفل',
-      lettuce: 'خس',
-      cabbage: 'ملفوف',
-      broccoli: 'بروكلي',
-      cauliflower: 'قرنبيط',
-      spinach: 'سبانخ',
-      kale: 'كرنب',
-      other: 'أخرى'
-    };
-    return labels[type] || type;
-  };
 
-  const getUnitLabel = (unit: string) => {
-    const labels: { [key: string]: string } = {
-      kg: 'كيلوغرام',
-      ton: 'طن',
-      piece: 'قطعة',
-      bundle: 'حزمة',
-      box: 'صندوق'
-    };
-    return labels[unit] || unit;
-  };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pt-20">
@@ -477,9 +452,11 @@ const NewVegetableListingPage: React.FC = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     {imagePreview.map((preview, index) => (
                       <div key={index} className="relative">
-                        <img
+                        <Image
                           src={preview}
                           alt={`Preview ${index + 1}`}
+                          width={96}
+                          height={96}
                           className="w-full h-24 object-cover rounded-lg"
                         />
                         <button

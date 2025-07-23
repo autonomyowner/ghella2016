@@ -7,7 +7,7 @@ import AuthGuard from '@/components/AuthGuard'
 const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { ssr: false, loading: () => <div /> });
 const MotionButton = dynamic(() => import('framer-motion').then(mod => mod.motion.button), { ssr: false, loading: () => <button /> });
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
-import { useFirebase } from '@/hooks/useFirebase'
+import { useSupabaseData } from '@/hooks/useSupabase'
 import { 
   User, Settings, Plus, Package, BarChart3, MessageCircle, 
   Heart, Star, Tractor, ArrowLeft, Edit3, Trash2, Eye,
@@ -17,7 +17,7 @@ import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user, signOut } = useSupabaseAuth()
-  const { getEquipment, isOnline, isWithinLimits } = useFirebase()
+  const { getEquipment, isOnline, isWithinLimits } = useSupabaseData()
   const [equipment, setEquipment] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [profile] = useState<any>({ full_name: 'مستخدم' })

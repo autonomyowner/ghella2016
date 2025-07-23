@@ -706,9 +706,11 @@ const LiveLandIntelligenceTool: React.FC = () => {
                         className="relative group cursor-pointer overflow-hidden rounded-2xl"
                         onClick={() => setSelectedImage(image)}
                       >
-                        <img
+                        <Image
                           src={image.url}
                           alt={`Satellite ${image.type}`}
+                          width={400}
+                          height={300}
                           className="w-full h-56 object-cover rounded-2xl border border-white/20 group-hover:border-emerald-400/50 transition-all duration-300 transform group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/40 transition-all duration-300 rounded-2xl flex items-end">
@@ -943,9 +945,11 @@ const LiveLandIntelligenceTool: React.FC = () => {
                   <X className="w-8 h-8" />
                 </button>
               </div>
-              <img
+              <Image
                 src={selectedImage.url}
                 alt={`Satellite ${selectedImage.type}`}
+                width={400}
+                height={300}
                 className="w-full h-96 object-cover rounded-2xl border border-white/20"
               />
               <div className="mt-6 text-emerald-200 space-y-2">

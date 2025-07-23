@@ -18,6 +18,7 @@ import {
   Settings,
   FileText
 } from 'lucide-react'
+import Image from 'next/image'
 
 export default function EquipmentForm() {
   const { user } = useSupabaseAuth()
@@ -483,9 +484,11 @@ export default function EquipmentForm() {
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {Array.from(files).map((file, index) => (
                           <div key={index} className="relative group">
-                            <img
+                            <Image
                               src={URL.createObjectURL(file)}
                               alt={`Preview ${index + 1}`}
+                              width={100}
+                              height={60}
                               className="w-full h-24 object-cover rounded-lg border border-white/20"
                             />
                             <button

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSearch } from '@/contexts/SearchContext';
 import { SearchResult } from '@/contexts/SearchContext';
@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function SearchPage() {
+function SearchPageInner() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const { results, loading, error, search } = useSearch();
@@ -318,5 +318,13 @@ export default function SearchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense>
+      <SearchPageInner />
+    </Suspense>
   );
 } 

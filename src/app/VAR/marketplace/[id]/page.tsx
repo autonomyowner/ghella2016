@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface VegetableListing {
@@ -23,7 +23,7 @@ interface VegetableListing {
   freshness: 'excellent' | 'good' | 'fair' | 'poor';
   organic: boolean;
   location: string;
-  coordinates?: any;
+  coordinates?: { lat: number; lng: number } | null;
   images: string[];
   is_available: boolean;
   is_featured: boolean;
@@ -37,7 +37,7 @@ interface VegetableListing {
 const VegetableDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
-  const { getVegetables, updateVegetable, deleteVegetable } = useFirebase();
+  const { getVegetables, updateVegetable, deleteVegetable } = useSupabaseData();
   const { user } = useSupabaseAuth();
   
   const [vegetable, setVegetable] = useState<VegetableListing | null>(null);
@@ -53,7 +53,7 @@ const VegetableDetailPage: React.FC = () => {
       try {
         setLoading(true);
         const vegetables = await getVegetables();
-        const foundVegetable = vegetables.find((v: any) => v.id === vegetableId);
+        const foundVegetable = vegetables.find((v: VegetableListing) => v.id === vegetableId);
         
         if (foundVegetable) {
           setVegetable(foundVegetable);
@@ -62,7 +62,7 @@ const VegetableDetailPage: React.FC = () => {
         } else {
           setError('الخضار غير موجودة');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching vegetable:', error);
         setError('حدث خطأ في تحميل بيانات الخضار');
       } finally {
@@ -79,7 +79,7 @@ const VegetableDetailPage: React.FC = () => {
     try {
       await deleteVegetable(vegetableId);
       router.push('/VAR/marketplace');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting vegetable:', error);
       setError('حدث خطأ في حذف الخضار');
     }

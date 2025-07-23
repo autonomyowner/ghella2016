@@ -9,8 +9,8 @@ import {
   Mail, Camera, Award, DollarSign, Clock, 
   Languages, Check, AlertCircle, Upload
 } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
-import { firestore, storage } from '@/lib/firebaseConfig';
+
+import { supabase } from '@/lib/supabase/supabaseClient';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface FormData {
@@ -106,42 +106,54 @@ export default function NewExpertPage() {
       // Upload image if provided
       if (formData.profile_image) {
         try {
-          const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
           const fileExt = formData.profile_image.name.split('.').pop();
           const fileName = `${user.id}-${Date.now()}.${fileExt}`;
           const storagePath = `experts/${fileName}`;
-          const fileRef = ref(storage, storagePath);
-          await uploadBytes(fileRef, formData.profile_image);
-          profileImageUrl = await getDownloadURL(fileRef);
+          
+          const { data, error } = await supabase.storage
+            .from('uploads')
+            .upload(storagePath, formData.profile_image);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('uploads')
+            .getPublicUrl(storagePath);
+
+          profileImageUrl = publicUrl;
         } catch (error) {
           console.error('Error uploading image:', error);
         }
       }
-      // Insert expert profile into Firestore
-      await addDoc(collection(firestore, 'expert_profiles'), {
-        user_id: user.id,
-        name: formData.name,
-        title: formData.title,
-        specialization: formData.specialization,
-        bio: formData.bio,
-        years_of_experience: formData.years_of_experience,
-        education: formData.education,
-        certifications: formData.certifications,
-        location: formData.location,
-        phone: formData.phone,
-        email: formData.email,
-        profile_image: profileImageUrl,
-        hourly_rate: formData.hourly_rate > 0 ? formData.hourly_rate : null,
-        services_offered: formData.services_offered,
-        languages: formData.languages,
-        availability_status: 'available',
-        rating: 0,
-        reviews_count: 0,
-        is_verified: false,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      // Insert expert profile into Supabase
+      const { data, error } = await supabase
+        .from('expert_profiles')
+        .insert([{
+          user_id: user.id,
+          name: formData.name,
+          title: formData.title,
+          specialization: formData.specialization,
+          bio: formData.bio,
+          years_of_experience: formData.years_of_experience,
+          education: formData.education,
+          certifications: formData.certifications,
+          location: formData.location,
+          phone: formData.phone,
+          email: formData.email,
+          profile_image: profileImageUrl,
+          hourly_rate: formData.hourly_rate > 0 ? formData.hourly_rate : null,
+          services_offered: formData.services_offered,
+          languages: formData.languages,
+          availability_status: 'available',
+          rating: 0,
+          reviews_count: 0,
+          is_verified: false,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+
+      if (error) throw error;
       router.push('/experts');
     } catch (err) {
       console.error('Error creating expert:', err);

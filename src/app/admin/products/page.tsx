@@ -5,6 +5,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/supabaseClient';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -177,10 +178,11 @@ export default function AdminProducts() {
               {/* Product Image */}
               <div className="h-48 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
                 {product.image_url ? (
-                  <img
+                  <Image
                     src={product.image_url}
                     alt={product.title}
-                    className="w-full h-full object-cover"
+                    layout="fill"
+                    objectFit="cover"
                   />
                 ) : (
                   <i className="fas fa-image text-4xl text-emerald-400"></i>

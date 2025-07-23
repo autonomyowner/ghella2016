@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface VegetableListing {
@@ -23,7 +23,7 @@ interface VegetableListing {
   freshness: 'excellent' | 'good' | 'fair' | 'poor';
   organic: boolean;
   location: string;
-  coordinates?: any;
+  coordinates?: { lat: number; lng: number } | null;
   images: string[];
   is_available: boolean;
   is_featured: boolean;
@@ -35,7 +35,7 @@ interface VegetableListing {
 }
 
 const VegetablesMarketplacePage: React.FC = () => {
-  const { getVegetables, isOnline, isWithinLimits } = useFirebase();
+  const { getVegetables, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<VegetableListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,7 +148,7 @@ const VegetablesMarketplacePage: React.FC = () => {
 
       setHasMore((vegetableData?.length || 0) === ITEMS_PER_PAGE);
       setCurrentPage(page);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching vegetable listings:', err);
       setError('حدث خطأ في تحميل الإعلانات');
     } finally {

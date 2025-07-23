@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface NurseryListing {
@@ -34,7 +34,7 @@ interface NurseryListing {
 }
 
 const NurseriesPage: React.FC = () => {
-  const { getNurseries, isOnline, isWithinLimits } = useFirebase();
+  const { getNurseries, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<NurseryListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

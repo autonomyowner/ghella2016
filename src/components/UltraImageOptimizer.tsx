@@ -324,8 +324,7 @@ const UltraImageOptimizer: React.FC<UltraImageProps> = ({
       )}
       
       {/* Main image */}
-      <img
-        ref={imgRef}
+      <Image
         src={currentSrc}
         alt={alt}
         width={width}

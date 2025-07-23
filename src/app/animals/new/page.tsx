@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const NewAnimalListingPage: React.FC = () => {
-  const { addAnimal } = useFirebase();
+  const { addAnimal } = useSupabaseData();
   const { user } = useSupabaseAuth();
   const router = useRouter();
 

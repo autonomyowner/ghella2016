@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useFirebase } from '@/hooks/useFirebase'
+import { useSupabaseData } from '@/hooks/useSupabase'
 import { motion } from 'framer-motion'
 
 interface MarketplaceStats {
@@ -13,7 +13,7 @@ interface MarketplaceStats {
 }
 
 export default function MarketplaceStatus() {
-  const { isOnline, isWithinLimits, getStats } = useFirebase()
+  const { isOnline, isWithinLimits, getStats } = useSupabaseData()
   const [stats, setStats] = useState<MarketplaceStats>({
     equipment: 0,
     land: 0,

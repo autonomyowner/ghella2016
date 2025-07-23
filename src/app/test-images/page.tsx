@@ -48,7 +48,7 @@ const TestImagesPage = () => {
                 <p className="text-sm text-gray-600">مسار الصورة: {founder.image}</p>
                 <button
                   onClick={() => {
-                    const img = new Image();
+                    const img = new window.Image();
                     img.onload = () => console.log('Image loads successfully:', founder.image);
                     img.onerror = () => console.error('Image fails to load:', founder.image);
                     img.src = founder.image;

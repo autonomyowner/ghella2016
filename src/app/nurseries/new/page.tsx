@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Image from 'next/image';
 
 const NurseriesFormPage: React.FC = () => {
   const router = useRouter();
-  const { addNursery } = useFirebase();
+  const { addNursery } = useSupabaseData();
   const { user } = useSupabaseAuth();
   
   const [formData, setFormData] = useState({
@@ -386,9 +387,11 @@ const NurseriesFormPage: React.FC = () => {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                     {imagePreview.map((preview, index) => (
                       <div key={index} className="relative">
-                        <img
+                        <Image
                           src={preview}
                           alt={`Preview ${index + 1}`}
+                          width={100}
+                          height={50}
                           className="w-full h-24 object-cover rounded-lg"
                         />
                       </div>

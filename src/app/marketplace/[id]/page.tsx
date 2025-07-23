@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getMarketplaceItem, MarketplaceItem } from '@/lib/marketplaceService';
+import Image from 'next/image';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -170,9 +171,11 @@ export default function ProductDetailPage() {
                     <div className="space-y-4">
                       {/* Main Image */}
                       <div className="relative">
-                        <img
+                        <Image
                           src={item.images[0]}
                           alt={item.name}
+                          width={256}
+                          height={128}
                           className="w-full h-64 object-cover rounded-2xl border-2 border-emerald-200"
                         />
                         <div className="absolute top-4 right-4 flex space-x-2 space-x-reverse">
@@ -199,9 +202,11 @@ export default function ProductDetailPage() {
                         <div className="grid grid-cols-4 gap-3">
                           {item.images.slice(1, 5).map((image, index) => (
                             <div key={index} className="relative">
-                              <img
+                              <Image
                                 src={image}
                                 alt={`${item.name} ${index + 2}`}
+                                width={64}
+                                height={64}
                                 className="w-full h-16 object-cover rounded-lg border border-emerald-200 cursor-pointer hover:opacity-80 transition-opacity"
                               />
                             </div>

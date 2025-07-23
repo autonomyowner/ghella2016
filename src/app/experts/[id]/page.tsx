@@ -13,9 +13,9 @@ import {
   MessageCircle, Calendar, Share2, Heart,
   CheckCircle, Users, Eye
 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { firestore } from '@/lib/firebaseConfig';
-import { useAuth } from '@/contexts/AuthContext';
+
+import { supabase } from '@/lib/supabase/supabaseClient';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface Expert {
   id: string;
@@ -55,7 +55,7 @@ interface Review {
 export default function ExpertDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [expert, setExpert] = useState<Expert | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,37 +74,41 @@ export default function ExpertDetailPage() {
   // ...existing code...
   const fetchExpert = async () => {
     try {
-      const docRef = doc(firestore, 'expert_profiles', expertId);
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) {
+      const { data, error } = await supabase
+        .from('expert_profiles')
+        .select('*')
+        .eq('id', expertId)
+        .single();
+
+      if (error || !data) {
         router.push('/experts');
         return;
       }
-      const docData = docSnap.data();
+
       setExpert({
         id: expertId,
-        user_id: docData.user_id || '',
-        name: docData.name || '',
-        title: docData.title || '',
-        specialization: docData.specialization || '',
-        bio: docData.bio || '',
-        years_of_experience: docData.years_of_experience || 0,
-        education: docData.education || '',
-        certifications: docData.certifications || [],
-        location: docData.location || '',
-        phone: docData.phone || null,
-        email: docData.email || null,
-        profile_image: docData.profile_image || null,
-        rating: docData.rating || 0,
-        reviews_count: docData.reviews_count || 0,
-        hourly_rate: docData.hourly_rate || null,
-        availability_status: docData.availability_status || 'available',
-        services_offered: docData.services_offered || [],
-        languages: docData.languages || [],
-        is_verified: docData.is_verified || false,
-        is_active: docData.is_active || true,
-        created_at: docData.created_at || '',
-        updated_at: docData.updated_at || '',
+        user_id: data.user_id || '',
+        name: data.name || '',
+        title: data.title || '',
+        specialization: data.specialization || '',
+        bio: data.bio || '',
+        years_of_experience: data.years_of_experience || 0,
+        education: data.education || '',
+        certifications: data.certifications || [],
+        location: data.location || '',
+        phone: data.phone || null,
+        email: data.email || null,
+        profile_image: data.profile_image || null,
+        rating: data.rating || 0,
+        reviews_count: data.reviews_count || 0,
+        hourly_rate: data.hourly_rate || null,
+        availability_status: data.availability_status || 'available',
+        services_offered: data.services_offered || [],
+        languages: data.languages || [],
+        is_verified: data.is_verified || false,
+        is_active: data.is_active || true,
+        created_at: data.created_at || '',
+        updated_at: data.updated_at || '',
       });
     } catch (error) {
       console.error('Error:', error);

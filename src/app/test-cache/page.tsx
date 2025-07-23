@@ -1,11 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import BrowserCache from '@/lib/browserCache'
 
 export default function TestCachePage() {
   const [message, setMessage] = useState('')
   const [caches, setCaches] = useState<string[]>([])
+  const [cacheAvailable, setCacheAvailable] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    setCacheAvailable(BrowserCache.isAvailable())
+  }, [])
 
   const handleClearCache = async () => {
     setMessage('Clearing cache...')
@@ -34,7 +39,7 @@ export default function TestCachePage() {
         <h1 className="text-2xl font-bold mb-6">Cache Test Page</h1>
         
         <div className="mb-4 p-4 bg-gray-800 rounded">
-          <p><strong>Cache Available:</strong> {BrowserCache.isAvailable() ? 'Yes' : 'No'}</p>
+          <p><strong>Cache Available:</strong> {cacheAvailable === null ? 'Checking...' : cacheAvailable ? 'Yes' : 'No'}</p>
           <p><strong>Environment:</strong> {process.env.NODE_ENV}</p>
         </div>
 

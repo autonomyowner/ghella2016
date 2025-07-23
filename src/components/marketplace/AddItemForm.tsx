@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { addMarketplaceItem, uploadImage } from '@/lib/marketplaceService';
+import Image from 'next/image';
 
 interface AddItemFormProps {
   onSuccess?: () => void;
@@ -229,9 +230,11 @@ export default function AddItemForm({ onSuccess, onCancel }: AddItemFormProps) {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {imagePreviewUrls.map((url, index) => (
                     <div key={index} className="relative group">
-                      <img
+                      <Image
                         src={url}
                         alt={`Preview ${index + 1}`}
+                        width={100}
+                        height={100}
                         className="w-full h-24 object-cover rounded-xl border-2 border-emerald-200"
                       />
                       <button

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DeliveryListing {
@@ -45,7 +45,7 @@ interface DeliveryListing {
 }
 
 const DeliveryPage: React.FC = () => {
-  const { getDelivery, isOnline, isWithinLimits } = useFirebase();
+  const { getDelivery, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<DeliveryListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,7 +60,7 @@ const DeliveryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   const ITEMS_PER_PAGE = 12;
 

@@ -489,3 +489,551 @@ export function useUserLandListings() {
     refetch: fetchUserLandListings 
   }
 }
+
+// Comprehensive data management hook to replace useFirebase
+export function useSupabaseData() {
+  const { user } = useSupabaseAuth();
+  const [isOnline, setIsOnline] = useState(true);
+
+  // Check online status
+  useEffect(() => {
+    const checkOnline = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener('online', checkOnline);
+    window.addEventListener('offline', checkOnline);
+    checkOnline();
+
+    return () => {
+      window.removeEventListener('online', checkOnline);
+      window.removeEventListener('offline', checkOnline);
+    };
+  }, []);
+
+  // Generic CRUD operations
+  const createRecord = useCallback(async (table: string, data: any) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      const recordData = {
+        ...data,
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data: result, error } = await supabase
+        .from(table)
+        .insert([recordData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    } catch (error) {
+      console.error(`Error creating ${table} record:`, error);
+      throw error;
+    }
+  }, [user]);
+
+  const updateRecord = useCallback(async (table: string, id: string, updates: any) => {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error(`Error updating ${table} record:`, error);
+      throw error;
+    }
+  }, []);
+
+  const deleteRecord = useCallback(async (table: string, id: string) => {
+    try {
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error(`Error deleting ${table} record:`, error);
+      throw error;
+    }
+  }, []);
+
+  const fetchRecords = useCallback(async (table: string, filters?: any) => {
+    try {
+      let query = supabase
+        .from(table)
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      // Apply filters
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== 'all') {
+            if (key === 'minPrice') {
+              query = query.gte('price', value as number);
+            } else if (key === 'maxPrice') {
+              query = query.lte('price', value as number);
+            } else if (key === 'minArea') {
+              query = query.gte('area_size', value as number);
+            } else if (key === 'maxArea') {
+              query = query.lte('area_size', value as number);
+            } else {
+              query = query.eq(key, value);
+            }
+          }
+        });
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      let filteredData = data || [];
+
+      // Apply search filter client-side
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter((item: any) => 
+          (item.title && item.title.toLowerCase().includes(searchLower)) ||
+          (item.description && item.description.toLowerCase().includes(searchLower)) ||
+          (item.location && item.location.toLowerCase().includes(searchLower))
+        );
+      }
+
+      return filteredData;
+    } catch (error) {
+      console.error(`Error fetching ${table} records:`, error);
+      return [];
+    }
+  }, []);
+
+  // Equipment operations
+  const getEquipment = useCallback(async (filters?: any) => {
+    return fetchRecords('equipment', filters);
+  }, [fetchRecords]);
+
+  const addEquipment = useCallback(async (equipmentData: any) => {
+    return createRecord('equipment', equipmentData);
+  }, [createRecord]);
+
+  const updateEquipment = useCallback(async (id: string, updates: any) => {
+    return updateRecord('equipment', id, updates);
+  }, [updateRecord]);
+
+  const deleteEquipment = useCallback(async (id: string) => {
+    return deleteRecord('equipment', id);
+  }, [deleteRecord]);
+
+  // Animal operations
+  const getAnimals = useCallback(async (filters?: any) => {
+    return fetchRecords('animal_listings', filters);
+  }, [fetchRecords]);
+
+  const addAnimal = useCallback(async (animalData: any) => {
+    return createRecord('animal_listings', animalData);
+  }, [createRecord]);
+
+  const updateAnimal = useCallback(async (id: string, updates: any) => {
+    return updateRecord('animal_listings', id, updates);
+  }, [updateRecord]);
+
+  const deleteAnimal = useCallback(async (id: string) => {
+    return deleteRecord('animal_listings', id);
+  }, [deleteRecord]);
+
+  // Land operations
+  const getLand = useCallback(async (filters?: any) => {
+    return fetchRecords('land_listings', filters);
+  }, [fetchRecords]);
+
+  const addLand = useCallback(async (landData: any) => {
+    return createRecord('land_listings', landData);
+  }, [createRecord]);
+
+  const updateLand = useCallback(async (id: string, updates: any) => {
+    return updateRecord('land_listings', id, updates);
+  }, [updateRecord]);
+
+  const deleteLand = useCallback(async (id: string) => {
+    return deleteRecord('land_listings', id);
+  }, [deleteRecord]);
+
+  // Nurseries operations
+  const getNurseries = useCallback(async (filters?: any) => {
+    return fetchRecords('nurseries', filters);
+  }, [fetchRecords]);
+
+  const addNursery = useCallback(async (nurseryData: any) => {
+    return createRecord('nurseries', nurseryData);
+  }, [createRecord]);
+
+  const updateNursery = useCallback(async (id: string, updates: any) => {
+    return updateRecord('nurseries', id, updates);
+  }, [updateRecord]);
+
+  const deleteNursery = useCallback(async (id: string) => {
+    return deleteRecord('nurseries', id);
+  }, [deleteRecord]);
+
+  // Vegetables operations
+  const getVegetables = useCallback(async (filters?: any) => {
+    return fetchRecords('vegetables', filters);
+  }, [fetchRecords]);
+
+  const addVegetable = useCallback(async (vegetableData: any) => {
+    return createRecord('vegetables', vegetableData);
+  }, [createRecord]);
+
+  const updateVegetable = useCallback(async (id: string, updates: any) => {
+    return updateRecord('vegetables', id, updates);
+  }, [updateRecord]);
+
+  const deleteVegetable = useCallback(async (id: string) => {
+    return deleteRecord('vegetables', id);
+  }, [deleteRecord]);
+
+  // Labor operations
+  const getLabor = useCallback(async (filters?: any) => {
+    return fetchRecords('labor', filters);
+  }, [fetchRecords]);
+
+  const addLabor = useCallback(async (laborData: any) => {
+    return createRecord('labor', laborData);
+  }, [createRecord]);
+
+  const updateLabor = useCallback(async (id: string, updates: any) => {
+    return updateRecord('labor', id, updates);
+  }, [updateRecord]);
+
+  const deleteLabor = useCallback(async (id: string) => {
+    return deleteRecord('labor', id);
+  }, [deleteRecord]);
+
+  // Analysis operations
+  const getAnalysis = useCallback(async (filters?: any) => {
+    return fetchRecords('analysis', filters);
+  }, [fetchRecords]);
+
+  const addAnalysis = useCallback(async (analysisData: any) => {
+    return createRecord('analysis', analysisData);
+  }, [createRecord]);
+
+  const updateAnalysis = useCallback(async (id: string, updates: any) => {
+    return updateRecord('analysis', id, updates);
+  }, [updateRecord]);
+
+  const deleteAnalysis = useCallback(async (id: string) => {
+    return deleteRecord('analysis', id);
+  }, [deleteRecord]);
+
+  // Delivery operations
+  const getDelivery = useCallback(async (filters?: any) => {
+    return fetchRecords('delivery', filters);
+  }, [fetchRecords]);
+
+  const addDelivery = useCallback(async (deliveryData: any) => {
+    return createRecord('delivery', deliveryData);
+  }, [createRecord]);
+
+  const updateDelivery = useCallback(async (id: string, updates: any) => {
+    return updateRecord('delivery', id, updates);
+  }, [updateRecord]);
+
+  const deleteDelivery = useCallback(async (id: string) => {
+    return deleteRecord('delivery', id);
+  }, [deleteRecord]);
+
+  // Profile operations
+  const getProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (userId: string, updates: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }, []);
+
+  // File upload
+  const uploadFile = useCallback(async (file: File, path: string) => {
+    try {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size too large. Maximum 5MB allowed.');
+      }
+
+      const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(path, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(path);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  }, []);
+
+  // Search functionality
+  const searchEquipment = useCallback(async (searchQuery: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('*')
+        .or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+        .limit(20);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error searching equipment:', error);
+      return [];
+    }
+  }, []);
+
+  // Categories
+  const getCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      return [];
+    }
+  }, []);
+
+  // Messages
+  const getMessages = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      return [];
+    }
+  }, []);
+
+  const sendMessage = useCallback(async (messageData: any) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .insert([{
+          ...messageData,
+          sender_id: user.id,
+          created_at: new Date().toISOString(),
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  }, [user]);
+
+  // Favorites (stored in localStorage for now)
+  const getFavorites = useCallback(async (userId: string) => {
+    try {
+      const favorites = localStorage.getItem(`favorites_${userId}`);
+      return favorites ? JSON.parse(favorites) : [];
+    } catch (error) {
+      console.error('Error getting favorites:', error);
+      return [];
+    }
+  }, []);
+
+  const addFavorite = useCallback(async (userId: string, itemId: string, itemType: string) => {
+    try {
+      const favorites = await getFavorites(userId);
+      const newFavorite = { id: itemId, type: itemType, added_at: new Date().toISOString() };
+      favorites.push(newFavorite);
+      localStorage.setItem(`favorites_${userId}`, JSON.stringify(favorites));
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding favorite:', error);
+      throw error;
+    }
+  }, [getFavorites]);
+
+  const removeFavorite = useCallback(async (userId: string, itemId: string) => {
+    try {
+      const favorites = await getFavorites(userId);
+      const filteredFavorites = favorites.filter((fav: any) => fav.id !== itemId);
+      localStorage.setItem(`favorites_${userId}`, JSON.stringify(filteredFavorites));
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+      throw error;
+    }
+  }, [getFavorites]);
+
+  // Statistics
+  const getStats = useCallback(async () => {
+    try {
+      const [equipment, animals, land, nurseries] = await Promise.all([
+        getEquipment(),
+        getAnimals(),
+        getLand(),
+        getNurseries(),
+      ]);
+
+      return {
+        totalEquipment: equipment.length,
+        totalAnimals: animals.length,
+        totalLand: land.length,
+        totalNurseries: nurseries.length,
+        onlineStatus: isOnline,
+        readCount: 0, // Not tracking in Supabase
+        writeCount: 0, // Not tracking in Supabase
+      };
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      return {
+        totalEquipment: 0,
+        totalAnimals: 0,
+        totalLand: 0,
+        totalNurseries: 0,
+        onlineStatus: isOnline,
+        readCount: 0,
+        writeCount: 0,
+      };
+    }
+  }, [getEquipment, getAnimals, getLand, getNurseries, isOnline]);
+
+  return {
+    // Equipment
+    getEquipment,
+    addEquipment,
+    updateEquipment,
+    deleteEquipment,
+    searchEquipment,
+    
+    // Animal
+    getAnimals,
+    addAnimal,
+    updateAnimal,
+    deleteAnimal,
+    
+    // Land
+    getLand,
+    addLand,
+    updateLand,
+    deleteLand,
+    
+    // Nurseries
+    getNurseries,
+    addNursery,
+    updateNursery,
+    deleteNursery,
+    
+    // Vegetables
+    getVegetables,
+    addVegetable,
+    updateVegetable,
+    deleteVegetable,
+    
+    // Labor
+    getLabor,
+    addLabor,
+    updateLabor,
+    deleteLabor,
+    
+    // Analysis
+    getAnalysis,
+    addAnalysis,
+    updateAnalysis,
+    deleteAnalysis,
+    
+    // Delivery
+    getDelivery,
+    addDelivery,
+    updateDelivery,
+    deleteDelivery,
+    
+    // Profiles
+    getProfile,
+    updateProfile,
+    
+    // Files
+    uploadFile,
+    
+    // Categories
+    getCategories,
+    
+    // Messages
+    getMessages,
+    sendMessage,
+    
+    // Favorites
+    getFavorites,
+    addFavorite,
+    removeFavorite,
+    
+    // Stats
+    getStats,
+    
+    // Status
+    isOnline,
+    isWithinLimits: true, // Supabase doesn't have the same limits as Firebase free plan
+  };
+}

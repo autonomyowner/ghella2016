@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { LandListing } from '@/types/database.types';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -26,7 +26,7 @@ import {
 import Image from 'next/image';
 
 const LandListingsPage: React.FC = () => {
-  const { getLand, isOnline, isWithinLimits } = useFirebase();
+  const { getLand, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<LandListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface AnalysisListing {
@@ -34,7 +34,7 @@ interface AnalysisListing {
 }
 
 const AnalysisPage: React.FC = () => {
-  const { getAnalysis, isOnline, isWithinLimits } = useFirebase();
+  const { getAnalysis, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<AnalysisListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +49,7 @@ const AnalysisPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   const ITEMS_PER_PAGE = 12;
 
@@ -95,7 +95,7 @@ const AnalysisPage: React.FC = () => {
           (analysis.title && analysis.title.toLowerCase().includes(term)) ||
           (analysis.description && analysis.description.toLowerCase().includes(term)) ||
           (analysis.location && analysis.location.toLowerCase().includes(term)) ||
-          (analysis.equipment_used && analysis.equipment_used.some(equipment => equipment.toLowerCase().includes(term)))
+          (analysis.equipment_used && analysis.equipment_used.some((equipment: string) => equipment.toLowerCase().includes(term)))
         );
       }
 

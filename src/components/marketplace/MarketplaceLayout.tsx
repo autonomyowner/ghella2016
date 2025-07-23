@@ -326,7 +326,7 @@ export default function MarketplaceLayout({
                                   const current = selectedFilters[filter.id] || [];
                                   const newValue = e.target.checked
                                     ? [...current, option.value]
-                                    : current.filter(v => v !== option.value);
+                                    : current.filter((v: string) => v !== option.value);
                                   handleFilterChange(filter.id, newValue);
                                 }}
                                 className="mr-2 rounded border-white/20 bg-white/10 text-emerald-500 focus:ring-emerald-400"

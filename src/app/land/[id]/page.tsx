@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { LandListing } from '@/types/database.types';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Link from 'next/link';
@@ -12,7 +12,7 @@ const LandDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const { user } = useSupabaseAuth();
-  const { getLand, isOnline, isWithinLimits } = useFirebase();
+  const { getLand, isOnline, isWithinLimits } = useSupabaseData();
   const [listing, setListing] = useState<LandListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [showContactInfo, setShowContactInfo] = useState(false);

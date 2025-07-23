@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useFirebase } from '@/hooks/useFirebase';
+import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface LaborListing {
@@ -39,7 +39,7 @@ interface LaborListing {
 }
 
 const LaborPage: React.FC = () => {
-  const { getLabor, isOnline, isWithinLimits } = useFirebase();
+  const { getLabor, isOnline, isWithinLimits } = useSupabaseData();
   const [listings, setListings] = useState<LaborListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +54,7 @@ const LaborPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   const ITEMS_PER_PAGE = 12;
 
@@ -100,8 +100,8 @@ const LaborPage: React.FC = () => {
           (labor.title && labor.title.toLowerCase().includes(term)) ||
           (labor.description && labor.description.toLowerCase().includes(term)) ||
           (labor.location && labor.location.toLowerCase().includes(term)) ||
-          (labor.skills && labor.skills.some(skill => skill.toLowerCase().includes(term))) ||
-          (labor.specializations && labor.specializations.some(spec => spec.toLowerCase().includes(term)))
+          (labor.skills && labor.skills.some((skill: string) => skill.toLowerCase().includes(term))) ||
+          (labor.specializations && labor.specializations.some((spec: string) => spec.toLowerCase().includes(term)))
         );
       }
 
