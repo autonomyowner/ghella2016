@@ -42,47 +42,53 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Fetch user profile
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error)
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile...')
+          // Create profile if it doesn't exist
+          const newProfile = {
+            id: userId,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            full_name: null,
+            phone: null,
+            location: null,
+            avatar_url: null,
+            user_type: 'farmer' as const,
+            is_verified: false,
+            bio: null,
+            website: null,
+            social_links: {},
+          }
+          
+          const { data: createdProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([newProfile])
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('Error creating profile:', createError)
+          } else {
+            console.log('Profile created successfully:', createdProfile)
+            setProfile(createdProfile)
+          }
+        } else {
+          console.error('Error fetching profile:', error)
+        }
         return
       }
 
       if (data) {
+        console.log('Profile fetched successfully:', data)
         setProfile(data)
-      } else {
-        // Create profile if it doesn't exist
-        const newProfile = {
-          id: userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          full_name: null,
-          phone: null,
-          location: null,
-          avatar_url: null,
-          user_type: 'farmer' as const,
-          is_verified: false,
-          bio: null,
-          website: null,
-          social_links: {},
-        }
-        
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert([newProfile])
-          .select()
-          .single()
-
-        if (createError) {
-          console.error('Error creating profile:', createError)
-        } else {
-          setProfile(createdProfile)
-        }
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error)
@@ -91,16 +97,34 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // Initialize auth state
   useEffect(() => {
-    // Get initial session
+    // Get initial session with timeout
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          // Set a timeout for profile fetching to prevent long loading
+          const profileTimeout = setTimeout(() => {
+            setLoading(false)
+          }, 3000) // 3 second timeout
+          
+          try {
+            await fetchProfile(session.user.id)
+          } catch (error) {
+            console.error('Profile fetch error:', error)
+          } finally {
+            clearTimeout(profileTimeout)
+            setLoading(false)
+          }
+        } else {
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Session fetch error:', error)
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     getInitialSession()
@@ -112,7 +136,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          await fetchProfile(session.user.id)
+          try {
+            await fetchProfile(session.user.id)
+          } catch (error) {
+            console.error('Profile fetch error:', error)
+          }
         } else {
           setProfile(null)
         }
@@ -126,12 +154,28 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Sign in
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('SupabaseAuthContext: Attempting sign in for email:', email)
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      return { error }
+      
+      console.log('SupabaseAuthContext: Sign in response:', { data, error })
+      
+      if (error) {
+        console.error('SupabaseAuthContext: Sign in error:', error)
+        return { error }
+      }
+      
+      if (data.user) {
+        console.log('SupabaseAuthContext: User signed in successfully:', data.user.id)
+        // Fetch profile after successful sign in
+        await fetchProfile(data.user.id)
+      }
+      
+      return { error: null }
     } catch (error) {
+      console.error('SupabaseAuthContext: Unexpected error during sign in:', error)
       return { error }
     }
   }

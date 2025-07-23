@@ -8,6 +8,7 @@ let supabaseInstance: SupabaseClient | null = null;
 
 export const getSupabaseClient = (): SupabaseClient => {
   if (!supabaseInstance) {
+    console.log('Creating new Supabase client instance...');
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
@@ -23,6 +24,11 @@ export const getSupabaseClient = (): SupabaseClient => {
     });
     
     console.log('Supabase client initialized with URL:', supabaseUrl);
+    console.log('Supabase client config:', {
+      url: supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+      keyLength: supabaseAnonKey?.length
+    });
   }
   
   return supabaseInstance;

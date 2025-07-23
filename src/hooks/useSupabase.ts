@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment, LandListing, Category, Profile } from '@/types/database.types'
-import { collection, query, where, getDocs, deleteDoc, doc, updateDoc, orderBy } from 'firebase/firestore';
-import { firestore } from '@/lib/firebaseConfig';
+import { supabase } from '@/lib/supabase/supabaseClient'
 
 // Hook for user profile management
 export function useProfile() {
@@ -19,7 +18,7 @@ export function useProfile() {
     setError(null)
     
     try {
-      const result = await updateProfile(updates)
+      const result = await updateProfile(updates as any)
       if (result.error) {
         setError(result.error.message)
       }
@@ -41,7 +40,217 @@ export function useProfile() {
   }
 }
 
-// Hook for user equipment management
+// Hook for equipment management with Supabase
+export function useEquipment() {
+  const { user } = useSupabaseAuth();
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFetchParams, setLastFetchParams] = useState<string>('');
+
+  const fetchEquipment = async (filters?: {
+    category?: string;
+    location?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    condition?: string;
+    search?: string;
+  }) => {
+    try {
+      // Create a cache key for the current filters
+      const cacheKey = JSON.stringify(filters || {});
+      
+      // Skip if we're already loading or if the filters haven't changed
+      if (loading || cacheKey === lastFetchParams) {
+        return equipment;
+      }
+      
+      setLoading(true);
+      setError(null);
+      setLastFetchParams(cacheKey);
+
+      let query = supabase
+        .from('equipment')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to 50 items for better performance
+
+      // Apply filters
+      if (filters?.category && filters.category !== 'all') {
+        query = query.eq('category_id', filters.category);
+      }
+      if (filters?.location && filters.location !== 'جميع الولايات') {
+        query = query.eq('location', filters.location);
+      }
+      if (filters?.minPrice) {
+        query = query.gte('price', filters.minPrice);
+      }
+      if (filters?.maxPrice) {
+        query = query.lte('price', filters.maxPrice);
+      }
+      if (filters?.condition) {
+        query = query.eq('condition', filters.condition);
+      }
+
+      const { data, error: supabaseError } = await query;
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      let filteredData = data || [];
+
+      // Apply search filter client-side for better performance
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter(item => 
+          (item.title && item.title.toLowerCase().includes(searchLower)) ||
+          (item.brand && item.brand.toLowerCase().includes(searchLower)) ||
+          (item.model && item.model.toLowerCase().includes(searchLower)) ||
+          (item.description && item.description.toLowerCase().includes(searchLower))
+        );
+      }
+
+      setEquipment(filteredData);
+      return filteredData;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error loading equipment';
+      setError(errorMessage);
+      console.error('Error fetching equipment:', err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addEquipment = async (equipmentData: Partial<Equipment>) => {
+    if (!user) {
+      throw new Error('User must be logged in to add equipment');
+    }
+
+    try {
+      const newEquipment = {
+        ...equipmentData,
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error: supabaseError } = await supabase
+        .from('equipment')
+        .insert([newEquipment])
+        .select()
+        .single();
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      // Refresh the equipment list
+      await fetchEquipment();
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error adding equipment';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
+  const updateEquipment = async (id: string, updates: Partial<Equipment>) => {
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('equipment')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      // Refresh the equipment list
+      await fetchEquipment();
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error updating equipment';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
+  const deleteEquipment = async (id: string) => {
+    try {
+      const { error: supabaseError } = await supabase
+        .from('equipment')
+        .delete()
+        .eq('id', id);
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      // Refresh the equipment list
+      await fetchEquipment();
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error deleting equipment';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
+  const fetchUserEquipment = async () => {
+    if (!user) {
+      setEquipment([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: supabaseError } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      setEquipment(data || []);
+    } catch (err) {
+      setError('Error loading user equipment');
+      console.error('Error fetching user equipment:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchEquipment();
+  }, []);
+
+  return {
+    equipment,
+    loading,
+    error,
+    fetchEquipment: useCallback(fetchEquipment, []),
+    addEquipment,
+    updateEquipment,
+    deleteEquipment,
+    fetchUserEquipment,
+  };
+}
+
+// Hook for user equipment management (for user's own equipment)
 export function useUserEquipment() {
   const { user } = useSupabaseAuth();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -59,38 +268,20 @@ export function useUserEquipment() {
       setLoading(true);
       setError(null);
 
-      const equipmentRef = collection(firestore, 'equipment');
-      const q = query(equipmentRef, where('user_id', '==', user.id), orderBy('created_at', 'desc'));
-      const querySnapshot = await getDocs(q);
+      const { data, error: supabaseError } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      const data = querySnapshot.docs.map(doc => {
-        const docData = doc.data();
-        return {
-          id: doc.id,
-          created_at: docData.created_at || new Date().toISOString(),
-          updated_at: docData.updated_at || new Date().toISOString(),
-          user_id: docData.user_id || user.id,
-          title: docData.title || '',
-          description: docData.description || null,
-          price: docData.price || 0,
-          currency: docData.currency || 'USD',
-          category_id: docData.category_id || '',
-          condition: docData.condition || 'new',
-          images: docData.images || [],
-          location: docData.location || null,
-          is_available: docData.is_available || true,
-          view_count: docData.view_count || 0,
-          year: docData.year || null,
-          brand: docData.brand || '',
-          model: docData.model || '',
-          hours_used: docData.hours_used || 0,
-          coordinates: docData.coordinates || null,
-          is_featured: docData.is_featured || false,
-        };
-      });
-      setEquipment(data);
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      setEquipment(data || []);
     } catch (err) {
       setError('Error loading equipment');
+      console.error('Error fetching user equipment:', err);
     } finally {
       setLoading(false);
     }
@@ -98,27 +289,46 @@ export function useUserEquipment() {
 
   const deleteEquipment = async (id: string) => {
     try {
-      const equipmentDoc = doc(firestore, 'equipment', id);
-      await deleteDoc(equipmentDoc);
+      const { error: supabaseError } = await supabase
+        .from('equipment')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user?.id);
 
-      setEquipment(prev => prev.filter(item => item.id !== id));
-      return true;
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      await fetchUserEquipment();
+      return { success: true };
     } catch (err) {
       setError('Error deleting equipment');
-      return false;
+      throw err;
     }
   };
 
   const updateEquipment = async (id: string, updates: Partial<Equipment>) => {
     try {
-      const equipmentDoc = doc(firestore, 'equipment', id);
-      await updateDoc(equipmentDoc, updates);
+      const { data, error: supabaseError } = await supabase
+        .from('equipment')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('user_id', user?.id)
+        .select()
+        .single();
 
-      setEquipment(prev => prev.map(item => (item.id === id ? { ...item, ...updates } : item)));
-      return true;
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      await fetchUserEquipment();
+      return data;
     } catch (err) {
       setError('Error updating equipment');
-      return false;
+      throw err;
     }
   };
 
@@ -130,9 +340,9 @@ export function useUserEquipment() {
     equipment,
     loading,
     error,
+    fetchUserEquipment,
     deleteEquipment,
     updateEquipment,
-    refetch: fetchUserEquipment,
   };
 }
 
@@ -146,15 +356,11 @@ export function useCategories() {
     async function fetchCategories() {
       try {
         setLoading(true)
-        const categoriesRef = collection(firestore, 'categories');
-        const q = query(categoriesRef, orderBy('sort_order', 'asc'));
-        const querySnapshot = await getDocs(q);
+        const categoriesRef = supabase.from('categories');
+        const q = supabase.from('categories').select('*').order('sort_order', { ascending: true });
+        const querySnapshot = await q.select();
 
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          created_at: doc.data().created_at || new Date().toISOString(),
-        })) as Category[];
+        const data = querySnapshot.data as Category[];
 
         setCategories(data);
       } catch (err) {
@@ -195,12 +401,12 @@ export function useUserStats() {
         setError(null)
 
         // Get equipment count and views
-        const equipmentRef = collection(firestore, 'equipment');
-        const q = query(equipmentRef, where('user_id', '==', user.id));
-        const querySnapshot = await getDocs(q);
+        const equipmentRef = supabase.from('equipment');
+        const q = supabase.from('equipment').select('*').eq('user_id', user.id);
+        const querySnapshot = await q.select();
 
-        const equipmentData = querySnapshot.docs.map(doc => doc.data());
-        const totalViews = equipmentData.reduce((sum, item) => sum + (item.view_count || 0), 0);
+                 const equipmentData = querySnapshot.data || [];
+         const totalViews = equipmentData.reduce((sum: any, item: any) => sum + (item.view_count || 0), 0);
 
         setStats({
           totalEquipment: equipmentData.length,
@@ -240,16 +446,11 @@ export function useUserLandListings() {
       setLoading(true)
       setError(null)
 
-      const landRef = collection(firestore, 'land_listings');
-      const q = query(landRef, where('user_id', '==', user.id), orderBy('created_at', 'desc'));
-      const querySnapshot = await getDocs(q);
+      const landRef = supabase.from('land_listings');
+      const q = supabase.from('land_listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      const querySnapshot = await q.select();
 
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        created_at: doc.data().created_at || new Date().toISOString(),
-        updated_at: doc.data().updated_at || new Date().toISOString(),
-      })) as LandListing[];
+      const data = querySnapshot.data as LandListing[];
 
       setLandListings(data);
     } catch (err) {
@@ -261,14 +462,18 @@ export function useUserLandListings() {
 
   const deleteLandListing = async (id: string) => {
     try {
-      const landDoc = doc(firestore, 'land_listings', id);
-      await deleteDoc(landDoc);
+      const landDoc = supabase.from('land_listings').delete().eq('id', id);
+      const { error: supabaseError } = await landDoc;
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
 
       setLandListings(prev => prev.filter(item => item.id !== id))
-      return true
+      return { success: true }
     } catch (err) {
       setError('حدث خطأ في حذف الأرض')
-      return false
+      return { success: false }
     }
   }
 

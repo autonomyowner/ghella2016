@@ -1,25 +1,35 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+const supabaseUrl = 'https://puvmqdnvofbtmqpcjmia.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1dm1xZG52b2ZidG1xcGNqbWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5ODc2MDcsImV4cCI6MjA2ODU2MzYwN30.9rLsQz3vi8rU46OqTYHCInVMSGdj5xgZTYZvq7ZBfjY';
+
+// Singleton pattern to prevent multiple instances
+let supabaseInstance: SupabaseClient | null = null;
+
+export const getSupabaseClient = (): SupabaseClient => {
+  if (!supabaseInstance) {
+    console.log('Creating new Supabase client instance for farming marketplace...');
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: 'elghella-farming-auth',
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+    });
+    
+    console.log('Supabase client initialized for farming marketplace');
+  }
+  
+  return supabaseInstance;
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Export the singleton instance
+export const supabase = getSupabaseClient();
 
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const firestore = getFirestore(app);
-export const storage = getStorage(app);
-
-// Export the app instance for other uses
-export default app; 
+export default supabase; 

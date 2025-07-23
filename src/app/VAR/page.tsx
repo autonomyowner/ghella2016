@@ -45,7 +45,7 @@ const PremiumLoadingSpinner = () => (
         <div className="w-20 h-20 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
         <div className="absolute inset-0 w-20 h-20 border-4 border-teal-400 border-b-transparent rounded-full animate-spin mx-auto" style={{ animationDelay: '0.5s' }}></div>
       </div>
-      <p className="text-emerald-300 font-semibold text-lg">جاري تحميل منصة الذكاء الزراعي...</p>
+      <p className="text-emerald-300 font-semibold text-lg">جاري تحميل منصة تحليل الأراضي...</p>
       <p className="text-emerald-400 text-sm mt-2">أحدث التقنيات لتحليل الأراضي الزراعية</p>
     </div>
   </div>
@@ -340,31 +340,34 @@ const LiveLandIntelligenceTool: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-6 lg:px-8">
-        <div className="text-center max-w-7xl mx-auto">
+        {/* Hero Background GIF */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{
+            backgroundImage: 'url(/assets/field.gif)',
+          }}
+        />
+        
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/60 z-10"></div>
+        
+        {/* Hero Content */}
+        <div className="text-center max-w-7xl mx-auto relative z-20">
           {/* Premium Badge */}
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-sm font-semibold mb-8 shadow-lg">
             <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
-            منصة الذكاء الزراعي المتطورة - تقنيات NASA و AI
+            منصة تحليل الأراضي المتطورة - تقنيات NASA
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-white mb-6 md:mb-8 leading-tight">
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 bg-clip-text text-transparent">
-              منصة الذكاء الزراعي
-            </span>
-          </h1>
+
           
           {/* Subtitle */}
           <p className="text-xl md:text-2xl lg:text-3xl text-emerald-200 mb-8 md:mb-12 leading-relaxed max-w-4xl mx-auto">
-            أحدث تقنيات الذكاء الاصطناعي وبيانات الأقمار الصناعية لتحليل الأراضي الزراعية وتحسين الإنتاجية
+            أحدث تقنيات تحليل البيانات وبيانات الأقمار الصناعية لتحليل الأراضي الزراعية وتحسين الإنتاجية
           </p>
 
           {/* Technology Icons */}
           <div className="flex justify-center items-center space-x-8 space-x-reverse mb-12">
-            <div className="flex items-center space-x-2 space-x-reverse text-emerald-300">
-              <Brain className="w-8 h-8" />
-              <span className="text-lg font-semibold">AI</span>
-            </div>
             <div className="flex items-center space-x-2 space-x-reverse text-emerald-300">
               <Satellite className="w-8 h-8" />
               <span className="text-lg font-semibold">NASA</span>
@@ -407,8 +410,8 @@ const LiveLandIntelligenceTool: React.FC = () => {
               <div className="text-emerald-200 text-sm">دقة التحليل</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">AI</div>
-              <div className="text-emerald-200 text-sm">ذكاء اصطناعي</div>
+              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">ML</div>
+              <div className="text-emerald-200 text-sm">تعلم آلي</div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">NASA</div>
@@ -430,7 +433,7 @@ const LiveLandIntelligenceTool: React.FC = () => {
               الخريطة <span className="text-emerald-400">التفاعلية الذكية</span>
             </h2>
             <p className="text-xl text-emerald-200 max-w-3xl mx-auto">
-              تحليل شامل للأراضي الزراعية باستخدام أحدث تقنيات الأقمار الصناعية والذكاء الاصطناعي
+              تحليل شامل للأراضي الزراعية باستخدام أحدث تقنيات الأقمار الصناعية وتحليل البيانات
             </p>
           </div>
           
@@ -593,8 +596,8 @@ const LiveLandIntelligenceTool: React.FC = () => {
           {/* Advanced Analysis Tools */}
           <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl p-6 border border-emerald-400/30 text-center group hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <Brain className="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="text-lg font-bold text-white mb-2">تحليل الذكاء الاصطناعي</h3>
+                              <Brain className="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
+                <h3 className="text-lg font-bold text-white mb-2">تحليل البيانات المتقدم</h3>
               <p className="text-emerald-300 text-sm">توقعات متقدمة للمحاصيل والأسعار</p>
             </div>
 
@@ -657,7 +660,7 @@ const LiveLandIntelligenceTool: React.FC = () => {
             <div className="mt-8 flex justify-center space-x-4 space-x-reverse">
               <div className="flex items-center text-emerald-300">
                 <Brain className="w-5 h-5 mr-2" />
-                <span>تحليل AI</span>
+                <span>تحليل البيانات</span>
               </div>
               <div className="flex items-center text-emerald-300">
                 <Satellite className="w-5 h-5 mr-2" />
@@ -693,7 +696,7 @@ const LiveLandIntelligenceTool: React.FC = () => {
                         <div className="absolute inset-0 w-20 h-20 border-4 border-teal-300 border-b-transparent rounded-full animate-spin mx-auto" style={{ animationDelay: '0.5s' }}></div>
                       </div>
                       <p className="text-emerald-200 text-lg">جاري تحميل صور الأقمار الصناعية...</p>
-                      <p className="text-emerald-300 text-sm mt-2">تحليل متقدم باستخدام AI</p>
+                      <p className="text-emerald-300 text-sm mt-2">تحليل متقدم للبيانات</p>
                     </div>
                   )}
                   <div className="grid md:grid-cols-2 gap-6">
@@ -856,8 +859,8 @@ const LiveLandIntelligenceTool: React.FC = () => {
                   className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
                 >
                   <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                    <Brain className="w-6 h-6 text-emerald-400 ml-3" />
-                    رؤى الذكاء الاصطناعي
+                                    <Brain className="w-6 h-6 text-emerald-400 ml-3" />
+                رؤى تحليل البيانات
                   </h2>
                   <div className="space-y-6">
                     <div className="p-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl border border-emerald-400/30">

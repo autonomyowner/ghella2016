@@ -1,73 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useWebsiteSettings } from '@/lib/websiteSettings';
-
-// Premium components with lazy loading
-const PremiumBackground = dynamic(() => import('@/components/PremiumBackground'), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900 animate-pulse" />
-  )
-});
-
-const PremiumHeader = dynamic(() => import('@/components/PremiumHeader'), {
-  ssr: false,
-  loading: () => <div className="h-20 bg-black/20 backdrop-blur-lg animate-pulse" />
-});
-
-const MarketStats = dynamic(() => import('@/components/MarketStats'), {
-  ssr: false,
-  loading: () => null
-});
-
-const PremiumFeatures = dynamic(() => import('@/components/PremiumFeatures'), {
-  ssr: false,
-  loading: () => null
-});
-
-const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSection'), {
-  ssr: false,
-  loading: () => null
-});
-
-const PremiumFooter = dynamic(() => import('@/components/PremiumFooter'), {
-  ssr: false,
-  loading: () => null
-});
-
-// Premium loading component
-const PremiumLoadingSpinner = () => (
-  <div className="h-screen w-full relative overflow-hidden bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900 flex items-center justify-center">
-    <div className="text-center">
-      <div className="relative">
-        <div className="w-20 h-20 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-        <div className="absolute inset-0 w-20 h-20 border-4 border-teal-400 border-b-transparent rounded-full animate-spin mx-auto" style={{ animationDelay: '0.5s' }}></div>
-      </div>
-      <p className="text-emerald-300 font-semibold text-lg">جاري تحميل منصة الغلة...</p>
-      <p className="text-emerald-400 text-sm mt-2">أفضل منصة زراعية في الشرق الأوسط</p>
-    </div>
-  </div>
-);
+import UnifiedSearch from '@/components/UnifiedSearch';
+import { 
+  MapPin, 
+  Leaf, 
+  Wrench, 
+  Truck, 
+  Ship, 
+  Satellite, 
+  Users, 
+  ArrowRight,
+  Star,
+  Shield,
+  Clock,
+  TrendingUp,
+  Award,
+  Heart,
+  Share2,
+  CalendarCheck
+} from 'lucide-react';
 
 export default function HomePage() {
   const { user, signOut, profile } = useSupabaseAuth();
   const { settings, loading } = useWebsiteSettings();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [currentSection, setCurrentSection] = useState(0);
   
   useEffect(() => {
     setIsHydrated(true);
-    
-    // Auto-scroll through sections for premium feel
-    const interval = setInterval(() => {
-      setCurrentSection((prev) => (prev + 1) % 3);
-    }, 5000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   const handleSignOut = async () => {
@@ -78,182 +41,403 @@ export default function HomePage() {
     }
   };
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch with proper layout preservation
   if (!isHydrated) {
-    return <PremiumLoadingSpinner />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800">
+        {/* Preserve layout structure to prevent CLS */}
+        <div className="pt-20 pb-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center">
+              <div className="text-8xl mb-8">🚜</div>
+              <div className="text-5xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+                الغلة
+              </div>
+              <div className="text-xl lg:text-2xl mb-12 opacity-90 max-w-4xl mx-auto leading-relaxed">
+                منصة التكنولوجيا الزراعية
+              </div>
+              <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-emerald-300 font-semibold">جاري التحميل...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-black">
-      {/* Premium Background */}
-      <Suspense fallback={
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900" />
-      }>
-        <PremiumBackground />
-      </Suspense>
+  const marketplaceCategories = [
+    {
+      title: "الأراضي الزراعية",
+      description: "استأجر أو اشتر أراضي زراعية",
+      icon: MapPin,
+      href: "/land",
+      color: "bg-green-500",
+      count: "150+ أرض متاحة",
+      image: "/assets/land01.jpg",
+      emoji: "🌾",
+      features: ["ري متطور", "تربة خصبة", "طرق ممهدة"]
+    },
+    {
+      title: "الخضروات والفواكه",
+      description: "بيع وشراء المنتجات الطازجة",
+      icon: Leaf,
+      href: "/marketplace",
+      color: "bg-emerald-500",
+      count: "500+ منتج",
+      image: "/assets/tomato 2.jpg",
+      emoji: "🍅",
+      features: ["طازج", "عضوي", "مضمون الجودة"]
+    },
+    {
+      title: "المشاتل",
+      description: "شتلات وأشجار جاهزة للزراعة",
+      icon: Leaf,
+      href: "/nurseries",
+      color: "bg-teal-500",
+      count: "80+ مشتل",
+      image: "/assets/seedings01.jpg",
+      emoji: "🌱",
+      features: ["شتلات صحية", "أصناف متنوعة", "ضمان النمو"]
+    },
+    {
+      title: "المعدات الزراعية",
+      description: "جرارات وأدوات ومعدات",
+      icon: Wrench,
+      href: "/equipment",
+      color: "bg-blue-500",
+      count: "200+ معدة",
+      image: "/assets/machin01.jpg",
+      emoji: "🚜",
+      features: ["مؤمن", "صيانة دورية", "تأجير مرن"]
+    }
+  ];
 
-      {/* Premium Header */}
-      <Suspense fallback={<div className="h-20 bg-black/20 backdrop-blur-lg animate-pulse" />}>
-        <PremiumHeader 
-          user={user} 
-          profile={profile} 
-          settings={settings} 
-          loading={loading}
-          onSignOut={handleSignOut}
-        />
-      </Suspense>
+  const services = [
+    {
+      title: "خدمات التوصيل",
+      description: "توصيل المنتجات للمنازل",
+      icon: Truck,
+      href: "/delivery",
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/20",
+      emoji: "🚚"
+    },
+    {
+      title: "خدمات التصدير",
+      description: "تصدير المنتجات للخارج",
+      icon: Ship,
+      href: "/exports",
+      color: "text-green-400",
+      bgColor: "bg-green-500/20",
+      emoji: "🚢"
+    },
+    {
+      title: "التحليل بالأقمار الصناعية",
+      description: "دراسة الأراضي والتربة",
+      icon: Satellite,
+      href: "/analysis",
+      color: "text-purple-400",
+      bgColor: "bg-purple-500/20",
+      emoji: "🛰️"
+    },
+    {
+      title: "الاستشارات الزراعية",
+      description: "خبراء متخصصون",
+      icon: Users,
+      href: "/experts",
+      color: "text-orange-400",
+      bgColor: "bg-orange-500/20",
+      emoji: "👨‍🌾"
+    }
+  ];
+
+  const stats = [
+    { number: "10,000+", label: "مزارع نشط", icon: "🌾" },
+    { number: "50,000+", label: "معاملة مكتملة", icon: "✅" },
+    { number: "4.8", label: "تقييم المستخدمين", icon: "⭐" },
+    { number: "24/7", label: "دعم متواصل", icon: "🛡️" }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 text-white relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-emerald-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-20 h-20 bg-teal-400/25 rounded-full blur-xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-6 lg:px-8">
-        <div className="text-center max-w-7xl mx-auto">
-          {/* Premium Badge */}
-          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-sm font-semibold mb-8 shadow-lg">
-            <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
-            منصة معتمدة من وزارة الزراعة
+      <section className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+        {/* Hero Background Image */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/assets/seedings01.jpg)',
+          }}
+        />
+        
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="max-w-7xl mx-auto text-center">
+          {/* Main Icon Animation */}
+          <div className="text-8xl mb-8 drop-shadow-2xl animate-bounce" style={{ animationDuration: '3s' }}>
+            🌾
           </div>
 
-          {/* Main Title with Premium Typography */}
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-white mb-6 md:mb-8 leading-tight">
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 bg-clip-text text-transparent">
-              {settings.homepage_title}
-            </span>
+          {/* Main Title */}
+          <h1 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-lg">
+            {settings?.homepage_title || "سوق المزارعين الأول في الجزائر"}
           </h1>
           
-          {/* Premium Subtitle */}
-          <p className="text-xl md:text-2xl lg:text-3xl text-emerald-200 mb-8 md:mb-12 leading-relaxed max-w-4xl mx-auto">
-            {settings.homepage_subtitle}
+          {/* Subtitle */}
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
+            {settings?.homepage_subtitle || "بيع وشراء الأراضي، المنتجات، المشاتل والمعدات الزراعية بسهولة وأمان"}
           </p>
+          
+          {/* Search Bar */}
+          <div className="mb-8">
+            <UnifiedSearch variant="homepage" />
+          </div>
 
-          {/* Premium CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-12">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link
               href="/marketplace"
-              className="group px-8 py-4 md:px-12 md:py-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-2xl font-bold text-lg md:text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/30 flex items-center"
+              className="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full font-bold text-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              <i className="fas fa-rocket mr-3 group-hover:rotate-12 transition-transform duration-300"></i>
-              ابدأ الآن مجاناً
+              ابدأ البيع والشراء
+              <ArrowRight className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
-            
             <Link
-              href="/demo"
-              className="group px-8 py-4 md:px-12 md:py-5 bg-transparent border-2 border-emerald-400 hover:bg-emerald-400/10 text-emerald-300 hover:text-white rounded-2xl font-bold text-lg md:text-xl transition-all duration-300 transform hover:scale-105 flex items-center"
+              href="/land"
+              className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-full hover:bg-white/20 font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              <i className="fas fa-play mr-3 group-hover:scale-110 transition-transform duration-300"></i>
-              شاهد العرض التوضيحي
+              استكشف الأراضي
+            </Link>
+            <Link
+              href="/equipment"
+              className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-full hover:bg-white/20 font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              استكشف المعدات
+            </Link>
+            <Link
+              href="/marketplace"
+              className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-full hover:bg-white/20 font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              استكشف السوق
+            </Link>
+            <Link
+              href="/nurseries"
+              className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-full hover:bg-white/20 font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              استكشف الشتلات
             </Link>
           </div>
 
-          {/* Market Stats */}
-          <Suspense fallback={null}>
-            <MarketStats />
-          </Suspense>
+          {/* Stats Section */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {stats.map((stat, index) => (
+              <div 
+                key={index}
+                className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105"
+              >
+                <div className="text-3xl mb-2">{stat.icon}</div>
+                <div className="text-2xl font-bold text-emerald-300 mb-1">{stat.number}</div>
+                <div className="text-sm text-white/70">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Premium Services Section */}
-      <section className="relative z-10 py-20 px-4 md:px-6 lg:px-8">
+      {/* Marketplace Categories */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
-              خدماتنا <span className="text-emerald-400">المتميزة</span>
-            </h2>
-            <p className="text-xl text-emerald-200 max-w-3xl mx-auto">
-              نقدم مجموعة شاملة من الخدمات المتطورة لتحويل الزراعة التقليدية إلى زراعة ذكية ومستدامة
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-emerald-300 mb-4">فئات السوق</h2>
+            <p className="text-xl text-white/80">اختر ما تريد بيعه أو شراؤه</p>
           </div>
 
-          {/* Premium Service Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Marketplace Service */}
-            <Link
-              href="/marketplace"
-              className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-emerald-400/50 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/20"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                  <i className="fas fa-store text-white text-2xl group-hover:rotate-12 transition-transform duration-500"></i>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {marketplaceCategories.map((category, index) => (
+              <Link
+                key={index}
+                href={category.href}
+                className="group relative aspect-[4/5] rounded-lg overflow-hidden hover:scale-105 transition-all duration-300 transform hover:shadow-2xl"
+              >
+                {/* Full Card Background Image with proper aspect ratio */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                  style={{ 
+                    backgroundImage: `url('${category.image}')`,
+                    aspectRatio: '4/5'
+                  }}
+                >
+                  {/* Dark overlay for better text readability */}
+                  <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-all duration-300"></div>
                 </div>
                 
-                <h3 className="text-2xl font-bold text-white mb-4">سوق الغلة الذكي</h3>
-                <p className="text-emerald-200 mb-6 leading-relaxed">
-                  منصة تجارة إلكترونية متطورة تربط المزارعين بالمشترين مع ضمان الجودة والأمان
-                </p>
-                
-                <div className="flex items-center text-emerald-400 font-semibold">
-                  <span>اكتشف السوق</span>
-                  <i className="fas fa-arrow-left mr-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+                {/* Card Content Overlay */}
+                <div className="relative z-10 h-full flex flex-col justify-between p-6">
+                  {/* Top Section */}
+                  <div>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <category.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-4xl drop-shadow-lg">{category.emoji}</div>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{category.title}</h3>
+                    <p className="text-white/90 mb-3 text-sm drop-shadow-md">{category.description}</p>
+                  </div>
+                  
+                  {/* Bottom Section */}
+                  <div>
+                    {/* Features */}
+                    <div className="flex gap-2 flex-wrap mb-3">
+                      {category.features.map((feature, idx) => (
+                        <span key={idx} className="bg-emerald-600/30 backdrop-blur-sm text-emerald-100 px-2 py-1 rounded text-xs border border-emerald-500/30">
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <p className="text-sm text-emerald-300 font-medium mb-4 drop-shadow-md">{category.count}</p>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center transition-colors shadow-lg">
+                        <CalendarCheck className="w-4 h-4 mr-2" />
+                        استكشف
+                      </button>
+                      <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-2 rounded-lg transition-colors border border-white/30">
+                        <Heart className="w-4 h-4" />
+                      </button>
+                      <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-2 rounded-lg transition-colors border border-white/30">
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-
-            {/* Operations Service */}
-            <Link
-              href="/services"
-              className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-emerald-400/50 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/20"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                  <i className="fas fa-cogs text-white text-2xl group-hover:rotate-12 transition-transform duration-500"></i>
-                </div>
-                
-                <h3 className="text-2xl font-bold text-white mb-4">إدارة المزرعة الذكية</h3>
-                <p className="text-emerald-200 mb-6 leading-relaxed">
-                  حلول متكاملة لإدارة المزرعة باستخدام أحدث التقنيات والذكاء الاصطناعي
-                </p>
-                
-                <div className="flex items-center text-emerald-400 font-semibold">
-                  <span>ابدأ الإدارة</span>
-                  <i className="fas fa-arrow-left mr-2 group-hover:translate-x-1 transition-transform duration-300"></i>
-                </div>
-              </div>
-            </Link>
-
-            {/* Support Service */}
-            <Link
-              href="/VAR"
-              className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-emerald-400/50 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/20"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                  <i className="fas fa-hands-helping text-white text-2xl group-hover:rotate-12 transition-transform duration-500"></i>
-                </div>
-                
-                <h3 className="text-2xl font-bold text-white mb-4">الاستشارات المتخصصة</h3>
-                <p className="text-emerald-200 mb-6 leading-relaxed">
-                  فريق من الخبراء المتخصصين لتقديم الاستشارات الفنية والمالية للمزارعين
-                </p>
-                
-                <div className="flex items-center text-emerald-400 font-semibold">
-                  <span>احصل على استشارة</span>
-                  <i className="fas fa-arrow-left mr-2 group-hover:translate-x-1 transition-transform duration-300"></i>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Premium Features Section */}
-      <Suspense fallback={null}>
-        <PremiumFeatures />
-      </Suspense>
+      {/* Services Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-emerald-300 mb-4">خدماتنا الإضافية</h2>
+            <p className="text-xl text-white/80">خدمات متكاملة لدعم المزارعين</p>
+          </div>
 
-      {/* Testimonials Section */}
-      <Suspense fallback={null}>
-        <TestimonialsSection />
-      </Suspense>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service, index) => (
+              <Link
+                key={index}
+                href={service.href}
+                className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-6 hover:bg-white/10 hover:border-emerald-400/30 transition-all duration-300 transform hover:scale-105"
+              >
+                <div className={`w-16 h-16 ${service.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className="text-3xl">{service.emoji}</div>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{service.title}</h3>
+                <p className="text-white/70 text-sm">{service.description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Premium Footer */}
-      <Suspense fallback={null}>
-        <PremiumFooter settings={settings} />
-      </Suspense>
+      {/* Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-emerald-300 mb-4">لماذا تختار منصة الغلة؟</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-8 hover:bg-white/10 transition-all duration-300">
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">آمن وموثوق</h3>
+              <p className="text-white/70">جميع المعاملات محمية ومؤمنة بأحدث تقنيات الأمان</p>
+            </div>
+
+            <div className="text-center bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-8 hover:bg-white/10 transition-all duration-300">
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">سريع وسهل</h3>
+              <p className="text-white/70">بيع وشراء في دقائق معدودة بواجهة بسيطة وسهلة الاستخدام</p>
+            </div>
+
+            <div className="text-center bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-8 hover:bg-white/10 transition-all duration-300">
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Star className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">جودة عالية</h3>
+              <p className="text-white/70">منتجات وأراضي مضمونة الجودة مع نظام تقييم متطور</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black/20 backdrop-blur-lg border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 space-x-reverse mb-4">
+                <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                  <Leaf className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white">الغلة</h3>
+              </div>
+              <p className="text-white/70">منصة المزارعين الأولى في الجزائر</p>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4 text-emerald-300">السوق</h4>
+              <ul className="space-y-2 text-white/70">
+                <li><Link href="/land" className="hover:text-emerald-300 transition-colors">الأراضي</Link></li>
+                <li><Link href="/marketplace" className="hover:text-emerald-300 transition-colors">المنتجات</Link></li>
+                <li><Link href="/equipment" className="hover:text-emerald-300 transition-colors">المعدات</Link></li>
+                <li><Link href="/nurseries" className="hover:text-emerald-300 transition-colors">المشاتل</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4 text-emerald-300">الخدمات</h4>
+              <ul className="space-y-2 text-white/70">
+                <li><Link href="/delivery" className="hover:text-emerald-300 transition-colors">التوصيل</Link></li>
+                <li><Link href="/exports" className="hover:text-emerald-300 transition-colors">التصدير</Link></li>
+                <li><Link href="/analysis" className="hover:text-emerald-300 transition-colors">التحليل</Link></li>
+                <li><Link href="/experts" className="hover:text-emerald-300 transition-colors">الاستشارات</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4 text-emerald-300">تواصل معنا</h4>
+              <ul className="space-y-2 text-white/70">
+                <li><Link href="/about" className="hover:text-emerald-300 transition-colors">من نحن</Link></li>
+                <li><Link href="/contact" className="hover:text-emerald-300 transition-colors">اتصل بنا</Link></li>
+                <li><Link href="/help" className="hover:text-emerald-300 transition-colors">المساعدة</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
+            <p>&copy; 2024 منصة الغلة. جميع الحقوق محفوظة.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

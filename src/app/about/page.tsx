@@ -13,7 +13,7 @@ export default function AboutPage() {
         <div 
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            backgroundImage: 'url(/assets/field.gif)',
+            backgroundImage: 'url(/assets/n7l2.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'

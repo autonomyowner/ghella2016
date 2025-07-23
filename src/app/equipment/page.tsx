@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic';
 const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { ssr: false, loading: () => <div /> });
 import { AnimatePresence } from 'framer-motion';
-import { useFirebase } from '@/hooks/useFirebase'
+import { useEquipment } from '@/hooks/useSupabase'
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment } from '@/types/database.types'
 import EquipmentCard from '@/components/equipment/EquipmentCard'
 import Link from 'next/link'
@@ -270,10 +271,10 @@ const EquipmentCardEnhanced = ({ item, viewMode }: { item: any, viewMode: 'grid'
 )
 
 export default function EquipmentPage() {
-  const { getEquipment, isOnline, isWithinLimits } = useFirebase()
-  const [equipment, setEquipment] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const { equipment, loading, error, fetchEquipment } = useEquipment()
+  const { user } = useSupabaseAuth()
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [selectedCondition, setSelectedCondition] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -283,80 +284,48 @@ export default function EquipmentPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [isFiltering, setIsFiltering] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   const itemsPerPage = 12
 
+  // Hydration check
   useEffect(() => {
-    fetchEquipment()
-  }, [currentPage])
+    setIsHydrated(true)
+  }, [])
 
-  const fetchEquipment = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // For now, use sample data. In production, this would come from Firebase
-      let data = sampleEquipment
-      
-      // Apply filtering
-      let filteredData = data.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             (item.brand && item.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                             (item.model && item.model.toLowerCase().includes(searchTerm.toLowerCase()))
-        
-        const matchesCondition = !selectedCondition || item.condition === selectedCondition
-        
-        const matchesCategory = selectedCategory === 'all' || 
-          (selectedCategory === 'available' && item.is_available) ||
-          (selectedCategory === 'insured' && item.is_insured) ||
-          (selectedCategory === 'new' && item.condition === 'new') ||
-          item.category_id === selectedCategory
-        
-        const matchesLocation = selectedLocation === 'جميع الولايات' || item.location === selectedLocation
-        
-        const matchesPrice = (!priceRange.min || item.price >= parseInt(priceRange.min)) &&
-                           (!priceRange.max || item.price <= parseInt(priceRange.max))
-        
-        return matchesSearch && matchesCondition && matchesCategory && matchesLocation && matchesPrice
-      })
-      
-      // Apply sorting
-      switch (sortBy) {
-        case 'price-low':
-          filteredData.sort((a, b) => a.price - b.price)
-          break
-        case 'price-high':
-          filteredData.sort((a, b) => b.price - a.price)
-          break
-        case 'rating':
-          filteredData.sort((a, b) => b.rating - a.rating)
-          break
-        case 'oldest':
-          filteredData.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-          break
-        default: // latest
-          filteredData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  // Debounce search term and trigger data fetch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+      setCurrentPage(1)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Fetch equipment when filters change
+  useEffect(() => {
+    const loadEquipment = async () => {
+      setIsFiltering(true)
+      try {
+        await fetchEquipment({
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+          location: selectedLocation === 'جميع الولايات' ? undefined : selectedLocation,
+          minPrice: priceRange.min ? parseInt(priceRange.min) : undefined,
+          maxPrice: priceRange.max ? parseInt(priceRange.max) : undefined,
+          condition: selectedCondition || undefined,
+          search: debouncedSearchTerm
+        })
+      } catch (err) {
+        console.error('Error fetching equipment:', err)
+      } finally {
+        setIsFiltering(false)
       }
-      
-      // Apply pagination
-      const startIndex = (currentPage - 1) * itemsPerPage
-      const endIndex = startIndex + itemsPerPage
-      const paginatedData = filteredData.slice(startIndex, endIndex)
-      
-      if (currentPage === 1) {
-        setEquipment(paginatedData)
-      } else {
-        setEquipment(prev => [...prev, ...paginatedData])
-      }
-      
-      setHasMore(endIndex < filteredData.length)
-      setLoading(false)
-    } catch (err) {
-      setError('حدث خطأ أثناء تحميل البيانات')
-      setLoading(false)
     }
-  }
+    
+    loadEquipment()
+  }, [debouncedSearchTerm, selectedCondition, selectedCategory, selectedLocation, priceRange.min, priceRange.max, sortBy])
 
   const loadMore = () => {
     setCurrentPage(prev => prev + 1)
@@ -370,6 +339,18 @@ export default function EquipmentPage() {
     setPriceRange({ min: '', max: '' })
     setSortBy('latest')
     setCurrentPage(1)
+  }
+
+  // Prevent hydration mismatch
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-emerald-300 font-semibold">جاري التحميل...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -412,7 +393,7 @@ export default function EquipmentPage() {
 
             {/* Subtitle */}
             <MotionDiv
-              className="text-xl lg:text-2xl mb-12 opacity-90 max-w-4xl mx-auto leading-relaxed"
+              className="text-xl lg:text-2xl mb-8 opacity-90 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.4 }}
@@ -420,17 +401,31 @@ export default function EquipmentPage() {
               اكتشف أحدث المعدات الزراعية المتطورة من جرارات وحصادات وأنظمة ري متقدمة
             </MotionDiv>
 
-            {/* Status Indicator */}
-            {(!isOnline || !isWithinLimits) && (
-              <MotionDiv
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm mb-8"
-              >
-                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
-                {!isOnline ? 'وضع عدم الاتصال' : 'استخدام التخزين المحلي'}
-              </MotionDiv>
-            )}
+            {/* Stats Section */}
+            <MotionDiv
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.6 }}
+            >
+              {[
+                { number: `${equipment.length}+`, label: "معدات متاحة", icon: "🚜" },
+                { number: `${equipment.filter(e => e.condition === 'new').length}+`, label: "جديدة", icon: "🆕" },
+                { number: `${equipment.filter(e => e.condition === 'good').length}+`, label: "مستعملة", icon: "✅" },
+                { number: "24/7", label: "دعم متواصل", icon: "🛡️" }
+              ].map((stat, index) => (
+                <div 
+                  key={index}
+                  className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105"
+                >
+                  <div className="text-3xl mb-2">{stat.icon}</div>
+                  <div className="text-2xl font-bold text-emerald-300 mb-1">{stat.number}</div>
+                  <div className="text-sm text-white/70">{stat.label}</div>
+                </div>
+              ))}
+            </MotionDiv>
+
+
 
             {/* Search Bar */}
             <MotionDiv
@@ -447,7 +442,13 @@ export default function EquipmentPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-6 py-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full text-white placeholder-white/60 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
                 />
-                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
+                {isFiltering ? (
+                  <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
+                    <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
+                )}
               </div>
             </MotionDiv>
           </div>
@@ -455,8 +456,8 @@ export default function EquipmentPage() {
       </section>
 
       {/* Main Content */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
           {/* Filters and Controls */}
           <div className="mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -498,14 +499,54 @@ export default function EquipmentPage() {
                 ))}
               </select>
 
+              {/* Clear Filters Button */}
+              {(searchTerm || selectedCondition || selectedCategory !== 'all' || selectedLocation !== 'جميع الولايات' || priceRange.min || priceRange.max) && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white"
+                >
+                  مسح الفلاتر
+                </button>
+              )}
+
               {/* Add Equipment Button */}
-              <Link
-                href="/equipment/new"
-                className="flex items-center px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                إضافة معدات
-              </Link>
+              {user ? (
+                <Link
+                  href="/equipment/new"
+                  className="flex items-center px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  إضافة معدات
+                </Link>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  تسجيل الدخول لإضافة معدات
+                </Link>
+              )}
+            </div>
+
+            {/* Category Chips */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-3">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center px-4 py-2 rounded-full transition-all duration-200 ${
+                      selectedCategory === category.id
+                        ? 'bg-emerald-500 text-white shadow-lg'
+                        : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
+                    }`}
+                  >
+                    <span className="ml-2 text-lg">{category.icon}</span>
+                    {category.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Advanced Filters */}
@@ -517,25 +558,9 @@ export default function EquipmentPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-6 mb-6"
                 >
-                  {/* Category Chips */}
+                  {/* Advanced Filters Title */}
                   <div className="mb-6">
-                    <h3 className="text-lg font-bold text-emerald-300 mb-4">تصفية الآلات</h3>
-                    <div className="flex flex-wrap gap-3">
-                      {categories.map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() => setSelectedCategory(category.id)}
-                          className={`flex items-center px-4 py-2 rounded-full transition-all duration-200 ${
-                            selectedCategory === category.id
-                              ? 'bg-emerald-500 text-white shadow-lg'
-                              : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
-                          }`}
-                        >
-                          <span className="ml-2 text-lg">{category.icon}</span>
-                          {category.label}
-                        </button>
-                      ))}
-                    </div>
+                    <h3 className="text-lg font-bold text-emerald-300 mb-4">فلاتر متقدمة</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -612,10 +637,10 @@ export default function EquipmentPage() {
           {/* Results Summary */}
           <div className="flex justify-between items-center mb-6">
             <div className="text-emerald-300">
-              <span className="font-bold">{equipment.length}</span> آلة متاحة
+              <span className="font-bold">{equipment.length}</span> معدات متاحة
             </div>
             <div className="text-sm text-white/60">
-              عرض {equipment.length} من {equipment.length} آلة
+              {equipment.length > 0 ? `عرض ${equipment.length} من ${equipment.length} معدات` : 'لا توجد معدات متاحة'}
             </div>
           </div>
 
@@ -627,7 +652,7 @@ export default function EquipmentPage() {
           )}
 
           {/* Equipment Grid */}
-          {loading ? (
+          {loading || isFiltering ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 animate-pulse">
@@ -670,15 +695,25 @@ export default function EquipmentPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold text-white mb-2">لا توجد نتائج</h3>
-              <p className="text-white/60 mb-6">جرب تغيير معايير البحث أو الفلاتر</p>
-              <button 
-                onClick={clearFilters}
-                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold transition-colors"
-              >
-                إعادة تعيين الفلاتر
-              </button>
+              <div className="text-8xl mb-6">🚜</div>
+              <h3 className="text-3xl font-bold text-white mb-4">لا توجد معدات متاحة</h3>
+              <p className="text-white/60 mb-8 text-lg">جرب تغيير الفلاتر أو البحث بكلمات مختلفة</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={clearFilters}
+                  className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors font-semibold"
+                >
+                  مسح الفلاتر
+                </button>
+                {user && (
+                  <Link
+                    href="/equipment/new"
+                    className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-lg font-semibold transition-all duration-300"
+                  >
+                    إضافة معدات جديدة
+                  </Link>
+                )}
+              </div>
             </MotionDiv>
           )}
         </div>

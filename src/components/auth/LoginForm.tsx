@@ -19,16 +19,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Login button clicked - starting login process')
     setLoading(true)
     setError(null)
 
     try {
+      console.log('Attempting to sign in with email:', email)
       const { error: signInError } = await signIn(email, password)
 
       if (signInError) {
+        console.error('Sign in error:', signInError)
         throw signInError
       }
 
+      console.log('Login successful, redirecting...')
       if (onSuccess) {
         onSuccess()
       } else {
@@ -37,10 +41,15 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError((error as Error).message)
+      setError((error as Error).message || 'حدث خطأ أثناء تسجيل الدخول')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    console.log('Button clicked - event:', e)
+    // This will help debug if the button click is being registered
   }
 
   return (
@@ -88,7 +97,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-500 text-white rounded-md transition-all duration-300 flex items-center justify-center font-medium"
+          onClick={handleButtonClick}
+          className="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-500 text-white rounded-md transition-all duration-300 flex items-center justify-center font-medium cursor-pointer"
         >
           {loading ? (
             <>
@@ -105,14 +115,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         ليس لديك حساب؟{' '}
         <button
           onClick={() => router.push('/auth/signup')}
-          className="text-green-400 hover:text-green-300 underline"
+          className="text-green-400 hover:text-green-300 underline cursor-pointer"
         >
           إنشاء حساب جديد
         </button>
       </div>
       
       <div className="mt-4 text-center">
-        <button className="text-green-400 hover:text-green-300 text-sm underline">
+        <button className="text-green-400 hover:text-green-300 text-sm underline cursor-pointer">
           نسيت كلمة المرور؟
         </button>
       </div>

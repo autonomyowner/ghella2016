@@ -66,9 +66,14 @@ img {
   contain: layout style paint;
 }
 
-/* Optimize animations for better performance */
-* {
-  will-change: auto;
+/* Prevent layout shifts */
+img[loading="lazy"] {
+  min-height: 1px;
+}
+
+/* Prevent text layout shifts */
+.text-content {
+  min-height: 1.2em;
 }
 
 .animate-shimmer {

@@ -43,7 +43,6 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
     // DNS prefetch for external domains
     { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },
     { rel: 'dns-prefetch', href: '//cdnjs.cloudflare.com' },
-    { rel: 'dns-prefetch', href: '//firebase.co' },
     { rel: 'dns-prefetch', href: '//supabase.co' },
     
     // Preconnect for critical domains

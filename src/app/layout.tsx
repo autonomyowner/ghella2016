@@ -4,7 +4,6 @@ import { Cairo } from 'next/font/google'
 import "./globals.css";
 import "./performance.css";
 import ClientLayout from "@/components/ClientLayout";
-import FirebaseStatus from "@/components/FirebaseStatus";
 
 type Viewport = {
   themeColor: string
@@ -125,14 +124,13 @@ export default function RootLayout({
         {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-        <link rel="dns-prefetch" href="//firebase.co" />
-        <link rel="dns-prefetch" href="//firebasestorage.googleapis.com" />
+        <link rel="dns-prefetch" href="//supabase.co" />
         
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+        <link rel="preconnect" href="https://supabase.co" />
         
         {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
@@ -173,7 +171,6 @@ export default function RootLayout({
         <ClientLayout>
           {children}
         </ClientLayout>
-        <FirebaseStatus />
       </body>
     </html>
   );

@@ -58,9 +58,9 @@ export default function EquipmentCard({ equipment, viewMode = 'grid' }: Equipmen
       <Link href={`/equipment/${id}`}>
         <motion.div
           whileHover={{ y: -2 }}
-          className="group flex gap-4 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer"
+          className="group flex gap-4 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer hover:bg-white/15"
         >
-          <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="relative w-40 h-28 rounded-lg overflow-hidden flex-shrink-0">
             {images && images.length > 0 ? (
               <Image
                 src={images[0]}
@@ -70,7 +70,7 @@ export default function EquipmentCard({ equipment, viewMode = 'grid' }: Equipmen
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center">
-                <span className="text-2xl">🚜</span>
+                <span className="text-3xl">🚜</span>
               </div>
             )}
             
@@ -120,7 +120,7 @@ export default function EquipmentCard({ equipment, viewMode = 'grid' }: Equipmen
     <Link href={`/equipment/${id}`}>
       <motion.div
         whileHover={{ y: -8 }}
-        className="group flex flex-col h-full overflow-hidden rounded-xl border border-white/20 transition-all hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 bg-white/10 backdrop-blur-md"
+        className="group flex flex-col h-full overflow-hidden rounded-xl border border-white/20 transition-all hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 bg-white/10 backdrop-blur-md hover:bg-white/15"
       >
         <div className="relative aspect-video overflow-hidden">
           {images && images.length > 0 ? (
@@ -154,8 +154,8 @@ export default function EquipmentCard({ equipment, viewMode = 'grid' }: Equipmen
           </div>
         </div>
 
-        <div className="flex flex-col flex-grow p-4">
-          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-emerald-400 transition-colors">
+        <div className="flex flex-col flex-grow p-6">
+          <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
             {title}
           </h3>
 

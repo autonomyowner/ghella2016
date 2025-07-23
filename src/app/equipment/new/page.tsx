@@ -3,11 +3,25 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
-import { useFirebase } from '@/hooks/useFirebase'
+import { useEquipment } from '@/hooks/useSupabase'
+import { motion } from 'framer-motion'
+import { 
+  Upload, 
+  X, 
+  Plus, 
+  ArrowLeft, 
+  CheckCircle,
+  AlertCircle,
+  Camera,
+  DollarSign,
+  MapPin,
+  Settings,
+  FileText
+} from 'lucide-react'
 
 export default function EquipmentForm() {
   const { user } = useSupabaseAuth()
-  const { addEquipment } = useFirebase()
+  const { addEquipment } = useEquipment()
   const router = useRouter()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -27,6 +41,7 @@ export default function EquipmentForm() {
   const [files, setFiles] = useState<FileList | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -41,6 +56,16 @@ export default function EquipmentForm() {
     }
     setFiles(selectedFiles)
     setError(null)
+  }
+
+  const removeFile = (index: number) => {
+    if (!files) return
+    
+    const dt = new DataTransfer()
+    Array.from(files).forEach((file, i) => {
+      if (i !== index) dt.items.add(file)
+    })
+    setFiles(dt.files)
   }
 
   // Helper function to convert image to base64
@@ -76,15 +101,11 @@ export default function EquipmentForm() {
       }
 
       try {
-        // Convert image to base64 instead of uploading to Firebase Storage
         const base64String = await convertImageToBase64(file)
         imageUrls.push(base64String)
-        console.log('Image converted to base64 successfully')
       } catch (error) {
         console.error('Error converting image:', error)
-        // If conversion fails, use a placeholder image
         imageUrls.push('/placeholder-image.jpg')
-        console.log('Using placeholder image due to conversion failure')
       }
     }
 
@@ -103,11 +124,7 @@ export default function EquipmentForm() {
     setError(null)
 
     try {
-      console.log('Starting equipment form submission...')
-      
-      // Upload images first
       const imageUrls = await uploadImages()
-      console.log('Images processed:', imageUrls.length)
 
       const equipmentData = {
         user_id: user.id,
@@ -121,7 +138,7 @@ export default function EquipmentForm() {
         year: formData.year ? parseInt(formData.year) : null,
         hours_used: formData.hours_used ? parseInt(formData.hours_used) : null,
         images: imageUrls,
-        category_id: 'default', // You'll need to implement category selection
+        category_id: 'default',
         currency: 'DZD',
         is_available: true,
         is_featured: false,
@@ -130,15 +147,12 @@ export default function EquipmentForm() {
         updated_at: new Date().toISOString()
       }
 
-      console.log('Equipment data prepared:', equipmentData)
-
-      // Use the addEquipment function from useFirebase hook
-      const newEquipment = await addEquipment(equipmentData)
-      console.log('Equipment added successfully:', newEquipment)
-
-      // Redirect to equipment page
-      router.push('/equipment')
-      router.refresh()
+      await addEquipment(equipmentData)
+      setSuccess(true)
+      
+      setTimeout(() => {
+        router.push('/equipment')
+      }, 2000)
     } catch (error) {
       console.error('Error creating equipment:', error)
       setError((error as Error).message)
@@ -149,252 +163,375 @@ export default function EquipmentForm() {
 
   if (!user) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-white mb-4">يجب تسجيل الدخول أولاً</h1>
-        <button
-          onClick={() => router.push('/auth/login')}
-          className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-md hover:from-green-500 hover:to-green-400 transition"
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 flex items-center justify-center">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          تسجيل الدخول
-        </button>
+          <div className="text-6xl mb-6">🔒</div>
+          <h1 className="text-3xl font-bold text-white mb-4">يجب تسجيل الدخول أولاً</h1>
+          <p className="text-white/70 mb-8">سجل دخولك لإضافة معدات جديدة</p>
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+          >
+            تسجيل الدخول
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 flex items-center justify-center">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="text-6xl mb-6">✅</div>
+          <h1 className="text-3xl font-bold text-white mb-4">تم إضافة المعدات بنجاح!</h1>
+          <p className="text-white/70 mb-8">سيتم توجيهك إلى صفحة المعدات قريباً...</p>
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-black/50 backdrop-blur-lg border border-green-500/30 rounded-xl p-8">
-          <h1 className="text-3xl font-bold text-white mb-8">إضافة معدات زراعية جديدة</h1>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-md text-red-400">
-              {error}
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 text-white">
+      {/* Header */}
+      <div className="relative z-10 pt-8 pb-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              رجوع
+            </button>
+            
+            <div className="text-center">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
+                إضافة معدات جديدة
+              </h1>
+              <p className="text-white/70 mt-2">أضف معداتك الزراعية بسهولة</p>
             </div>
-          )}
+            
+            <div className="w-24"></div> {/* Spacer for centering */}
+          </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
-                عنوان الإعلان *
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="مثال: جرار زراعي جون دير 5000 - حالة ممتازة"
-              />
-            </div>
+      {/* Main Form */}
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-4xl mx-auto">
+          <motion.div 
+            className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {error && (
+              <motion.div 
+                className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <span className="text-red-300">{error}</span>
+              </motion.div>
+            )}
 
-            {/* Price and Condition */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-200 mb-2">
-                  السعر (دينار أردني) *
-                </label>
-                <input
-                  id="price"
-                  name="price"
-                  type="number"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="0"
-                />
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Basic Information Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-white">المعلومات الأساسية</h2>
+                </div>
+
+                {/* Title */}
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-white/90 mb-3">
+                    عنوان الإعلان *
+                  </label>
+                  <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="مثال: جرار زراعي جون دير 5000 - حالة ممتازة"
+                  />
+                </div>
+
+                {/* Price and Condition */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="price" className="block text-sm font-medium text-white/90 mb-3">
+                      السعر (دينار جزائري) *
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
+                      <input
+                        id="price"
+                        name="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={handleChange}
+                        required
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="condition" className="block text-sm font-medium text-white/90 mb-3">
+                      حالة المعدات *
+                    </label>
+                    <select
+                      id="condition"
+                      name="condition"
+                      value={formData.condition}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    >
+                      <option value="new">جديد</option>
+                      <option value="excellent">ممتاز</option>
+                      <option value="good">جيد</option>
+                      <option value="fair">مقبول</option>
+                      <option value="poor">يحتاج صيانة</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-white/90 mb-3">
+                    الموقع *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
+                    <input
+                      id="location"
+                      name="location"
+                      type="text"
+                      value={formData.location}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                      placeholder="المدينة، المحافظة"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label htmlFor="condition" className="block text-sm font-medium text-gray-200 mb-2">
-                  حالة المعدات *
-                </label>
-                <select
-                  id="condition"
-                  name="condition"
-                  value={formData.condition}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              {/* Technical Details Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <Settings className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-white">المواصفات التقنية</h2>
+                </div>
+
+                {/* Brand, Model, Year */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label htmlFor="brand" className="block text-sm font-medium text-white/90 mb-3">
+                      الماركة
+                    </label>
+                    <input
+                      id="brand"
+                      name="brand"
+                      type="text"
+                      value={formData.brand}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                      placeholder="جون دير، ماسي فيرغسون..."
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="model" className="block text-sm font-medium text-white/90 mb-3">
+                      الموديل
+                    </label>
+                    <input
+                      id="model"
+                      name="model"
+                      type="text"
+                      value={formData.model}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                      placeholder="5000، M135..."
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="year" className="block text-sm font-medium text-white/90 mb-3">
+                      سنة الصنع
+                    </label>
+                    <input
+                      id="year"
+                      name="year"
+                      type="number"
+                      value={formData.year}
+                      onChange={handleChange}
+                      min="1900"
+                      max={new Date().getFullYear()}
+                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                      placeholder="2020"
+                    />
+                  </div>
+                </div>
+
+                {/* Hours Used */}
+                <div>
+                  <label htmlFor="hours_used" className="block text-sm font-medium text-white/90 mb-3">
+                    عدد ساعات الاستخدام
+                  </label>
+                  <input
+                    id="hours_used"
+                    name="hours_used"
+                    type="number"
+                    value={formData.hours_used}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="500"
+                  />
+                </div>
+              </div>
+
+              {/* Description Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-white">الوصف التفصيلي</h2>
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-white/90 mb-3">
+                    وصف المعدات *
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    rows={5}
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300 resize-none"
+                    placeholder="اكتب وصفاً تفصيلياً للمعدات، الميزات، المواصفات، وأي معلومات مهمة أخرى..."
+                  />
+                </div>
+              </div>
+
+              {/* Images Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <Camera className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-white">صور المعدات</h2>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-3">
+                    صور المعدات * (حتى 5 صور)
+                  </label>
+                  
+                  {/* File Upload Area */}
+                  <div
+                    className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center hover:border-emerald-400 transition-all duration-300 cursor-pointer bg-white/5 backdrop-blur-lg"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      name="images"
+                      type="file"
+                      onChange={handleFileChange}
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      required
+                    />
+                    <Upload className="w-12 h-12 text-white/50 mx-auto mb-4" />
+                    <p className="text-white/80 mb-2 font-medium">اضغط لاختيار الصور أو اسحبها هنا</p>
+                    <p className="text-sm text-white/60">
+                      الحد الأقصى: 5 صور، كل صورة حتى 5 ميجابايت
+                    </p>
+                  </div>
+
+                  {/* Selected Files Preview */}
+                  {files && files.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-sm font-medium text-white/90 mb-3">الصور المختارة:</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {Array.from(files).map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border border-white/20"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-white/20">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="flex-1 px-6 py-3 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300 font-medium"
                 >
-                  <option value="new">جديد</option>
-                  <option value="excellent">ممتاز</option>
-                  <option value="good">جيد</option>
-                  <option value="fair">مقبول</option>
-                  <option value="poor">يحتاج صيانة</option>
-                </select>
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className="flex-1 px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-600 disabled:to-gray-500 text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      جاري النشر...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      نشر الإعلان
+                    </>
+                  )}
+                </button>
               </div>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-200 mb-2">
-                الموقع *
-              </label>
-              <input
-                id="location"
-                name="location"
-                type="text"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="المدينة، المحافظة"
-              />
-            </div>
-
-            {/* Brand, Model, Year */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label htmlFor="brand" className="block text-sm font-medium text-gray-200 mb-2">
-                  الماركة
-                </label>
-                <input
-                  id="brand"
-                  name="brand"
-                  type="text"
-                  value={formData.brand}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="جون دير، ماسي فيرغسون..."
-                />
-              </div>
-
-              <div>
-                <label htmlFor="model" className="block text-sm font-medium text-gray-200 mb-2">
-                  الموديل
-                </label>
-                <input
-                  id="model"
-                  name="model"
-                  type="text"
-                  value={formData.model}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="5000، M135..."
-                />
-              </div>
-
-              <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-200 mb-2">
-                  سنة الصنع
-                </label>
-                <input
-                  id="year"
-                  name="year"
-                  type="number"
-                  value={formData.year}
-                  onChange={handleChange}
-                  min="1900"
-                  max={new Date().getFullYear()}
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="2020"
-                />
-              </div>
-            </div>
-
-            {/* Hours Used */}
-            <div>
-              <label htmlFor="hours_used" className="block text-sm font-medium text-gray-200 mb-2">
-                عدد ساعات الاستخدام
-              </label>
-              <input
-                id="hours_used"
-                name="hours_used"
-                type="number"
-                value={formData.hours_used}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="500"
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
-                وصف المعدات *
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={5}
-                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                placeholder="اكتب وصفاً تفصيلياً للمعدات، الميزات، المواصفات، وأي معلومات مهمة أخرى..."
-              />
-            </div>
-
-            {/* Images */}
-            <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
-                صور المعدات * (حتى 5 صور)
-              </label>
-              <div
-                className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-green-500 transition-colors cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  ref={fileInputRef}
-                  name="images"
-                  type="file"
-                  onChange={handleFileChange}
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  required
-                />
-                <div className="text-4xl text-gray-500 mb-2">📷</div>
-                <p className="text-gray-400 mb-1">اضغط لاختيار الصور أو اسحبها هنا</p>
-                <p className="text-sm text-gray-500">
-                  الحد الأقصى: 5 صور، كل صورة حتى 5 ميجابايت
-                </p>
-                {files && files.length > 0 && (
-                  <p className="mt-2 text-green-400">
-                    تم اختيار {files.length} صورة
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end gap-4 pt-6">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
-              >
-                إلغاء
-              </button>
-              <button
-                type="submit"
-                disabled={uploading}
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-500 text-white rounded-md transition-all duration-300 flex items-center gap-2 font-medium"
-              >
-                {uploading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    جاري النشر...
-                  </>
-                ) : (
-                  <>
-                    <span>نشر الإعلان</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          </motion.div>
         </div>
       </div>
     </div>

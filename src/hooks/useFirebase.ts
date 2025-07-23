@@ -899,7 +899,7 @@ export const useFirebase = () => {
   const getNurseries = useCallback(async (filters?: any) => {
     try {
       // Check if we can use Firebase
-      const canUseFirebase = isOnline && isWithinLimits && checkLimits();
+      const canUseFirebase = isOnline && isWithinLimits && checkLimits() && firestore;
       
       if (canUseFirebase) {
         optimizedFirestore.readCount.count++;

@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from './supabase/supabaseClient';
 
 export interface WebsiteSettings {
   id: string;

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "node scripts/dev-clean.js",
+    "dev:fresh": "rm -rf .next && npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -12,7 +14,9 @@
     "build:prod": "NODE_ENV=production next build",
     "start:prod": "NODE_ENV=production next start",
     "performance": "next build && next start",
-    "optimize": "npm run build:prod && npm run analyze"
+    "optimize": "npm run build:prod && npm run analyze",
+    "clean": "if exist .next rmdir /s /q .next && if exist node_modules\\.cache rmdir /s /q node_modules\\.cache && if exist .swc rmdir /s /q .swc",
+    "clean:all": "if exist .next rmdir /s /q .next && if exist node_modules\\.cache rmdir /s /q node_modules\\.cache && if exist .swc rmdir /s /q .swc && if exist node_modules rmdir /s /q node_modules && if exist package-lock.json del package-lock.json && npm install"
   },
   "dependencies": {
     "@firebase/auth": "^1.11.0",
@@ -40,6 +44,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

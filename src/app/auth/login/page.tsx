@@ -24,18 +24,27 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Login page: Form submitted')
     setIsLoading(true)
     setError('')
 
-    const { error } = await signIn(email, password)
-    
-    if (error) {
-      setError(error.message)
-    } else {
-      router.push('/')
+    try {
+      console.log('Login page: Attempting sign in')
+      const { error } = await signIn(email, password)
+      
+      if (error) {
+        console.error('Login page: Sign in error:', error)
+        setError(error.message || 'حدث خطأ أثناء تسجيل الدخول')
+      } else {
+        console.log('Login page: Sign in successful, redirecting...')
+        router.push('/dashboard')
+      }
+    } catch (err) {
+      console.error('Login page: Unexpected error:', err)
+      setError('حدث خطأ غير متوقع')
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const features = [
@@ -261,7 +270,8 @@ export default function LoginPage() {
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all flex items-center justify-center gap-2"
+                  onClick={() => console.log('Login button clicked')}
+                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isLoading ? (
                     <>

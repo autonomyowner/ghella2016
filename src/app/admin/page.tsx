@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase/supabaseClient';
 
 interface AdminStats {
   totalProducts: number;

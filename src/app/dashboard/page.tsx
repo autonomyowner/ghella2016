@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic';
+import AuthGuard from '@/components/AuthGuard'
 
 const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { ssr: false, loading: () => <div /> });
 const MotionButton = dynamic(() => import('framer-motion').then(mod => mod.motion.button), { ssr: false, loading: () => <button /> });
@@ -17,22 +17,14 @@ import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user, signOut } = useSupabaseAuth()
-  const router = useRouter()
   const { getEquipment, isOnline, isWithinLimits } = useFirebase()
   const [equipment, setEquipment] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [profile] = useState<any>({ full_name: 'مستخدم' })
   const [activeTab, setActiveTab] = useState('overview')
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login')
-    }
-  }, [user, router])
-
   const handleSignOut = async () => {
     await signOut()
-    router.push('/')
   }
 
   const handleDeleteEquipment = async (id: string) => {
@@ -51,15 +43,8 @@ export default function DashboardPage() {
     { id: 'settings', name: 'الإعدادات', icon: <Settings className="w-5 h-5" /> },
   ]
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400"></div>
-      </div>
-    )
-  }
-
   return (
+    <AuthGuard>
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]" dir="rtl">
       {/* Header */}
       <header className="bg-black/30 backdrop-blur-lg border-b border-green-500/30">
@@ -77,7 +62,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-white text-sm">
-                مرحباً، {profile?.full_name || user.email}
+                مرحباً، {profile?.full_name || user!.email}
               </div>
               <button
                 onClick={handleSignOut}
@@ -377,5 +362,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+    </AuthGuard>
   )
 }
