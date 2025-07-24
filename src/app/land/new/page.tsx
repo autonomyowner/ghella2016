@@ -135,16 +135,21 @@ const AddLandPage: React.FC = () => {
 
       console.log('Land data prepared:', landData);
 
-      // Use the addLand function from useFirebase hook
+      // Use the addLand function from useSupabaseData hook
       const newLand = await addLand(landData);
       console.log('Land added successfully:', newLand);
 
+      // Show success message
+      alert('تم إضافة الأرض بنجاح!');
+      
       // Redirect to land page
       router.push('/land');
       router.refresh();
     } catch (error) {
       console.error('Error creating land listing:', error);
-      setError((error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+      setError(`خطأ في إضافة الأرض: ${errorMessage}`);
+      alert(`خطأ في إضافة الأرض: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

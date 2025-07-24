@@ -139,7 +139,7 @@ export default function EquipmentForm() {
         year: formData.year ? parseInt(formData.year) : null,
         hours_used: formData.hours_used ? parseInt(formData.hours_used) : null,
         images: imageUrls,
-        category_id: 'default',
+        category_id: undefined,
         currency: 'DZD',
         is_available: true,
         is_featured: false,

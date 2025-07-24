@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment, LandListing, Category, Profile } from '@/types/database.types'
 import { supabase } from '@/lib/supabase/supabaseClient'
+import { withInsertTimeout, createProgressTracker } from '@/lib/supabase/timeoutWrapper'
 
 // Hook for user profile management
 export function useProfile() {
@@ -44,11 +45,11 @@ export function useProfile() {
 export function useEquipment() {
   const { user } = useSupabaseAuth();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false, not true
   const [error, setError] = useState<string | null>(null);
   const [lastFetchParams, setLastFetchParams] = useState<string>('');
 
-  const fetchEquipment = async (filters?: {
+  const fetchEquipment = useCallback(async (filters?: {
     category?: string;
     location?: string;
     minPrice?: number;
@@ -60,9 +61,30 @@ export function useEquipment() {
       // Create a cache key for the current filters
       const cacheKey = JSON.stringify(filters || {});
       
-      // Skip if we're already loading or if the filters haven't changed
-      if (loading || cacheKey === lastFetchParams) {
+      console.log('fetchEquipment called with:', { 
+        loading, 
+        currentEquipmentCount: equipment.length,
+        filters: filters || 'none',
+        user: user?.id 
+      });
+
+      // Skip if we're already loading (but allow manual refresh)
+      if (loading) {
+        console.log('Skipping fetch - already loading');
         return equipment;
+      }
+
+      // For manual calls, always fetch fresh data
+      const isManualCall = !filters || Object.keys(filters).length === 0;
+      if (isManualCall) {
+        console.log('Manual call detected - fetching fresh data');
+      }
+
+      // Skip if no user is available
+      if (!user) {
+        console.log('Skipping fetch - no user available');
+        setEquipment([]);
+        return [];
       }
       
       setLoading(true);
@@ -95,8 +117,15 @@ export function useEquipment() {
       const { data, error: supabaseError } = await query;
 
       if (supabaseError) {
+        console.error('Supabase query error:', supabaseError);
         throw supabaseError;
       }
+
+      console.log('Supabase query successful:', { 
+        dataCount: data?.length || 0, 
+        user: user?.id,
+        hasData: !!data 
+      });
 
       let filteredData = data || [];
 
@@ -112,6 +141,7 @@ export function useEquipment() {
       }
 
       setEquipment(filteredData);
+      console.log('Setting equipment state:', filteredData.length, 'items');
       return filteredData;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading equipment';
@@ -121,7 +151,17 @@ export function useEquipment() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]); // Include user in dependencies
+
+  // Initial fetch when component mounts and user is available
+  useEffect(() => {
+    if (user) {
+      console.log('User available, fetching equipment...', user.id);
+      fetchEquipment();
+    } else {
+      console.log('No user available yet, skipping equipment fetch');
+    }
+  }, [user]); // Run when user changes
 
   const addEquipment = async (equipmentData: Partial<Equipment>) => {
     if (!user) {
@@ -146,7 +186,8 @@ export function useEquipment() {
         throw supabaseError;
       }
 
-      // Refresh the equipment list
+      // Force refresh by clearing the cache and refetching
+      setLastFetchParams('');
       await fetchEquipment();
       return data;
     } catch (err) {
@@ -515,30 +556,65 @@ export function useSupabaseData() {
   const createRecord = useCallback(async (table: string, data: any) => {
     if (!user) throw new Error('User must be logged in');
     
+    const progressTracker = createProgressTracker(`Creating ${table} record`);
+    
     try {
       const recordData = {
         ...data,
-        user_id: user.id,
+        // Only add user_id if it's not already present
+        user_id: data.user_id || user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      const { data: result, error } = await supabase
+      console.log(`Starting ${table} insert...`);
+      progressTracker.checkProgress();
+
+      const { data: resultData, error } = await supabase
         .from(table)
         .insert([recordData])
         .select()
         .single();
 
-      if (error) throw error;
-      return result;
+      const elapsed = progressTracker.getElapsed();
+      console.log(`${table} insert completed in ${elapsed}ms`);
+
+      if (error) {
+        console.error(`Supabase error creating ${table} record:`, error);
+        console.error(`Error details:`, {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw new Error(`Failed to create ${table}: ${error.message || error.details || 'Unknown error'}`);
+      }
+      
+      return resultData;
     } catch (error) {
-      console.error(`Error creating ${table} record:`, error);
-      throw error;
+      const elapsed = progressTracker.getElapsed();
+      console.error(`Error creating ${table} record after ${elapsed}ms:`, error);
+      console.error(`Full error object:`, JSON.stringify(error, null, 2));
+      
+      if (error instanceof Error) {
+        throw new Error(`Error creating ${table} record: ${error.message}`);
+      } else if (typeof error === 'object' && error !== null) {
+        // Handle Supabase error objects
+        const errorObj = error as any;
+        const errorMessage = errorObj.message || errorObj.details || errorObj.hint || 'Unknown database error';
+        throw new Error(`Error creating ${table} record: ${errorMessage}`);
+      } else {
+        throw new Error(`Error creating ${table} record: Unknown error`);
+      }
     }
   }, [user]);
 
   const updateRecord = useCallback(async (table: string, id: string, updates: any) => {
+    if (!user) throw new Error('User must be logged in');
+    
     try {
+      console.log(`Updating ${table} record ${id} with:`, updates);
+      
       const { data, error } = await supabase
         .from(table)
         .update({
@@ -549,28 +625,50 @@ export function useSupabaseData() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error(`Supabase error updating ${table} record:`, error);
+        throw new Error(`Failed to update ${table}: ${error.message || 'Unknown error'}`);
+      }
+      
+      console.log(`Successfully updated ${table} record:`, data);
       return data;
     } catch (error) {
       console.error(`Error updating ${table} record:`, error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`Error updating ${table} record: ${error.message}`);
+      } else {
+        throw new Error(`Error updating ${table} record: Unknown error`);
+      }
     }
-  }, []);
+  }, [user]);
 
   const deleteRecord = useCallback(async (table: string, id: string) => {
+    if (!user) throw new Error('User must be logged in');
+    
     try {
+      console.log(`Deleting ${table} record ${id}...`);
+      
       const { error } = await supabase
         .from(table)
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error(`Supabase error deleting ${table} record:`, error);
+        throw new Error(`Failed to delete ${table}: ${error.message || 'Unknown error'}`);
+      }
+      
+      console.log(`Successfully deleted ${table} record ${id}`);
       return { success: true };
     } catch (error) {
       console.error(`Error deleting ${table} record:`, error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`Error deleting ${table} record: ${error.message}`);
+      } else {
+        throw new Error(`Error deleting ${table} record: Unknown error`);
+      }
     }
-  }, []);
+  }, [user]);
 
   const fetchRecords = useCallback(async (table: string, filters?: any) => {
     try {

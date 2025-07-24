@@ -155,6 +155,8 @@ const NewVegetableListingPage: React.FC = () => {
         updated_at: new Date().toISOString()
       };
 
+      console.log('Attempting to add vegetable with data:', vegetableData);
+
       await addVegetable(vegetableData);
       
       // Redirect to marketplace
@@ -162,7 +164,23 @@ const NewVegetableListingPage: React.FC = () => {
       
     } catch (error: unknown) {
       console.error('Error adding vegetable:', error);
-      setError('حدث خطأ في إضافة الخضار. يرجى المحاولة مرة أخرى.');
+      
+      // Better error handling
+      let errorMessage = 'حدث خطأ في إضافة الخضار. يرجى المحاولة مرة أخرى.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('RLS')) {
+          errorMessage = 'خطأ في الصلاحيات. يرجى التأكد من تسجيل الدخول.';
+        } else if (error.message.includes('duplicate')) {
+          errorMessage = 'هذا الإعلان موجود بالفعل.';
+        } else if (error.message.includes('invalid')) {
+          errorMessage = 'بيانات غير صحيحة. يرجى التحقق من المعلومات المدخلة.';
+        } else {
+          errorMessage = `خطأ: ${error.message}`;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

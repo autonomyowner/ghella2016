@@ -18,8 +18,16 @@ export const getSupabaseClient = (): SupabaseClient => {
       },
       realtime: {
         params: {
-          eventsPerSecond: 10,
+          eventsPerSecond: 5, // Reduced for better performance
         },
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'elghella-web',
+        },
+      },
+      db: {
+        schema: 'public',
       },
     });
     

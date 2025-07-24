@@ -57,8 +57,14 @@ const VegetableDetailPage: React.FC = () => {
         
         if (foundVegetable) {
           setVegetable(foundVegetable);
-          // Increment view count
-          await updateVegetable(vegetableId, { view_count: (foundVegetable.view_count || 0) + 1 });
+          
+          // Increment view count - handle this separately to avoid blocking the page load
+          try {
+            await updateVegetable(vegetableId, { view_count: (foundVegetable.view_count || 0) + 1 });
+          } catch (viewCountError) {
+            console.warn('Failed to update view count:', viewCountError);
+            // Don't show this error to the user as it's not critical
+          }
         } else {
           setError('الخضار غير موجودة');
         }

@@ -115,11 +115,16 @@ const NurseriesFormPage: React.FC = () => {
       const result = await addNursery(nurseryData);
       console.log('Nursery added successfully:', result);
 
+      // Show success message
+      alert('تم إضافة المشتل بنجاح!');
+
       // Redirect to nurseries page
       router.push('/nurseries');
     } catch (err) {
       console.error('Error adding nursery:', err);
-      setError('حدث خطأ في إضافة الشتلات. يرجى المحاولة مرة أخرى.');
+      const errorMessage = err instanceof Error ? err.message : 'خطأ غير معروف';
+      setError(`خطأ في إضافة المشتل: ${errorMessage}`);
+      alert(`خطأ في إضافة المشتل: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

@@ -634,6 +634,8 @@ export default function EquipmentPage() {
             </AnimatePresence>
           </div>
 
+
+
           {/* Results Summary */}
           <div className="flex justify-between items-center mb-6">
             <div className="text-emerald-300">
