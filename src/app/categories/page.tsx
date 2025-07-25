@@ -324,7 +324,7 @@ export default function CategoriesPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-gray-400">
                           <Package className="w-4 h-4" />
-                          <span className="text-sm">{category.itemCount.toLocaleString()} منتج</span>
+                          <span className="text-sm">{category.itemCount.toLocaleString('en-US')} منتج</span>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition-colors" />
                       </div>
@@ -388,7 +388,7 @@ export default function CategoriesPage() {
                           <div className="flex items-center gap-4 text-sm text-gray-400">
                             <div className="flex items-center gap-1">
                               <Package className="w-4 h-4" />
-                              <span>{category.itemCount.toLocaleString()} منتج</span>
+                              <span>{category.itemCount.toLocaleString('en-US')} منتج</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />

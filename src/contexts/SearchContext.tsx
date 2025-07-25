@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase/supabaseClient';
 
 export interface SearchResult {
   id: string;
-  type: 'equipment' | 'land' | 'product' | 'nursery';
+  type: 'equipment' | 'land' | 'product' | 'nursery' | 'vegetable' | 'animal';
   title: string;
   description?: string;
   price?: number;
@@ -165,36 +165,68 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
-      // Search in agricultural products (if table exists)
+      // Search in vegetables (if table exists)
       try {
-        const { data: productsData, error: productsError } = await supabase
-          .from('agricultural_products')
+        const { data: vegetablesData, error: vegetablesError } = await supabase
+          .from('vegetables')
           .select('*')
-          .or(`title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%,vegetable_type.ilike.%${query}%`)
           .eq('is_available', true)
           .order('created_at', { ascending: false })
           .limit(10);
 
-        if (!productsError && productsData) {
-          productsData.forEach(item => {
+        if (!vegetablesError && vegetablesData) {
+          vegetablesData.forEach(item => {
             searchResults.push({
               id: item.id,
-              type: 'product',
+              type: 'vegetable',
               title: item.title,
               description: item.description,
               price: item.price,
               currency: item.currency,
               location: item.location,
               image: item.images?.[0],
-              category: item.category,
+              category: 'خضروات وفواكه',
               created_at: item.created_at,
-              url: `/marketplace/${item.id}`
+              url: `/VAR/marketplace/${item.id}`
             });
           });
         }
       } catch (error) {
         // Table might not exist, ignore
-        console.log('Agricultural products table not available');
+        console.log('Vegetables table not available');
+      }
+
+      // Search in animals (if table exists)
+      try {
+        const { data: animalsData, error: animalsError } = await supabase
+          .from('animal_listings')
+          .select('*')
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%,animal_type.ilike.%${query}%`)
+          .eq('is_available', true)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (!animalsError && animalsData) {
+          animalsData.forEach(item => {
+            searchResults.push({
+              id: item.id,
+              type: 'animal',
+              title: item.title,
+              description: item.description,
+              price: item.price,
+              currency: item.currency,
+              location: item.location,
+              image: item.images?.[0],
+              category: 'حيوانات',
+              created_at: item.created_at,
+              url: `/animals/${item.id}`
+            });
+          });
+        }
+      } catch (error) {
+        // Table might not exist, ignore
+        console.log('Animals table not available');
       }
 
       // Search in nurseries (if table exists)

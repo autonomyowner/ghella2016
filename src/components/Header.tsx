@@ -74,11 +74,11 @@ const Header: React.FC = () => {
     setShowUserDropdown(false);
   };
 
-  const marketplaceItems = [
-    { href: "/VAR", label: "تحليل الأراضي", icon: MapPin },
-    { href: "/marketplace", label: "المنتجات", icon: ShoppingCart },
-    { href: "/equipment", label: "المعدات", icon: Wrench },
-    { href: "/nurseries", label: "المشاتل", icon: Leaf }
+  const navigationItems = [
+    { href: "/", label: "الرئيسية", icon: LayoutDashboard },
+    { href: "/services", label: "الخدمات", icon: Wrench },
+    { href: "/experts", label: "الخبراء", icon: User },
+    { href: "/about", label: "من نحن", icon: Leaf }
   ];
 
   return (
@@ -109,20 +109,20 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-12 space-x-reverse">
-            <Link href="/marketplace" className={`font-medium transition-colors duration-300 hover:scale-105 ${
+            <Link href="/" className={`font-medium transition-colors duration-300 hover:scale-105 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'
             }`}>
-              السوق
+              الرئيسية
             </Link>
-            <Link href="/VAR" className={`font-medium transition-colors duration-300 hover:scale-105 ${
+            <Link href="/services" className={`font-medium transition-colors duration-300 hover:scale-105 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'
             }`}>
-              تحليل الأراضي
+              الخدمات
             </Link>
-            <Link href="/equipment" className={`font-medium transition-colors duration-300 hover:scale-105 ${
+            <Link href="/experts" className={`font-medium transition-colors duration-300 hover:scale-105 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'
             }`}>
-              المعدات
+              الخبراء
             </Link>
             <Link href="/about" className={`font-medium transition-colors duration-300 hover:scale-105 mr-8 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'
@@ -269,28 +269,18 @@ const Header: React.FC = () => {
         {showMobileMenu && (
           <div className="md:hidden pb-6">
             <div className="bg-white border border-green-200 rounded-lg p-4 mt-4">
-              <nav className="space-y-3">
-                {marketplaceItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    className="flex items-center space-x-3 space-x-reverse px-4 py-3 text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                ))}
-                
-                <div className="border-t border-green-200 pt-3">
-                  <Link
-                    href="/about"
-                    className="flex items-center space-x-3 space-x-reverse px-4 py-3 text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    <span className="font-medium">من نحن</span>
-                  </Link>
-                </div>
+                          <nav className="space-y-3">
+              {navigationItems.map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className="flex items-center space-x-3 space-x-reverse px-4 py-3 text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              ))}
 
                 {loading ? (
                   <div className="flex justify-center py-2">

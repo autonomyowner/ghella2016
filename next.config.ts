@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     forceSwcTransforms: true,
   },
   
+  // Suppress hydration warnings caused by browser extensions
+  reactStrictMode: false,
+  
   // Webpack configuration to prevent caching issues
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {

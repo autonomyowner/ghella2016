@@ -191,7 +191,7 @@ const OptimizedProductCard = memo(({
           </div>
           {isLand && area && (
             <div className="mt-1 text-sm text-gray-500">
-              <span>مساحة: {area.toLocaleString('ar-DZ')} م²</span>
+                              <span>مساحة: {area.toLocaleString('en-US')} م²</span>
             </div>
           )}
         </div>
@@ -231,7 +231,7 @@ const OptimizedProductCard = memo(({
           <div className="flex-1 flex items-center justify-end gap-4 text-sm text-gray-500 font-medium">
             <span className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
-              {views.toLocaleString('ar-DZ')}
+                              {views.toLocaleString('en-US')}
             </span>
             <span className="flex items-center gap-1 mr-2">
               <Clock className="w-4 h-4" />

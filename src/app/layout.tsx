@@ -4,6 +4,7 @@ import { Cairo } from 'next/font/google'
 import "./globals.css";
 import "./performance.css";
 import ClientLayout from "@/components/ClientLayout";
+import HydrationSuppressor from "@/components/HydrationSuppressor";
 
 type Viewport = {
   themeColor: string
@@ -168,9 +169,11 @@ export default function RootLayout({
         <link rel="prefetch" href="/marketplace" />
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        <HydrationSuppressor>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </HydrationSuppressor>
       </body>
     </html>
   );

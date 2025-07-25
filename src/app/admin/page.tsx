@@ -206,7 +206,7 @@ export default function AdminPanel() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">إجمالي الإيرادات</p>
-                <p className="text-3xl font-bold text-green-600">{stats.totalRevenue.toLocaleString()} د.ج</p>
+                <p className="text-3xl font-bold text-green-600">{stats.totalRevenue.toLocaleString('en-US')} د.ج</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <i className="fas fa-money-bill-wave text-green-600 text-xl"></i>

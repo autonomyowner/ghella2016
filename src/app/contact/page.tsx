@@ -85,22 +85,37 @@ export default function ContactPage() {
                 </div>
               )}
               
-              {settings.contact_phone && (
+              {/* Phone Numbers */}
+              <div className="space-y-3">
                 <div className="flex items-center space-x-3 space-x-reverse">
                   <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
                     <i className="fas fa-phone text-emerald-600"></i>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">رقم الهاتف</p>
-                    <a 
-                      href={`tel:${settings.contact_phone}`}
-                      className="text-emerald-600 hover:text-emerald-700 font-semibold"
-                    >
-                      {settings.contact_phone}
-                    </a>
+                    <p className="text-sm text-gray-600">أرقام الهاتف</p>
+                    <div className="space-y-1">
+                      <a 
+                        href="tel:0558981686"
+                        className="text-emerald-600 hover:text-emerald-700 font-semibold block"
+                      >
+                        05 58981686
+                      </a>
+                      <a 
+                        href="tel:0798700447"
+                        className="text-emerald-600 hover:text-emerald-700 font-semibold block"
+                      >
+                        07 98700447
+                      </a>
+                      <a 
+                        href="tel:0660378697"
+                        className="text-emerald-600 hover:text-emerald-700 font-semibold block"
+                      >
+                        06 60378697
+                      </a>
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
               
               {settings.address && (
                 <div className="flex items-center space-x-3 space-x-reverse">
@@ -129,59 +144,56 @@ export default function ContactPage() {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {settings.social_facebook && (
-                <a
-                  href={settings.social_facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center space-x-3 space-x-reverse p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                    <i className="fab fa-facebook-f text-white text-lg"></i>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800 group-hover:text-blue-700">Facebook</p>
-                    <p className="text-sm text-gray-600">تابعنا على فيسبوك</p>
-                  </div>
-                  <i className="fas fa-external-link-alt text-gray-400 group-hover:text-blue-500 transition-colors mr-auto"></i>
-                </a>
-              )}
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/profile.php?id=61578467404013&mibextid=wwXIfr&rdid=SeDWt8dZzlNCz9Fh&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1ApK4nZXXR%2F%3Fmibextid%3DwwXIfr#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center space-x-3 space-x-reverse p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <i className="fab fa-facebook-f text-white text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800 group-hover:text-blue-700">Facebook</p>
+                  <p className="text-sm text-gray-600">تابعنا على فيسبوك</p>
+                </div>
+                <i className="fas fa-external-link-alt text-gray-400 group-hover:text-blue-500 transition-colors mr-auto"></i>
+              </a>
               
-              {settings.social_instagram && (
-                <a
-                  href={settings.social_instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center space-x-3 space-x-reverse p-4 bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:from-purple-600 group-hover:to-pink-600 transition-all">
-                    <i className="fab fa-instagram text-white text-lg"></i>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800 group-hover:text-purple-700">Instagram</p>
-                    <p className="text-sm text-gray-600">تابعنا على انستغرام</p>
-                  </div>
-                  <i className="fas fa-external-link-alt text-gray-400 group-hover:text-purple-500 transition-colors mr-auto"></i>
-                </a>
-              )}
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/el_ghella_/?fbclid=IwY2xjawLwqzJleHRuA2FlbQIxMABicmlkETF1V0htdkVhRVNhcG9hb1YzAR6JtdV_SYKFKbWZi-eAC56MfdAcEwok-_hDSctq9tRuEhCBPYW1s0HPl-F6ig_aem_Akct20fqf2UrxE9Mf1EoiQ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center space-x-3 space-x-reverse p-4 bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:from-purple-600 group-hover:to-pink-600 transition-all">
+                  <i className="fab fa-instagram text-white text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800 group-hover:text-purple-700">Instagram</p>
+                  <p className="text-sm text-gray-600">تابعنا على انستغرام</p>
+                </div>
+                <i className="fas fa-external-link-alt text-gray-400 group-hover:text-purple-500 transition-colors mr-auto"></i>
+              </a>
               
-              {settings.social_tiktok && (
-                <a
-                  href={settings.social_tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center space-x-3 space-x-reverse p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                  <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <i className="fab fa-tiktok text-white text-lg"></i>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800 group-hover:text-gray-700">TikTok</p>
-                    <p className="text-sm text-gray-600">تابعنا على تيك توك</p>
-                  </div>
-                  <i className="fas fa-external-link-alt text-gray-400 group-hover:text-gray-600 transition-colors mr-auto"></i>
-                </a>
-              )}
+              {/* TikTok */}
+              <a
+                href="https://www.tiktok.com/@elghella10?_t=ZN-8yKMuFB1wIA&_r=1&fbclid=IwY2xjawLwqy5leHRuA2FlbQIxMABicmlkETF1V0htdkVhRVNhcG9hb1YzAR6jZLxUf1XjQseM-gHEzbPOsMaV0wH7ZLTgJu-Wter5Kxs0aKEnUr9In9w5fg_aem_BdvgT-Mkmob_c0Rp62-dGg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center space-x-3 space-x-reverse p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center group-hover:bg-gray-800 transition-colors">
+                  <i className="fab fa-tiktok text-white text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800 group-hover:text-gray-700">TikTok</p>
+                  <p className="text-sm text-gray-600">تابعنا على تيك توك</p>
+                </div>
+                <i className="fas fa-external-link-alt text-gray-400 group-hover:text-gray-600 transition-colors mr-auto"></i>
+              </a>
               
               {settings.social_twitter && (
                 <a

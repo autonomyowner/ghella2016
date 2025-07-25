@@ -19,7 +19,7 @@ export default function MarketplaceStatus() {
     land: 0,
     animals: 0,
     total: 0,
-    lastUpdated: new Date().toLocaleString('ar-DZ')
+            lastUpdated: new Date().toLocaleString('en-US')
   })
   const [loading, setLoading] = useState(true)
 
@@ -37,7 +37,7 @@ export default function MarketplaceStatus() {
           land: Math.floor((equipmentData?.totalEquipment || 0) * 0.3), // Estimate land as 30% of equipment
           animals: Math.floor((equipmentData?.totalEquipment || 0) * 0.2), // Estimate animals as 20% of equipment
           total: equipmentData?.totalEquipment || 0,
-          lastUpdated: new Date().toLocaleString('ar-DZ')
+          lastUpdated: new Date().toLocaleString('en-US')
         }
         
         setStats(marketplaceStats)

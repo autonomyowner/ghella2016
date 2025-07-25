@@ -102,9 +102,9 @@ const MarketStats: React.FC = () => {
               
               {/* Counter */}
               <div className="text-3xl md:text-4xl font-black text-white mb-2">
-                {index === 0 && counts.users.toLocaleString()}
-                {index === 1 && counts.products.toLocaleString()}
-                {index === 2 && counts.transactions.toLocaleString()}
+                {index === 0 && counts.users.toLocaleString('en-US')}
+                {index === 1 && counts.products.toLocaleString('en-US')}
+                {index === 2 && counts.transactions.toLocaleString('en-US')}
                 {index === 3 && counts.satisfaction}
                 <span className="text-emerald-400">{stat.suffix}</span>
               </div>

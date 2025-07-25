@@ -20,41 +20,38 @@ export default function Footer() {
             
             {/* Social Media Links */}
             <div className="flex space-x-4 space-x-reverse">
-              {settings.social_facebook && (
-                <a
-                  href={settings.social_facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                  title="تابعنا على Facebook"
-                >
-                  <i className="fab fa-facebook-f text-white text-lg group-hover:text-white"></i>
-                </a>
-              )}
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/profile.php?id=61578467404013&mibextid=wwXIfr&rdid=SeDWt8dZzlNCz9Fh&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1ApK4nZXXR%2F%3Fmibextid%3DwwXIfr#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                title="تابعنا على Facebook"
+              >
+                <i className="fab fa-facebook-f text-white text-lg group-hover:text-white"></i>
+              </a>
               
-              {settings.social_instagram && (
-                <a
-                  href={settings.social_instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                  title="تابعنا على Instagram"
-                >
-                  <i className="fab fa-instagram text-white text-lg group-hover:text-white"></i>
-                </a>
-              )}
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/el_ghella_/?fbclid=IwY2xjawLwqzJleHRuA2FlbQIxMABicmlkETF1V0htdkVhRVNhcG9hb1YzAR6JtdV_SYKFKbWZi-eAC56MfdAcEwok-_hDSctq9tRuEhCBPYW1s0HPl-F6ig_aem_Akct20fqf2UrxE9Mf1EoiQ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                title="تابعنا على Instagram"
+              >
+                <i className="fab fa-instagram text-white text-lg group-hover:text-white"></i>
+              </a>
               
-              {settings.social_tiktok && (
-                <a
-                  href={settings.social_tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-12 h-12 bg-black hover:bg-gray-800 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                  title="تابعنا على TikTok"
-                >
-                  <i className="fab fa-tiktok text-white text-lg group-hover:text-white"></i>
-                </a>
-              )}
+              {/* TikTok */}
+              <a
+                href="https://www.tiktok.com/@elghella10?_t=ZN-8yKMuFB1wIA&_r=1&fbclid=IwY2xjawLwqy5leHRuA2FlbQIxMABicmlkETF1V0htdkVhRVNhcG9hb1YzAR6jZLxUf1XjQseM-gHEzbPOsMaV0wH7ZLTgJu-Wter5Kxs0aKEnUr9In9w5fg_aem_BdvgT-Mkmob_c0Rp62-dGg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group w-12 h-12 bg-black hover:bg-gray-800 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                title="تابعنا على TikTok"
+              >
+                <i className="fab fa-tiktok text-white text-lg group-hover:text-white"></i>
+              </a>
               
               {settings.social_twitter && (
                 <a
@@ -142,17 +139,36 @@ export default function Footer() {
                 </div>
               )}
               
-              {settings.contact_phone && (
+              {/* Phone Numbers */}
+              <div className="space-y-2">
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <i className="fas fa-phone text-emerald-400"></i>
                   <a 
-                    href={`tel:${settings.contact_phone}`}
+                    href="tel:0558981686"
                     className="text-gray-300 hover:text-emerald-400 transition-colors"
                   >
-                    {settings.contact_phone}
+                    05 58981686
                   </a>
                 </div>
-              )}
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <i className="fas fa-phone text-emerald-400"></i>
+                  <a 
+                    href="tel:0798700447"
+                    className="text-gray-300 hover:text-emerald-400 transition-colors"
+                  >
+                    07 98700447
+                  </a>
+                </div>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <i className="fas fa-phone text-emerald-400"></i>
+                  <a 
+                    href="tel:0660378697"
+                    className="text-gray-300 hover:text-emerald-400 transition-colors"
+                  >
+                    06 60378697
+                  </a>
+                </div>
+              </div>
               
               {settings.address && (
                 <div className="flex items-start space-x-2 space-x-reverse">

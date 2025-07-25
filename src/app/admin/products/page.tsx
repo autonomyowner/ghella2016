@@ -205,7 +205,7 @@ export default function AdminProducts() {
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
 
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-emerald-600 font-bold text-lg">{product.price.toLocaleString()} د.ج</span>
+                                      <span className="text-emerald-600 font-bold text-lg">{product.price.toLocaleString('en-US')} د.ج</span>
                   <span className="text-gray-500 text-sm">{product.category}</span>
                 </div>
 

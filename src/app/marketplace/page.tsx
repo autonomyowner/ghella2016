@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { supabase } from '@/lib/supabase/supabaseClient';
 import { designSystem, utils, animations } from '@/lib/designSystem';
 import { useLazyLoad, PerformanceMonitor } from '@/lib/performance';
 import { 
@@ -18,113 +19,235 @@ import {
   CalendarCheck,
   Star,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  Clock
 } from 'lucide-react';
 
-interface MarketplaceCard {
+interface MarketplaceItem {
   id: string;
   title: string;
-  description: string;
-  link: string;
-  image: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  location: string;
+  images: string[];
+  is_available: boolean;
+  is_featured: boolean;
+  view_count: number;
+  created_at: string;
+  type: 'land' | 'nursery' | 'equipment' | 'animal' | 'vegetable';
+}
+
+interface SectionData {
+  title: string;
   emoji: string;
   color: string;
-  stats: {
-    count: string;
-    label: string;
-  };
-  features: string[];
-  isPopular?: boolean;
-  isNew?: boolean;
+  items: MarketplaceItem[];
+  loading: boolean;
+  link: string;
 }
 
 export default function MarketplacePage() {
   const { user } = useSupabaseAuth();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [sections, setSections] = useState<SectionData[]>([
+    {
+      title: 'الأراضي الزراعية',
+      emoji: '🌾',
+      color: 'bg-emerald-500',
+      items: [],
+      loading: true,
+      link: '/land'
+    },
+    {
+      title: 'الشتلات والمشاتل',
+      emoji: '🌱',
+      color: 'bg-green-500',
+      items: [],
+      loading: true,
+      link: '/nurseries'
+    },
+    {
+      title: 'المعدات الزراعية',
+      emoji: '🚜',
+      color: 'bg-blue-500',
+      items: [],
+      loading: true,
+      link: '/equipment'
+    },
+    {
+      title: 'الحيوانات',
+      emoji: '🐄',
+      color: 'bg-orange-500',
+      items: [],
+      loading: true,
+      link: '/animals'
+    },
+    {
+      title: 'الخضروات والفواكه',
+      emoji: '🍅',
+      color: 'bg-red-500',
+      items: [],
+      loading: true,
+      link: '/VAR/marketplace'
+    }
+  ]);
 
   useEffect(() => {
     setIsHydrated(true);
     PerformanceMonitor.startTimer('marketplace-load');
+    loadAllSections();
   }, []);
 
   useEffect(() => {
     PerformanceMonitor.endTimer('marketplace-load');
   }, []);
 
-  const marketplaceCards: MarketplaceCard[] = [
-    {
-      id: 'animals',
-      title: 'الحيوانات',
-      description: 'تصفح وشراء الحيوانات الزراعية من أبقار وأغنام ودواجن',
-      link: '/animals',
-      image: '/assets/sheep1.webp',
-      emoji: '🐄',
-      color: 'bg-orange-500',
-      stats: { count: '500+', label: 'حيوان متاح' },
-      features: ['صحي ومضمون', 'أوراق رسمية', 'توصيل مجاني'],
-      isPopular: true
-    },
-    {
-      id: 'vegetables',
-      title: 'الخضروات والفواكه',
-      description: 'منتجات طازجة مباشرة من المزرعة إلى طاولتك',
-      link: '/VAR/marketplace',
-      image: '/assets/tomato 2.jpg',
-      emoji: '🍅',
-      color: 'bg-red-500',
-      stats: { count: '1000+', label: 'منتج طازج' },
-      features: ['عضوي 100%', 'طازج يومياً', 'أسعار منافسة'],
-      isNew: true
-    },
-    {
-      id: 'equipment',
-      title: 'المعدات الزراعية',
-      description: 'جرارات وآلات ومعدات زراعية حديثة للبيع والإيجار',
-      link: '/equipment',
-      image: '/assets/machin01.jpg',
-      emoji: '🚜',
-      color: 'bg-blue-500',
-      stats: { count: '200+', label: 'معدة متاحة' },
-      features: ['مؤمن', 'صيانة دورية', 'تأجير مرن'],
-      isPopular: true
-    },
-    {
-      id: 'nurseries',
-      title: 'المشاتل والشتلات',
-      description: 'شتلات وبذور وأشجار جاهزة للزراعة',
-      link: '/nurseries',
-      image: '/assets/seedings01.jpg',
-      emoji: '🌱',
-      color: 'bg-green-500',
-      stats: { count: '300+', label: 'نوع شتلة' },
-      features: ['شتلات صحية', 'أصناف متنوعة', 'ضمان النمو']
-    },
-    {
-      id: 'exports',
-      title: 'خدمات التصدير',
-      description: 'تصدير المنتجات الزراعية للخارج بأسعار منافسة',
-      link: '/exports',
-      image: '/assets/exporting1.jpg',
-      emoji: '🚢',
-      color: 'bg-purple-500',
-      stats: { count: '50+', label: 'دولة مستوردة' },
-      features: ['وثائق رسمية', 'شحن سريع', 'أسعار منافسة']
-    },
-    {
-      id: 'land',
-      title: 'الأراضي الزراعية',
-      description: 'أراضي زراعية للبيع والإيجار في جميع أنحاء الجزائر',
-      link: '/land',
-      image: '/assets/land01.jpg',
-      emoji: '🌾',
-      color: 'bg-emerald-500',
-      stats: { count: '150+', label: 'أرض متاحة' },
-      features: ['ري متطور', 'تربة خصبة', 'طرق ممهدة'],
-      isPopular: true
-    }
-  ];
+  const loadAllSections = async () => {
+    await Promise.all([
+      loadLandSection(),
+      loadNurserySection(),
+      loadEquipmentSection(),
+      loadAnimalSection(),
+      loadVegetableSection()
+    ]);
+  };
 
-  const { displayedItems, hasMore, loading, loadMore } = useLazyLoad(marketplaceCards, 6);
+  const loadLandSection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('land_listings')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setSections(prev => prev.map(section => 
+          section.title === 'الأراضي الزراعية' 
+            ? { ...section, items: data.map(item => ({ ...item, type: 'land' as const })), loading: false }
+            : section
+        ));
+      }
+    } catch (error) {
+      console.error('Error loading land section:', error);
+    }
+  };
+
+  const loadNurserySection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('nurseries')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setSections(prev => prev.map(section => 
+          section.title === 'الشتلات والمشاتل' 
+            ? { ...section, items: data.map(item => ({ ...item, type: 'nursery' as const })), loading: false }
+            : section
+        ));
+      }
+    } catch (error) {
+      console.error('Error loading nursery section:', error);
+    }
+  };
+
+  const loadEquipmentSection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setSections(prev => prev.map(section => 
+          section.title === 'المعدات الزراعية' 
+            ? { ...section, items: data.map(item => ({ ...item, type: 'equipment' as const })), loading: false }
+            : section
+        ));
+      }
+    } catch (error) {
+      console.error('Error loading equipment section:', error);
+    }
+  };
+
+  const loadAnimalSection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('animal_listings')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setSections(prev => prev.map(section => 
+          section.title === 'الحيوانات' 
+            ? { ...section, items: data.map(item => ({ ...item, type: 'animal' as const })), loading: false }
+            : section
+        ));
+      }
+    } catch (error) {
+      console.error('Error loading animal section:', error);
+    }
+  };
+
+  const loadVegetableSection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vegetables')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setSections(prev => prev.map(section => 
+          section.title === 'الخضروات والفواكه' 
+            ? { ...section, items: data.map(item => ({ ...item, type: 'vegetable' as const })), loading: false }
+            : section
+        ));
+      }
+    } catch (error) {
+      console.error('Error loading vegetable section:', error);
+    }
+  };
+
+  const formatPrice = (price: number, currency: string) => {
+    return `${price.toLocaleString('en-US')} ${currency}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-SA', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getItemImage = (item: MarketplaceItem) => {
+    if (item.images && item.images.length > 0) {
+      return item.images[0];
+    }
+    
+    // Default images based on type
+    const defaultImages = {
+      land: '/assets/land01.jpg',
+      nursery: '/assets/seedings01.jpg',
+      equipment: '/assets/machin01.jpg',
+      animal: '/assets/sheep1.webp',
+      vegetable: '/assets/tomato 2.jpg'
+    };
+    
+    return defaultImages[item.type];
+  };
 
   // Prevent hydration mismatch
   if (!isHydrated) {
@@ -139,182 +262,133 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-800 text-white relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-emerald-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 right-1/3 w-20 h-20 bg-teal-400/25 rounded-full blur-xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-      </div>
+    <div className="min-h-screen text-white relative overflow-hidden bg-gradient-to-br from-green-900 to-gray-900">
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          {/* Main Icon Animation */}
-          <div className="text-8xl mb-8 drop-shadow-2xl animate-bounce" style={{ animationDuration: '3s' }}>
-            🛒
-          </div>
-
           {/* Main Title */}
-          <h1 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-lg">
-            سوق المزارعين
+          <h1 className="text-4xl md:text-6xl font-black mb-4 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-lg">
+            سوق الفلاح
           </h1>
           
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-            اكتشف كل ما تحتاجه للزراعة في مكان واحد - من الأراضي والمعدات إلى المنتجات والخدمات
+          <p className="text-lg md:text-xl text-white/90 mb-6 max-w-3xl mx-auto leading-relaxed">
+            اكتشف كل ما تحتاجه للزراعة في مكان واحد
           </p>
-
-          {/* Stats Section */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl mb-2">🌾</div>
-              <div className="text-2xl font-bold text-emerald-300 mb-1">2,200+</div>
-              <div className="text-sm text-white/70">عنصر متاح</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl mb-2">👥</div>
-              <div className="text-2xl font-bold text-emerald-300 mb-1">10,000+</div>
-              <div className="text-sm text-white/70">مزارع نشط</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl mb-2">⭐</div>
-              <div className="text-2xl font-bold text-emerald-300 mb-1">4.8</div>
-              <div className="text-sm text-white/70">تقييم المستخدمين</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl mb-2">🚚</div>
-              <div className="text-2xl font-bold text-emerald-300 mb-1">24/7</div>
-              <div className="text-sm text-white/70">خدمة التوصيل</div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Marketplace Categories */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-emerald-300 mb-4">فئات السوق</h2>
-            <p className="text-xl text-white/80">اختر ما تريد بيعه أو شراؤه</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayedItems.map((card, index) => (
-              <Link
-                key={card.id}
-                href={card.link}
-                className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 hover:border-emerald-400/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                {/* Card Image */}
-                <div 
-                  className="h-48 bg-cover bg-center relative"
-                  style={{ backgroundImage: `url('${card.image}')` }}
+      {/* Marketplace Sections */}
+      <div className="relative z-10 pb-20">
+        {sections.map((section, sectionIndex) => (
+          <section key={section.title} className="py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Section Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className={`${section.color} p-3 rounded-full text-2xl`}>
+                    {section.emoji}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-emerald-300">{section.title}</h2>
+                    <p className="text-white/70 text-sm">أحدث الإعلانات</p>
+                  </div>
+                </div>
+                <Link
+                  href={section.link}
+                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg transition-colors"
                 >
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
-                  
-                  {/* Badges */}
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    {card.isPopular && (
-                      <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                        <TrendingUp className="w-3 h-3 inline mr-1" />
-                        شعبي
-                      </div>
-                    )}
-                    {card.isNew && (
-                      <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                        جديد
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Emoji Icon */}
-                  <div className="absolute top-4 left-4 text-4xl">{card.emoji}</div>
-                  
-                  {/* Stats */}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 text-center">
-                      <div className="text-lg font-bold text-white">{card.stats.count}</div>
-                      <div className="text-xs text-white/80">{card.stats.label}</div>
+                  <span>عرض الكل</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Items Grid */}
+              {section.loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 animate-pulse">
+                      <div className="bg-white/20 h-32 rounded-lg mb-3"></div>
+                      <div className="bg-white/20 h-4 rounded mb-2"></div>
+                      <div className="bg-white/20 h-3 rounded w-2/3"></div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-                
-                {/* Card Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
-                  <p className="text-white/70 mb-4 line-clamp-2">{card.description}</p>
-                  
-                                     {/* Features */}
-                   <div className="flex gap-2 flex-wrap mb-4">
-                     {card.features.map((feature: string, idx: number) => (
-                       <span key={idx} className="bg-emerald-600/20 text-emerald-200 px-2 py-1 rounded text-xs">
-                         {feature}
-                       </span>
-                     ))}
-                   </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center transition-colors">
-                      <CalendarCheck className="w-4 h-4 mr-2" />
-                      استكشف
-                    </button>
-                    <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
-                      <Heart className="w-4 h-4" />
-                    </button>
-                    <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                  </div>
+              ) : section.items.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                  {section.items.map((item, index) => (
+                    <Link
+                      key={item.id}
+                      href={`${section.link}/${item.id}`}
+                      className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden hover:from-white/15 hover:to-white/10 hover:border-emerald-400/50 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      {/* Item Image */}
+                      <div className="relative h-32 overflow-hidden">
+                        <img
+                          src={getItemImage(item)}
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 group-hover:via-black/30 transition-all duration-500"></div>
+                        
+                        {/* Featured Badge */}
+                        {item.is_featured && (
+                          <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            مميز
+                          </div>
+                        )}
+                        
+                        {/* View Count */}
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 text-white/80 text-xs">
+                          <Eye className="w-3 h-3" />
+                          {item.view_count}
+                        </div>
+                      </div>
+
+                      {/* Item Content */}
+                      <div className="p-4">
+                        <h3 className="font-bold text-white mb-2 line-clamp-2 group-hover:text-emerald-300 transition-colors">
+                          {item.title}
+                        </h3>
+                        
+                        {item.description && (
+                          <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <div className="text-emerald-300 font-bold">
+                            {formatPrice(item.price, item.currency)}
+                          </div>
+                          <div className="flex items-center gap-1 text-white/60 text-xs">
+                            <MapPin className="w-3 h-3" />
+                            {item.location}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 text-white/50 text-xs mt-2">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(item.created_at)}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Load More Button */}
-          {hasMore && (
-            <div className="text-center mt-8">
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
-              >
-                {loading ? 'جاري التحميل...' : 'عرض المزيد'}
-              </button>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">😔</div>
+                  <h3 className="text-xl font-bold text-white mb-2">لا توجد إعلانات</h3>
+                  <p className="text-white/70">لم يتم العثور على إعلانات في هذه الفئة</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
-            <h2 className="text-3xl font-bold text-emerald-300 mb-4">ابدأ بيع منتجاتك الآن</h2>
-            <p className="text-white/80 mb-6 text-lg">
-              انضم إلى آلاف المزارعين الذين يبيعون منتجاتهم على منصة الغلة
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/auth/signup"
-                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full font-bold text-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                إنشاء حساب مجاني
-                <ArrowRight className="w-5 h-5 mr-2" />
-              </Link>
-              <Link
-                href="/help"
-                className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-full hover:bg-white/20 font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                تعلم المزيد
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

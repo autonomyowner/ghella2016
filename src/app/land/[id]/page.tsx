@@ -7,6 +7,8 @@ import { LandListing } from '@/types/database.types';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { fetchSellerInfo, Profile } from '@/lib/sellerUtils';
+import SellerInfo from '@/components/SellerInfo';
 
 const LandDetailPage: React.FC = () => {
   const params = useParams();
@@ -14,6 +16,7 @@ const LandDetailPage: React.FC = () => {
   const { user } = useSupabaseAuth();
   const { getLand, isOnline, isWithinLimits } = useSupabaseData();
   const [listing, setListing] = useState<LandListing | null>(null);
+  const [seller, setSeller] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -41,6 +44,10 @@ const LandDetailPage: React.FC = () => {
       }
 
       setListing(landData as any);
+
+      // Fetch real seller data using utility function
+      const sellerData = await fetchSellerInfo(landData.user_id, landData.location);
+      setSeller(sellerData);
     } catch (error) {
       console.error('Error fetching land listing:', error);
       router.push('/land');
@@ -316,6 +323,9 @@ const LandDetailPage: React.FC = () => {
                 <p className="text-green-700 leading-relaxed">{listing.description}</p>
               </div>
             )}
+
+            {/* Seller Information */}
+            {seller && <SellerInfo seller={seller} />}
           </div>
 
           {/* Sidebar */}

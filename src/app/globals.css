@@ -126,6 +126,32 @@ img[loading="lazy"] {
   font-family: var(--font-display);
 }
 
+/* NeoSansArabic Font Classes */
+.font-NeoSansArabicBlack {
+  font-family: 'NeoSansArabicBlack', var(--font-arabic);
+  font-weight: 900;
+}
+
+.font-NeoSansArabicBold {
+  font-family: 'NeoSansArabicBold', var(--font-arabic);
+  font-weight: 700;
+}
+
+.font-NeoSansArabicMedium {
+  font-family: 'NeoSansArabicMedium', var(--font-arabic);
+  font-weight: 600;
+}
+
+.font-NeoSansArabicRegular {
+  font-family: 'NeoSansArabicRegular', var(--font-arabic);
+  font-weight: 400;
+}
+
+.font-NeoSansArabicLight {
+  font-family: 'NeoSansArabicLight', var(--font-arabic);
+  font-weight: 300;
+}
+
 .arabic-title {
   font-weight: 800;
   font-size: 4rem;

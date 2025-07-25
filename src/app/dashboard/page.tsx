@@ -166,7 +166,7 @@ export default function DashboardPage() {
                           <p className="text-white/70 text-sm">{item.location}</p>
                         </div>
                         <div className="text-left">
-                          <p className="text-green-400 font-bold">{item.price?.toLocaleString()} د.ج</p>
+                          <p className="text-green-400 font-bold">{item.price?.toLocaleString('en-US')} د.ج</p>
                                                      <p className="text-white/70 text-sm">{(item as any).view_count || 0} مشاهدة</p>
                         </div>
                       </div>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between pt-4 border-t border-white/10">
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-4 h-4 text-green-400" />
-                            <span className="text-green-400 font-bold">{item.price?.toLocaleString()} د.ج</span>
+                            <span className="text-green-400 font-bold">{item.price?.toLocaleString('en-US')} د.ج</span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-white/70">
                                                          <span className="flex items-center gap-1">

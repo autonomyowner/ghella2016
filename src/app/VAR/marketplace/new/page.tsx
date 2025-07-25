@@ -2,66 +2,39 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSupabaseData } from '@/hooks/useSupabase';
 
 const NewVegetableListingPage: React.FC = () => {
   const router = useRouter();
-  const { addVegetable } = useSupabaseData();
   const { user } = useSupabaseAuth();
-  
+  const { addVegetable } = useSupabaseData();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    vegetable_type: 'tomatoes',
     price: '',
-    currency: 'دج',
-    vegetable_type: 'tomatoes' as 'tomatoes' | 'potatoes' | 'onions' | 'carrots' | 'cucumbers' | 'peppers' | 'lettuce' | 'cabbage' | 'broccoli' | 'cauliflower' | 'spinach' | 'kale' | 'other',
-    variety: '',
-    quantity: '1',
-    unit: 'kg' as 'kg' | 'ton' | 'piece' | 'bundle' | 'box',
-    freshness: 'excellent' as 'excellent' | 'good' | 'fair' | 'poor',
-    organic: false,
+    quantity: '',
+    unit: 'kg',
     location: '',
     harvest_date: '',
-    expiry_date: '',
-    certification: '',
-    packaging: 'loose' as 'loose' | 'packaged' | 'bulk',
-    images: [] as string[]
+    contact_phone: '',
+    contact_email: ''
   });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreview, setImagePreview] = useState<string[]>([]);
-
-  // Check authentication
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
-          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خضار جديدة</p>
-          <button
-            onClick={() => router.push('/auth/login')}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
-          >
-            تسجيل الدخول
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
     if (type === 'checkbox') {
-      const checkbox = e.target as HTMLInputElement;
+      const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({
         ...prev,
-        [name]: checkbox.checked
+        [name]: checked
       }));
     } else {
       setFormData(prev => ({
@@ -72,44 +45,26 @@ const NewVegetableListingPage: React.FC = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length + imageFiles.length > 10) {
-      setError('يمكنك رفع حتى 10 صور فقط');
-      return;
-    }
+    const files = e.target.files;
+    if (!files) return;
 
-    // Validate file sizes and types
-    const validFiles = files.filter(file => {
+    const newImages: string[] = [];
+    
+    Array.from(files).forEach(file => {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
         setError('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-        return false;
+        return;
       }
-      if (!file.type.startsWith('image/')) {
-        setError('يمكنك رفع صور فقط');
-        return false;
-      }
-      return true;
+      
+      convertImageToBase64(file).then(base64 => {
+        newImages.push(base64);
+        setImages(prev => [...prev, ...newImages]);
+      });
     });
-
-    if (validFiles.length !== files.length) return;
-
-    setImageFiles(prev => [...prev, ...validFiles]);
-
-    // Create previews
-    validFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(prev => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    setError(null);
   };
 
   const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreview(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const convertImageToBase64 = (file: File): Promise<string> => {
@@ -129,25 +84,23 @@ const NewVegetableListingPage: React.FC = () => {
       return;
     }
 
-    if (!formData.title.trim() || !formData.price || !formData.location.trim()) {
-      setError('يرجى ملء جميع الحقول المطلوبة');
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      // Convert images to base64
-      const imagePromises = imageFiles.map(convertImageToBase64);
-      const base64Images = await Promise.all(imagePromises);
-
       const vegetableData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        quantity: parseInt(formData.quantity),
-        images: base64Images,
         user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        vegetable_type: formData.vegetable_type,
+        price: parseFloat(formData.price),
+        quantity: parseFloat(formData.quantity),
+        unit: formData.unit,
+        location: formData.location,
+        harvest_date: formData.harvest_date || new Date().toISOString().split('T')[0],
+        contact_phone: formData.contact_phone,
+        contact_email: formData.contact_email,
+        images: images,
         is_available: true,
         is_featured: false,
         view_count: 0,
@@ -185,10 +138,6 @@ const NewVegetableListingPage: React.FC = () => {
       setLoading(false);
     }
   };
-
-
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pt-20">
@@ -247,9 +196,89 @@ const NewVegetableListingPage: React.FC = () => {
                     <option value="broccoli">بروكلي</option>
                     <option value="cauliflower">قرنبيط</option>
                     <option value="spinach">سبانخ</option>
-                    <option value="kale">كرنب</option>
                     <option value="other">أخرى</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    السعر (دج) *
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="مثال: 150"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      الكمية *
+                    </label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="مثال: 50"
+                      min="0"
+                      step="0.1"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      الوحدة
+                    </label>
+                    <select
+                      name="unit"
+                      value={formData.unit}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="kg">كيلوغرام</option>
+                      <option value="ton">طن</option>
+                      <option value="piece">قطعة</option>
+                      <option value="bundle">حزمة</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الموقع *
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="مثال: الجزائر العاصمة"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    تاريخ الحصاد
+                  </label>
+                  <input
+                    type="date"
+                    name="harvest_date"
+                    value={formData.harvest_date}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
                 </div>
               </div>
 
@@ -264,190 +293,40 @@ const NewVegetableListingPage: React.FC = () => {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="وصف مفصل عن الخضار، الجودة، طريقة الزراعة..."
+                  placeholder="وصف مفصل للخضار - Detailed description of the vegetables"
                 />
               </div>
 
-              {/* Price and Quantity */}
-              <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    السعر *
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الكمية *
-                  </label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="1"
-                    min="1"
-                    required
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    وحدة القياس *
-                  </label>
-                  <select
-                    name="unit"
-                    value={formData.unit}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="kg">كيلوغرام</option>
-                    <option value="ton">طن</option>
-                    <option value="piece">قطعة</option>
-                    <option value="bundle">حزمة</option>
-                    <option value="box">صندوق</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Quality and Type */}
+              {/* Contact Information */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    مستوى الطزاجة *
-                  </label>
-                  <select
-                    name="freshness"
-                    value={formData.freshness}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="excellent">ممتازة</option>
-                    <option value="good">جيدة</option>
-                    <option value="fair">متوسطة</option>
-                    <option value="poor">ضعيفة</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    النوع
+                    رقم الهاتف
                   </label>
                   <input
-                    type="text"
-                    name="variety"
-                    value={formData.variety}
+                    type="tel"
+                    name="contact_phone"
+                    value={formData.contact_phone}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: طماطم كرزية، بطاطس حمراء..."
-                  />
-                </div>
-              </div>
-
-              {/* Location and Dates */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الموقع *
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="المدينة أو المنطقة"
-                    required
+                    placeholder="مثال: 0770123456"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    نوع التعبئة
-                  </label>
-                  <select
-                    name="packaging"
-                    value={formData.packaging}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="loose">سائب</option>
-                    <option value="packaged">معبأ</option>
-                    <option value="bulk">كميات كبيرة</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ الحصاد
+                    البريد الإلكتروني
                   </label>
                   <input
-                    type="date"
-                    name="harvest_date"
-                    value={formData.harvest_date}
+                    type="email"
+                    name="contact_email"
+                    value={formData.contact_email}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="مثال: example@email.com"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ انتهاء الصلاحية
-                  </label>
-                  <input
-                    type="date"
-                    name="expiry_date"
-                    value={formData.expiry_date}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Additional Information */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الشهادات
-                  </label>
-                  <input
-                    type="text"
-                    name="certification"
-                    value={formData.certification}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: شهادة عضوية، شهادة جودة..."
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="organic"
-                    checked={formData.organic}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                  />
-                  <label className="mr-2 text-sm font-medium text-gray-700">
-                    خضار عضوية
-                  </label>
                 </div>
               </div>
 
@@ -463,55 +342,58 @@ const NewVegetableListingPage: React.FC = () => {
                   onChange={handleImageChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-                <p className="text-sm text-gray-500 mt-1">يمكنك رفع حتى 10 صور. الحد الأقصى 5 ميجابايت لكل صورة.</p>
-                
-                {/* Image Previews */}
-                {imagePreview.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    {imagePreview.map((preview, index) => (
-                      <div key={index} className="relative">
-                        <Image
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          width={96}
-                          height={96}
-                          className="w-full h-24 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="text-sm text-gray-500 mt-1">يمكنك رفع عدة صور (حد أقصى 5 ميجابايت لكل صورة)</p>
               </div>
+
+              {/* Image Preview */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={image}
+                        alt={`صورة ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                        style={{ aspectRatio: '1/1' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Error Message */}
               {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                  {error}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600">{error}</p>
                 </div>
               )}
 
               {/* Submit Button */}
-              <div className="flex justify-end space-x-4 space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => router.push('/VAR/marketplace')}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  إلغاء
-                </button>
+              <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2 space-x-reverse"
+                  style={{ minHeight: '48px' }}
                 >
-                  {loading ? 'جاري الإضافة...' : 'إضافة الخضار'}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>جاري الإضافة...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>إضافة الخضار</span>
+                      <span>🥬</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

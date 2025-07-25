@@ -306,7 +306,7 @@ export default function SearchFilters({
       {/* Results Info */}
       <div className="flex items-center justify-between text-sm text-gray-400">
         <span>
-          {isLoading ? 'جاري البحث...' : `${totalResults.toLocaleString()} نتيجة`}
+                          {isLoading ? 'جاري البحث...' : `${totalResults.toLocaleString('en-US')} نتيجة`}
         </span>
         <div className="flex items-center gap-4">
           <span>ترتيب حسب:</span>

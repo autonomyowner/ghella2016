@@ -183,7 +183,7 @@ const LandListingsPage: React.FC = () => {
       acre: 'فدان',
       dunum: 'دونم'
     };
-    return `${area.toLocaleString('ar-DZ')} ${unitNames[unit]}`;
+    return `${area.toLocaleString('en-US')} ${unitNames[unit]}`;
   };
 
   // Categories for filtering
