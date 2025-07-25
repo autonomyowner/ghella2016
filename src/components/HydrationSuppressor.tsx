@@ -7,7 +7,7 @@ interface HydrationSuppressorProps {
 }
 
 export default function HydrationSuppressor({ children }: HydrationSuppressorProps) {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [_isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -15,10 +15,8 @@ export default function HydrationSuppressor({ children }: HydrationSuppressorPro
 
   // Suppress hydration warnings in development
   if (typeof window !== 'undefined') {
-    // @ts-ignore
-    window.__NEXT_DATA__ = window.__NEXT_DATA__ || {};
-    // @ts-ignore
-    window.__NEXT_DATA__.suppressHydrationWarning = true;
+    (window as any).__NEXT_DATA__ = (window as any).__NEXT_DATA__ || {};
+    (window as any).__NEXT_DATA__.suppressHydrationWarning = true;
   }
 
   return (
