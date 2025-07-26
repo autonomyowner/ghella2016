@@ -93,12 +93,10 @@ const BottomNav: React.FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative flex flex-col items-center p-3 rounded-xl transition-all duration-300 group"
+                className="relative flex flex-col items-center p-3 rounded-xl transition-all duration-200 group touch-manipulation"
               >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`relative p-2 rounded-lg transition-all duration-300 ${
+                <div
+                  className={`relative p-2 rounded-lg transition-all duration-200 ${
                     item.active 
                       ? 'bg-emerald-500/20 text-emerald-400' 
                       : 'text-gray-400 hover:text-white hover:bg-white/10'
@@ -110,39 +108,29 @@ const BottomNav: React.FC = () => {
                       layoutId="activeTab"
                       className="absolute inset-0 bg-emerald-500/20 rounded-lg"
                       initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
-                </motion.div>
-                <span className={`text-xs mt-1 transition-colors duration-300 ${
-                  item.active ? 'text-emerald-400' : 'text-gray-400'
-                }`}>
-                  {item.label}
-                </span>
+                </div>
+                <span className="text-xs mt-1 text-white/80">{item.label}</span>
               </Link>
             ))}
 
-            {/* Quick Actions Menu */}
+            {/* More Menu Button */}
             <div className="relative">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={() => setShowMenu(!showMenu)}
-                className={`relative flex flex-col items-center p-3 rounded-xl transition-all duration-300 ${
-                  showMenu 
-                    ? 'text-emerald-400' 
-                    : 'text-gray-400 hover:text-white'
-                }`}
+                className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 touch-manipulation"
               >
-                <div className={`p-2 rounded-lg transition-all duration-300 ${
+                <div className={`p-2 rounded-lg transition-all duration-200 ${
                   showMenu 
                     ? 'bg-emerald-500/20' 
                     : 'hover:bg-white/10'
                 }`}>
                   <Menu className="w-5 h-5" />
                 </div>
-                <span className="text-xs mt-1">المزيد</span>
-              </motion.button>
+                <span className="text-xs mt-1 text-white/80">المزيد</span>
+              </button>
 
               {/* Quick Actions Dropdown */}
               <AnimatePresence>
@@ -151,7 +139,7 @@ const BottomNav: React.FC = () => {
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.15 }}
                     className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-2 shadow-2xl"
                   >
                     <div className="flex flex-col gap-2 min-w-[140px]">
@@ -160,12 +148,12 @@ const BottomNav: React.FC = () => {
                           key={action.href}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
+                          transition={{ delay: index * 0.03 }}
                         >
                           <Link
                             href={action.href}
                             onClick={() => setShowMenu(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200 touch-manipulation"
                           >
                             <div className={`w-8 h-8 rounded-lg bg-${action.color}-500/20 flex items-center justify-center`}>
                               <action.icon className="w-4 h-4 text-emerald-400" />
@@ -193,8 +181,8 @@ const BottomNav: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 lg:hidden"
             onClick={() => setShowMenu(false)}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           />
         )}
       </AnimatePresence>

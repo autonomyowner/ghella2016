@@ -916,6 +916,115 @@ img[loading="lazy"] {
   }
 }
 
+/* Mobile Touch Optimizations */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Reduce animation complexity on mobile */
+  .group:hover {
+    transform: none !important;
+  }
+  
+  /* Optimize transitions for mobile */
+  * {
+    transition-duration: 200ms !important;
+  }
+  
+  /* Improve scrolling performance */
+  body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto;
+  }
+  
+  /* Fix tap highlight issues */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Optimize backdrop filters for mobile */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(20px);
+  }
+  
+  /* Reduce shadow complexity on mobile */
+  .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Improve card interactions */
+  .group {
+    will-change: transform;
+  }
+  
+  /* Optimize image loading */
+  img {
+    will-change: auto;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover effects on touch devices */
+  .group:hover {
+    transform: none !important;
+  }
+  
+  /* Improve touch feedback */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Improve touch feedback */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Reduce animation complexity */
+  .animate-pulse {
+    animation: none;
+  }
+  
+  /* Optimize for touch scrolling */
+  .overflow-auto, .overflow-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Performance Optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Smooth scrolling for navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(20px);
+  }
+  
+  /* Fix for iOS Safari viewport issues */
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+/* Fix for Android Chrome */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(20px);
+  }
+}
+
 /* Islamic Geometric Patterns */
 .geometric-border {
   border: 3px solid transparent;

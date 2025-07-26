@@ -321,7 +321,7 @@ export default function MarketplacePage() {
                     <Link
                       key={item.id}
                       href={`${section.link}/${item.id}`}
-                      className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden hover:from-white/15 hover:to-white/10 hover:border-emerald-400/50 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
+                      className="group block bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden hover:from-white/15 hover:to-white/10 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-2 cursor-pointer"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       {/* Item Image */}
@@ -329,10 +329,10 @@ export default function MarketplacePage() {
                         <img
                           src={getItemImage(item)}
                           alt={item.title}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 group-hover:via-black/30 transition-all duration-500"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 group-hover:via-black/30 transition-all duration-300"></div>
                         
                         {/* Featured Badge */}
                         {item.is_featured && (

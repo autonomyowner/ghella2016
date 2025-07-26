@@ -77,7 +77,7 @@ const Header: React.FC = () => {
   const navigationItems = [
     { href: "/", label: "الرئيسية", icon: LayoutDashboard },
     { href: "/services", label: "الخدمات", icon: Wrench },
-    { href: "/experts", label: "الخبراء", icon: User },
+    { href: "/VAR", label: "البيانات الفضائية", icon: User },
     { href: "/about", label: "من نحن", icon: Leaf }
   ];
 
@@ -94,8 +94,8 @@ const Header: React.FC = () => {
           
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 space-x-reverse">
-            <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Leaf className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+              <img src="/assets/logowhite.jpg" alt="الغلة" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className={`text-2xl font-bold transition-colors duration-300 ${
@@ -119,10 +119,10 @@ const Header: React.FC = () => {
             }`}>
               الخدمات
             </Link>
-            <Link href="/experts" className={`font-medium transition-colors duration-300 hover:scale-105 ${
+            <Link href="/VAR" className={`font-medium transition-colors duration-300 hover:scale-105 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'
             }`}>
-              الخبراء
+              البيانات الفضائية
             </Link>
             <Link href="/about" className={`font-medium transition-colors duration-300 hover:scale-105 mr-8 ${
               isScrolled ? 'text-green-700 hover:text-green-800' : 'text-white/90 hover:text-white drop-shadow-md'

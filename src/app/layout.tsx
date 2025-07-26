@@ -1,75 +1,49 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Cairo } from 'next/font/google'
-import "./globals.css";
-import "./performance.css";
-import ClientLayout from "@/components/ClientLayout";
-import HydrationSuppressor from "@/components/HydrationSuppressor";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import ClientLayout from '@/components/ClientLayout';
+import HydrationSuppressor from '@/components/HydrationSuppressor';
+import MobileOptimizedInterface from '@/components/MobileOptimizedInterface';
 
-type Viewport = {
-  themeColor: string
-  width: string
-  initialScale: number
-  maximumScale: number
-  userScalable: boolean
-}
-
-// Optimized font loading with display swap
-const cairo = Cairo({
-  subsets: ['arabic'],
-  display: 'swap',
-  variable: '--font-cairo',
-  preload: true,
-  weight: ['300', '400', '600', '700', '900'],
-  adjustFontFallback: true,
-  fallback: ['system-ui', 'arial'],
-})
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-inter',
-  preload: true,
-  fallback: ['system-ui', 'arial'],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "الغلة - منصة التكنولوجيا الزراعية",
-  description: "منصة متطورة تربط المزارعين والمشترين والموردين في جميع أنحاء الجزائر. تجارة المنتجات الزراعية والأدوات والأراضي بتقنية 2030",
-  keywords: "زراعة, الجزائر, مزارع, منتجات زراعية, معدات زراعية, أراضي زراعية",
-  authors: [{ name: "الغلة" }],
-  creator: "الغلة",
-  publisher: "الغلة",
+  title: 'الغلة - سوق المزارعين الإلكتروني',
+  description: 'منصة متكاملة للمزارعين لبيع وشراء المنتجات الزراعية، المعدات، الأراضي، والخدمات الاستشارية',
+  keywords: 'زراعة، مزارعين، سوق إلكتروني، منتجات زراعية، معدات زراعية، أراضي زراعية',
+  authors: [{ name: 'Elghella Team' }],
+  creator: 'Elghella',
+  publisher: 'Elghella',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://elghella.com'),
+  metadataBase: new URL('https://elghella-v3-omega.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "الغلة - منصة التكنولوجيا الزراعية",
-    description: "منصة متطورة تربط المزارعين والمشترين والموردين في جميع أنحاء الجزائر",
-    url: 'https://elghella.com',
+    title: 'الغلة - سوق المزارعين الإلكتروني',
+    description: 'منصة متكاملة للمزارعين لبيع وشراء المنتجات الزراعية، المعدات، الأراضي، والخدمات الاستشارية',
+    url: 'https://elghella-v3-omega.vercel.app',
     siteName: 'الغلة',
-    locale: 'ar_SA',
-    type: 'website',
     images: [
       {
-        url: '/assets/n7l1.webp',
+        url: '/assets/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'الغلة - منصة التكنولوجيا الزراعية',
-      }
+        alt: 'الغلة - سوق المزارعين الإلكتروني',
+      },
     ],
+    locale: 'ar_SA',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "الغلة - منصة التكنولوجيا الزراعية",
-    description: "منصة متطورة تربط المزارعين والمشترين والموردين في جميع أنحاء الجزائر",
-    images: ['/assets/n7l1.webp'],
+    title: 'الغلة - سوق المزارعين الإلكتروني',
+    description: 'منصة متكاملة للمزارعين لبيع وشراء المنتجات الزراعية، المعدات، الأراضي، والخدمات الاستشارية',
+    images: ['/assets/twitter-image.jpg'],
   },
   robots: {
     index: true,
@@ -84,95 +58,75 @@ export const metadata: Metadata = {
   },
   verification: {
     google: 'your-google-verification-code',
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'الغلة',
-    'application-name': 'الغلة',
-    'msapplication-TileColor': '#2d5016',
-    'theme-color': '#2d5016',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: '#2d5016',
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-}
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable} font-sans`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
-        {/* Critical resource preloading - optimized for image background */}
-        <link rel="preload" href="/assets/n7l1.webp" as="image" type="image/webp" fetchPriority="high" />
-        <link rel="preload" href="/assets/n7l2.webp" as="image" type="image/webp" fetchPriority="low" />
-        
-        {/* Font preloading with optimized loading */}
-        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" as="style" />
-        
-        {/* Load Font Awesome for icons */}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-        
-        {/* DNS prefetch for external domains */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-        <link rel="dns-prefetch" href="//supabase.co" />
-        
-        {/* Preconnect to external domains */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-        <link rel="preconnect" href="https://supabase.co" />
-        
-        {/* Favicon and app icons */}
-        <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-        <link rel="icon" href="/globe.svg?v=3" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/placeholder.png?v=3" />
-        <link rel="manifest" href="/manifest.json?v=3" />
-        
-        {/* Theme color */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="theme-color" content="#2d5016" />
-        <meta name="msapplication-TileColor" content="#2d5016" />
-        
-        {/* Performance hints */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <meta name="format-detection" content="telephone=no" />
-        
-        {/* Cache control for development */}
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-        
-        {/* Security headers */}
-        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-        <meta httpEquiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
-        
-        {/* PWA meta tags */}
-        <meta name="application-name" content="الغلة" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="الغلة" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="msapplication-TileColor" content="#2d5016" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Resource hints for better performance - reduced for better performance */}
-        <link rel="prefetch" href="/marketplace" />
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://puvmqdnvofbtmqpcjmia.supabase.co" />
+        
+        {/* DNS prefetch for performance */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//puvmqdnvofbtmqpcjmia.supabase.co" />
+        
+        {/* Preload critical resources */}
+        <link rel="preload" href="/assets/Videoplayback1.mp4" as="video" type="video/mp4" />
+        <link rel="preload" href="/assets/hero-bg.jpg" as="image" />
+        
+        {/* Favicon and app icons */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "الغلة",
+              "alternateName": "Elghella",
+              "url": "https://elghella-v3-omega.vercel.app",
+              "description": "منصة متكاملة للمزارعين لبيع وشراء المنتجات الزراعية، المعدات، الأراضي، والخدمات الاستشارية",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://elghella-v3-omega.vercel.app/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
       </head>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <HydrationSuppressor>
-          <ClientLayout>
-            {children}
-          </ClientLayout>
+          <MobileOptimizedInterface>
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </MobileOptimizedInterface>
         </HydrationSuppressor>
       </body>
     </html>

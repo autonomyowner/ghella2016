@@ -248,22 +248,10 @@ export default function ServicesPage() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 gap-4 max-w-4xl mx-auto">
             <div className="text-center">
-              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">58</div>
-              <div className="text-emerald-200 text-sm">ولاية مغطاة</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">500+</div>
-              <div className="text-emerald-200 text-sm">خبير معتمد</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">2000+</div>
-              <div className="text-emerald-200 text-sm">مشروع ناجح</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-4xl font-black text-emerald-400 mb-2">98%</div>
-              <div className="text-emerald-200 text-sm">رضا العملاء</div>
+              <div className="text-2xl md:text-4xl font-black text-green-200 mb-2">58</div>
+              <div className="text-green-200 text-sm">ولاية مغطاة</div>
             </div>
           </div>
         </div>
