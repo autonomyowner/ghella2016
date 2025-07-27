@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic';
 const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { ssr: false, loading: () => <div /> });
 import { AnimatePresence } from 'framer-motion';
@@ -16,7 +16,7 @@ import {
   Heart, Share2, CalendarCheck, Shield, Award
 } from 'lucide-react'
 
-// Sample equipment data for demonstration (will be replaced with Firebase data)
+// Sample equipment data for fallback (will be replaced with Supabase data)
 const sampleEquipment = [
   {
     id: 1,
@@ -210,65 +210,110 @@ const sortOptions = [
 ]
 
 // Enhanced equipment card component for the new design
-const EquipmentCardEnhanced = ({ item, viewMode }: { item: any, viewMode: 'grid' | 'list' }) => (
-  <MotionDiv
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:bg-white/10 hover:border-emerald-400/30 ${
-      viewMode === 'grid' ? 'p-6' : 'p-6 flex items-center space-x-6 space-x-reverse'
-    }`}
-  >
-    {/* Equipment Image */}
-    <div className={`${viewMode === 'grid' ? 'w-full h-48' : 'w-32 h-32'} bg-gradient-to-br from-emerald-200 to-teal-400 rounded-lg flex items-center justify-center`}>
-      <div className="text-6xl">{item.image}</div>
-    </div>
-    {/* Badges */}
-    <div className="absolute top-2 right-2 space-y-1">
-      {item.is_available && (
-        <div className="bg-emerald-500 text-white px-2 py-1 rounded-full text-xs">
-          متاح
-        </div>
-      )}
-      {!item.is_available && (
-        <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs">
-          مؤجر
-        </div>
-      )}
-      {item.is_insured && (
-        <div className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
-          مؤمن
-        </div>
-      )}
-    </div>
-    {/* Equipment Info */}
-    <div className="mt-4">
-      <div className="text-xl font-bold mb-2">{item.title}</div>
-      <div className="text-sm text-emerald-300 mb-2">{item.brand} {item.model} • {item.year}</div>
-      <div className="text-sm text-emerald-400 mb-2">{item.description}</div>
-      <div className="flex gap-2 flex-wrap mb-2">
-        {item.features && item.features.map((feature: string, idx: number) => (
-          <span key={idx} className="bg-emerald-600/20 text-emerald-200 px-2 py-1 rounded text-xs">{feature}</span>
-        ))}
+const EquipmentCardEnhanced = ({ item, viewMode }: { item: any, viewMode: 'grid' | 'list' }) => {
+  // Get equipment icon based on category
+  const getEquipmentIcon = (categoryId: string) => {
+    const iconMap: { [key: string]: string } = {
+      'tractor': '🚜',
+      'harvester': '🌾',
+      'plow': '⚒️',
+      'seeder': '🌱',
+      'sprayer': '💧',
+      'irrigation': '🌀',
+      'tools': '🔧'
+    };
+    return iconMap[categoryId] || '🚜';
+  };
+
+  // Get condition text
+  const getConditionText = (condition: string) => {
+    const conditionMap: { [key: string]: string } = {
+      'new': 'جديد',
+      'excellent': 'ممتاز',
+      'good': 'جيد',
+      'fair': 'مقبول',
+      'poor': 'يحتاج صيانة'
+    };
+    return conditionMap[condition] || 'جيد';
+  };
+
+  // Get condition color
+  const getConditionColor = (condition: string) => {
+    const colorMap: { [key: string]: string } = {
+      'new': 'bg-green-500',
+      'excellent': 'bg-emerald-500',
+      'good': 'bg-blue-500',
+      'fair': 'bg-yellow-500',
+      'poor': 'bg-red-500'
+    };
+    return colorMap[condition] || 'bg-blue-500';
+  };
+
+  return (
+    <MotionDiv
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:bg-white/10 hover:border-emerald-400/30 relative ${
+        viewMode === 'grid' ? 'p-6' : 'p-6 flex items-center space-x-6 space-x-reverse'
+      }`}
+    >
+      {/* Equipment Image */}
+      <div className={`${viewMode === 'grid' ? 'w-full h-48' : 'w-32 h-32'} bg-gradient-to-br from-emerald-200 to-teal-400 rounded-lg flex items-center justify-center`}>
+        <div className="text-6xl">{getEquipmentIcon(item.category_id)}</div>
       </div>
-      <div className="mb-2">
-        <span className="text-sm text-yellow-400 font-semibold">{item.rating} ★</span>
-        <span className="text-xs text-gray-400 ml-2">({item.reviews} تقييم)</span>
+      
+      {/* Badges */}
+      <div className="absolute top-2 right-2 space-y-1">
+        {item.is_available && (
+          <div className="bg-emerald-500 text-white px-2 py-1 rounded-full text-xs">
+            متاح
+          </div>
+        )}
+        {!item.is_available && (
+          <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs">
+            مؤجر
+          </div>
+        )}
+        <div className={`${getConditionColor(item.condition)} text-white px-2 py-1 rounded-full text-xs`}>
+          {getConditionText(item.condition)}
+        </div>
       </div>
-      <div className="flex gap-2">
-        <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center transition-colors">
-          <CalendarCheck className="w-4 h-4 mr-2" />
-          احجز الآن
-        </button>
-        <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
-          <Heart className="w-4 h-4" />
-        </button>
-        <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
-          <Share2 className="w-4 h-4" />
-        </button>
+      
+      {/* Equipment Info */}
+      <div className="mt-4">
+        <div className="text-xl font-bold mb-2">{item.title}</div>
+        <div className="text-sm text-emerald-300 mb-2">
+          {item.brand} {item.model} • {item.year}
+        </div>
+        <div className="text-sm text-emerald-400 mb-2">{item.description}</div>
+        
+        {/* Price */}
+        <div className="text-lg font-bold text-emerald-300 mb-2">
+          {item.price.toLocaleString()} {item.currency}
+        </div>
+        
+        {/* Location */}
+        <div className="text-sm text-white/70 mb-2 flex items-center">
+          <MapPin className="w-4 h-4 mr-1" />
+          {item.location}
+        </div>
+        
+        <div className="flex gap-2">
+          <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center transition-colors">
+            <CalendarCheck className="w-4 h-4 mr-2" />
+            احجز الآن
+          </button>
+          <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
+            <Heart className="w-4 h-4" />
+          </button>
+          <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors">
+            <Share2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-    </div>
-  </MotionDiv>
-)
+    </MotionDiv>
+  );
+};
 
 export default function EquipmentPage() {
   const { equipment, loading, error, fetchEquipment } = useEquipment()
@@ -286,6 +331,7 @@ export default function EquipmentPage() {
   const [hasMore, setHasMore] = useState(true)
   const [isFiltering, setIsFiltering] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [hasInitialData, setHasInitialData] = useState(false)
 
   const itemsPerPage = 12
 
@@ -304,8 +350,41 @@ export default function EquipmentPage() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Fetch equipment when filters change
+  // Initial data fetch with retry logic
   useEffect(() => {
+    const loadInitialData = async () => {
+      console.log('🔄 Loading initial equipment data...')
+      setIsFiltering(true)
+      
+      try {
+        // Try to fetch from Supabase first
+        const data = await fetchEquipment()
+        console.log('📊 Fetched equipment data:', data?.length || 0, 'items')
+        
+        if (data && data.length > 0) {
+          setHasInitialData(true)
+          console.log('✅ Equipment data loaded successfully')
+        } else {
+          console.log('⚠️ No equipment data found, using sample data')
+          // If no data from Supabase, we'll use sample data in the render
+        }
+      } catch (err) {
+        console.error('❌ Error loading equipment:', err)
+        // Continue with sample data
+      } finally {
+        setIsFiltering(false)
+      }
+    }
+
+    if (isHydrated) {
+      loadInitialData()
+    }
+  }, [isHydrated, fetchEquipment])
+
+  // Fetch equipment when filters change (but not on initial load)
+  useEffect(() => {
+    if (!hasInitialData) return // Skip if we haven't loaded initial data yet
+    
     const loadEquipment = async () => {
       setIsFiltering(true)
       try {
@@ -325,7 +404,7 @@ export default function EquipmentPage() {
     }
     
     loadEquipment()
-  }, [debouncedSearchTerm, selectedCondition, selectedCategory, selectedLocation, priceRange.min, priceRange.max, sortBy])
+  }, [debouncedSearchTerm, selectedCondition, selectedCategory, selectedLocation, priceRange.min, priceRange.max, sortBy, hasInitialData])
 
   const loadMore = () => {
     setCurrentPage(prev => prev + 1)
@@ -340,6 +419,11 @@ export default function EquipmentPage() {
     setSortBy('latest')
     setCurrentPage(1)
   }
+
+  // Determine what data to show
+  const displayEquipment = equipment && equipment.length > 0 ? equipment : sampleEquipment
+  const isLoading = loading || isFiltering || !isHydrated
+  const hasData = displayEquipment && displayEquipment.length > 0
 
   // Prevent hydration mismatch
   if (!isHydrated) {
@@ -409,9 +493,9 @@ export default function EquipmentPage() {
               transition={{ duration: 1, delay: 0.6 }}
             >
               {[
-                { number: `${equipment.length}+`, label: "معدات متاحة", icon: "🚜" },
-                { number: `${equipment.filter(e => e.condition === 'new').length}+`, label: "جديدة", icon: "🆕" },
-                { number: `${equipment.filter(e => e.condition === 'good').length}+`, label: "مستعملة", icon: "✅" },
+                { number: `${displayEquipment.length}+`, label: "معدات متاحة", icon: "🚜" },
+                { number: `${displayEquipment.filter(e => e.condition === 'new').length}+`, label: "جديدة", icon: "🆕" },
+                { number: `${displayEquipment.filter(e => e.condition === 'good' || e.condition === 'excellent').length}+`, label: "مستعملة", icon: "✅" },
                 { number: "24/7", label: "دعم متواصل", icon: "🛡️" }
               ].map((stat, index) => (
                 <div 
@@ -424,8 +508,6 @@ export default function EquipmentPage() {
                 </div>
               ))}
             </MotionDiv>
-
-
 
             {/* Search Bar */}
             <MotionDiv
@@ -442,7 +524,7 @@ export default function EquipmentPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-6 py-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full text-white placeholder-white/60 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
                 />
-                {isFiltering ? (
+                {isLoading ? (
                   <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
                     <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
                   </div>
@@ -634,15 +716,13 @@ export default function EquipmentPage() {
             </AnimatePresence>
           </div>
 
-
-
           {/* Results Summary */}
           <div className="flex justify-between items-center mb-6">
             <div className="text-emerald-300">
-              <span className="font-bold">{equipment.length}</span> معدات متاحة
+              <span className="font-bold">{displayEquipment.length}</span> معدات متاحة
             </div>
             <div className="text-sm text-white/60">
-              {equipment.length > 0 ? `عرض ${equipment.length} من ${equipment.length} معدات` : 'لا توجد معدات متاحة'}
+              {displayEquipment.length > 0 ? `عرض ${displayEquipment.length} من ${displayEquipment.length} معدات` : 'لا توجد معدات متاحة'}
             </div>
           </div>
 
@@ -654,7 +734,7 @@ export default function EquipmentPage() {
           )}
 
           {/* Equipment Grid */}
-          {loading || isFiltering ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-4 animate-pulse">
@@ -665,7 +745,7 @@ export default function EquipmentPage() {
                 </div>
               ))}
             </div>
-          ) : equipment.length > 0 ? (
+          ) : hasData ? (
             <>
               <div className={`grid gap-6 ${
                 viewMode === 'grid' 
@@ -673,8 +753,8 @@ export default function EquipmentPage() {
                   : 'grid-cols-1'
               }`}>
                 <AnimatePresence>
-                  {equipment.map((item, index) => (
-                    <EquipmentCardEnhanced key={item.id} item={item} viewMode={viewMode} />
+                  {displayEquipment.map((item, index) => (
+                    <EquipmentCardEnhanced key={item.id || index} item={item} viewMode={viewMode} />
                   ))}
                 </AnimatePresence>
               </div>

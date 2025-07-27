@@ -45,9 +45,10 @@ export function useProfile() {
 export function useEquipment() {
   const { user } = useSupabaseAuth();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [loading, setLoading] = useState(false); // Start with false, not true
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchParams, setLastFetchParams] = useState<string>('');
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const fetchEquipment = useCallback(async (filters?: {
     category?: string;
@@ -61,31 +62,28 @@ export function useEquipment() {
       // Create a cache key for the current filters
       const cacheKey = JSON.stringify(filters || {});
       
-      console.log('fetchEquipment called with:', { 
+      console.log('🔄 fetchEquipment called with:', { 
         loading, 
         currentEquipmentCount: equipment.length,
         filters: filters || 'none',
-        user: user?.id 
+        user: user?.id,
+        hasInitialized
       });
 
       // Skip if we're already loading (but allow manual refresh)
       if (loading) {
-        console.log('Skipping fetch - already loading');
+        console.log('⏳ Skipping fetch - already loading');
         return equipment;
       }
 
       // For manual calls, always fetch fresh data
       const isManualCall = !filters || Object.keys(filters).length === 0;
       if (isManualCall) {
-        console.log('Manual call detected - fetching fresh data');
+        console.log('🔄 Manual call detected - fetching fresh data');
       }
 
-      // Skip if no user is available
-      if (!user) {
-        console.log('Skipping fetch - no user available');
-        setEquipment([]);
-        return [];
-      }
+      // Allow fetching equipment even without user (public equipment)
+      console.log('📡 Fetching equipment data from Supabase...');
       
       setLoading(true);
       setError(null);
@@ -117,11 +115,11 @@ export function useEquipment() {
       const { data, error: supabaseError } = await query;
 
       if (supabaseError) {
-        console.error('Supabase query error:', supabaseError);
+        console.error('❌ Supabase query error:', supabaseError);
         throw supabaseError;
       }
 
-      console.log('Supabase query successful:', { 
+      console.log('✅ Supabase query successful:', { 
         dataCount: data?.length || 0, 
         user: user?.id,
         hasData: !!data 
@@ -141,27 +139,52 @@ export function useEquipment() {
       }
 
       setEquipment(filteredData);
-      console.log('Setting equipment state:', filteredData.length, 'items');
+      setHasInitialized(true);
+      console.log('✅ Setting equipment state:', filteredData.length, 'items');
       return filteredData;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading equipment';
       setError(errorMessage);
-      console.error('Error fetching equipment:', err);
+      console.error('❌ Error fetching equipment:', err);
+      setHasInitialized(true);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [user]); // Include user in dependencies
+  }, [user, equipment.length, loading]); // Include all dependencies
 
-  // Initial fetch when component mounts and user is available
+  // Initial fetch when component mounts with retry logic
   useEffect(() => {
-    if (user) {
-      console.log('User available, fetching equipment...', user.id);
-      fetchEquipment();
-    } else {
-      console.log('No user available yet, skipping equipment fetch');
+    const initializeData = async () => {
+      console.log('🚀 Component mounted, initializing equipment data...');
+      
+      // Try to fetch data with retry logic
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          await fetchEquipment();
+          break; // Success, exit retry loop
+        } catch (error) {
+          retryCount++;
+          console.log(`⚠️ Retry ${retryCount}/${maxRetries} failed:`, error);
+          
+          if (retryCount >= maxRetries) {
+            console.error('❌ Max retries reached, giving up');
+            setError('Failed to load equipment data after multiple attempts');
+          } else {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          }
+        }
+      }
+    };
+
+    if (!hasInitialized) {
+      initializeData();
     }
-  }, [user]); // Run when user changes
+  }, [fetchEquipment, hasInitialized]);
 
   const addEquipment = async (equipmentData: Partial<Equipment>) => {
     if (!user) {

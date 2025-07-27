@@ -302,7 +302,7 @@ export default function HomePage() {
             
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-6 md:gap-8">
             {/* Bubble 1 - شراء وبيع المنتجات الطازجة */}
-            <Link href="/marketplace" className="group">
+            <Link href="/VAR/marketplace" className="group">
               <div className="text-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-500/30 to-green-600/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/25 border border-green-500/40 mx-auto mb-3">
                   <span className="text-4xl">🥦</span>
@@ -407,6 +407,18 @@ export default function HomePage() {
                   عروض خاصة
                 </h3>
             </div>
+            </Link>
+
+            {/* Bubble 10 - السوق */}
+            <Link href="/marketplace" className="group">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-red-500/30 to-red-600/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/25 border border-red-500/40 mx-auto mb-3">
+                  <span className="text-4xl">🏪</span>
+                </div>
+                <h3 className="text-sm font-bold text-red-200 group-hover:text-red-100 transition-colors">
+                  السوق
+                </h3>
+              </div>
             </Link>
           </div>
         </div>
@@ -575,8 +587,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 space-x-reverse mb-4">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src="/assets/logowhite.jpg" alt="الغلة" className="w-full h-full object-cover" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-white/20">
+                  <img src="/assets/logo o.jpg" alt="الغلة" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xl font-bold text-white">الغلة</h3>
               </div>
@@ -610,6 +622,11 @@ export default function HomePage() {
                 <li><Link href="/contact" className="hover:text-green-300 transition-colors">اتصل بنا</Link></li>
                 <li><Link href="/help" className="hover:text-green-300 transition-colors">المساعدة</Link></li>
               </ul>
+              
+              {/* Social Media Text */}
+              <div className="mb-3">
+                <p className="text-orange-400 text-xs font-medium mb-1">الغلة علا صفحات السوشيال ميديا</p>
+              </div>
               
               {/* Newsletter Subscription */}
               <div className="mb-4">

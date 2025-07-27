@@ -226,9 +226,9 @@ const VegetablesMarketplacePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 pt-20">
       {/* Premium Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-green-800 via-emerald-700 to-teal-600 overflow-hidden">
+      <section className="relative py-20 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 text-white overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -315,7 +315,7 @@ const VegetablesMarketplacePage: React.FC = () => {
       </section>
 
       {/* Main Content */}
-      <section className="py-16">
+      <section className="py-16 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
         <div className="container mx-auto px-4">
           {/* Filters and Controls */}
           <div className="mb-8">
@@ -498,15 +498,15 @@ const VegetablesMarketplacePage: React.FC = () => {
           {loading ? (
             <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-4'}`}>
               {[...Array(6)].map((_, i) => (
-                <div key={i} className={`bg-white rounded-lg shadow-lg p-6 animate-pulse ${viewMode === 'list' ? 'flex gap-4' : ''}`}>
-                  <div className={`${viewMode === 'list' ? 'w-32 h-24' : 'h-48'} bg-gray-200 rounded-lg ${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}></div>
+                <div key={i} className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-lg p-6 animate-pulse ${viewMode === 'list' ? 'flex gap-4' : ''}`}>
+                  <div className={`${viewMode === 'list' ? 'w-32 h-24' : 'h-48'} bg-gray-600/50 rounded-lg ${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}></div>
                   <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-600/50 rounded w-2/3 mb-2"></div>
+                    <div className="h-4 bg-gray-600/50 rounded w-1/2 mb-4"></div>
                     <div className="flex justify-between">
-                      <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                      <div className="h-6 bg-gray-600/50 rounded w-1/3"></div>
+                      <div className="h-6 bg-gray-600/50 rounded w-1/4"></div>
                     </div>
                   </div>
                 </div>
@@ -522,7 +522,7 @@ const VegetablesMarketplacePage: React.FC = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
+                      className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
                     >
                       {/* Vegetable Image */}
                       <div className={`${viewMode === 'list' ? 'w-32 h-24 flex-shrink-0' : 'h-48'} bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center overflow-hidden`}>
@@ -560,38 +560,38 @@ const VegetablesMarketplacePage: React.FC = () => {
                       {/* Vegetable Details */}
                       <div className={`p-6 ${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''}`}>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-800 mb-2">{vegetable.title}</h3>
-                          <p className="text-gray-600 mb-4 line-clamp-2">{vegetable.description}</p>
+                          <h3 className="text-xl font-bold text-white mb-2">{vegetable.title}</h3>
+                          <p className="text-gray-300 mb-4 line-clamp-2">{vegetable.description}</p>
                           
                           <div className="flex justify-between items-center mb-4">
-                            <span className="text-2xl font-bold text-green-600">
+                            <span className="text-2xl font-bold text-green-400">
                               {formatPrice(vegetable.price, vegetable.currency, vegetable.unit)}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-300">
                               {getVegetableTypeLabel(vegetable.vegetable_type)}
                             </span>
                           </div>
 
                           <div className="space-y-2 mb-4">
-                            <div className="flex items-center text-gray-500 text-sm">
+                            <div className="flex items-center text-gray-300 text-sm">
                               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
                               {vegetable.location}
                             </div>
-                            <div className="flex items-center text-gray-500 text-sm">
+                            <div className="flex items-center text-gray-300 text-sm">
                               <span className="mr-2">الطزاجة:</span>
                               <span className={`font-medium ${
-                                vegetable.freshness === 'excellent' ? 'text-green-600' :
-                                vegetable.freshness === 'good' ? 'text-blue-600' :
-                                vegetable.freshness === 'fair' ? 'text-yellow-600' : 'text-red-600'
+                                vegetable.freshness === 'excellent' ? 'text-green-400' :
+                                vegetable.freshness === 'good' ? 'text-blue-400' :
+                                vegetable.freshness === 'fair' ? 'text-yellow-400' : 'text-red-400'
                               }`}>
                                 {getFreshnessLabel(vegetable.freshness)}
                               </span>
                             </div>
                             {vegetable.organic && (
-                              <div className="flex items-center text-green-600 text-sm">
+                              <div className="flex items-center text-green-400 text-sm">
                                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
@@ -599,7 +599,7 @@ const VegetablesMarketplacePage: React.FC = () => {
                               </div>
                             )}
                             {vegetable.variety && (
-                              <div className="flex items-center text-gray-500 text-sm">
+                              <div className="flex items-center text-gray-300 text-sm">
                                 <span className="mr-2">النوع:</span>
                                 {vegetable.variety}
                               </div>
@@ -634,8 +634,8 @@ const VegetablesMarketplacePage: React.FC = () => {
           ) : (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🥬</div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-800">لا توجد خضار متاحة</h3>
-              <p className="text-gray-600 mb-6">جرب تغيير الفلاتر أو إضافة خضار جديدة</p>
+              <h3 className="text-2xl font-bold mb-2 text-white">لا توجد خضار متاحة</h3>
+              <p className="text-gray-300 mb-6">جرب تغيير الفلاتر أو إضافة خضار جديدة</p>
               <Link
                 href="/VAR/marketplace/new"
                 className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"

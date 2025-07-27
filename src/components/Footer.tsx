@@ -13,7 +13,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold text-emerald-400 mb-4">{settings.site_title}</h3>
+            <div className="flex items-center space-x-4 space-x-reverse mb-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-emerald-400/30">
+                <img src="/assets/logo o.jpg" alt="الغلة" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-emerald-400">{settings.site_title}</h3>
+                <p className="text-sm text-gray-400">منصة المزارعين</p>
+              </div>
+            </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
               {settings.site_description}
             </p>

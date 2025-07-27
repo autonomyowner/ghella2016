@@ -217,9 +217,9 @@ const NurseriesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white overflow-hidden">
+      <section className="relative py-20 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
@@ -290,7 +290,7 @@ const NurseriesPage: React.FC = () => {
       </section>
 
       {/* Main Content */}
-      <section className="py-16">
+      <section className="py-16 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
         <div className="container mx-auto px-4">
           {/* Filters and Controls */}
           <div className="mb-8">
@@ -453,15 +453,15 @@ const NurseriesPage: React.FC = () => {
           {loading ? (
             <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-4'}`}>
               {[...Array(6)].map((_, i) => (
-                <div key={i} className={`bg-white rounded-lg shadow-lg p-6 animate-pulse ${viewMode === 'list' ? 'flex gap-4' : ''}`}>
-                  <div className={`${viewMode === 'list' ? 'w-32 h-24' : 'h-48'} bg-gray-200 rounded-lg ${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}></div>
+                <div key={i} className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-lg p-6 animate-pulse ${viewMode === 'list' ? 'flex gap-4' : ''}`}>
+                  <div className={`${viewMode === 'list' ? 'w-32 h-24' : 'h-48'} bg-gray-600/50 rounded-lg ${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}></div>
                   <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-600/50 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-600/50 rounded w-2/3 mb-2"></div>
+                    <div className="h-4 bg-gray-600/50 rounded w-1/2 mb-4"></div>
                     <div className="flex justify-between">
-                      <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                      <div className="h-6 bg-gray-600/50 rounded w-1/3"></div>
+                      <div className="h-6 bg-gray-600/50 rounded w-1/4"></div>
                     </div>
                   </div>
                 </div>
@@ -477,7 +477,7 @@ const NurseriesPage: React.FC = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
+                      className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
                     >
                       {/* Nursery Image */}
                       <div className={`${viewMode === 'list' ? 'w-32 h-24 flex-shrink-0' : 'h-48'} bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center overflow-hidden`}>
@@ -504,32 +504,32 @@ const NurseriesPage: React.FC = () => {
                       {/* Nursery Details */}
                       <div className={`p-6 ${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''}`}>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-800 mb-2">{nursery.title}</h3>
-                          <p className="text-gray-600 mb-4 line-clamp-2">{nursery.description}</p>
+                          <h3 className="text-xl font-bold text-white mb-2">{nursery.title}</h3>
+                          <p className="text-gray-300 mb-4 line-clamp-2">{nursery.description}</p>
                           
                           <div className="flex justify-between items-center mb-4">
-                            <span className="text-2xl font-bold text-green-600">
+                            <span className="text-2xl font-bold text-green-400">
                               {formatPrice(nursery.price, nursery.currency)}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-300">
                               {getPlantTypeLabel(nursery.plant_type)}
                             </span>
                           </div>
 
                           <div className="space-y-2 mb-4">
-                            <div className="flex items-center text-gray-500 text-sm">
+                            <div className="flex items-center text-gray-300 text-sm">
                               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
                               {nursery.location}
                             </div>
-                            <div className="flex items-center text-gray-500 text-sm">
+                            <div className="flex items-center text-gray-300 text-sm">
                               <span className="mr-2">الحجم:</span>
                               {getSizeLabel(nursery.size)}
                             </div>
                             {nursery.plant_name && (
-                              <div className="flex items-center text-gray-500 text-sm">
+                              <div className="flex items-center text-gray-300 text-sm">
                                 <span className="mr-2">اسم النبات:</span>
                                 {nursery.plant_name}
                               </div>
@@ -564,8 +564,8 @@ const NurseriesPage: React.FC = () => {
           ) : (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🌱</div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-800">لا توجد شتلات متاحة</h3>
-              <p className="text-gray-600 mb-6">جرب تغيير الفلاتر أو إضافة شتلات جديدة</p>
+              <h3 className="text-2xl font-bold mb-2 text-white">لا توجد شتلات متاحة</h3>
+              <p className="text-gray-300 mb-6">جرب تغيير الفلاتر أو إضافة شتلات جديدة</p>
               <Link
                 href="/nurseries/new"
                 className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"

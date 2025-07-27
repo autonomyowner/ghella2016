@@ -26,6 +26,8 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signUp: (email: string, password: string, userData?: { full_name?: string; phone?: string; user_type?: string }) => Promise<{ error: any }>
+  signInWithGoogle: () => Promise<{ error: any }>
+  signInWithFacebook: () => Promise<{ error: any }>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>
   uploadAvatar: (file: File) => Promise<{ error: any; url?: string }>
@@ -264,6 +266,56 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   }
 
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      console.log('SupabaseAuthContext: Attempting Google sign in')
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+      
+      console.log('SupabaseAuthContext: Google sign in response:', { data, error })
+      
+      if (error) {
+        console.error('SupabaseAuthContext: Google sign in error:', error)
+        return { error }
+      }
+      
+      return { error: null }
+    } catch (error) {
+      console.error('SupabaseAuthContext: Unexpected error during Google sign in:', error)
+      return { error }
+    }
+  }
+
+  // Sign in with Facebook
+  const signInWithFacebook = async () => {
+    try {
+      console.log('SupabaseAuthContext: Attempting Facebook sign in')
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+      
+      console.log('SupabaseAuthContext: Facebook sign in response:', { data, error })
+      
+      if (error) {
+        console.error('SupabaseAuthContext: Facebook sign in error:', error)
+        return { error }
+      }
+      
+      return { error: null }
+    } catch (error) {
+      console.error('SupabaseAuthContext: Unexpected error during Facebook sign in:', error)
+      return { error }
+    }
+  }
+
   // Sign out
   const signOut = async () => {
     try {
@@ -342,6 +394,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
+    signInWithFacebook,
     signOut,
     updateProfile,
     uploadAvatar

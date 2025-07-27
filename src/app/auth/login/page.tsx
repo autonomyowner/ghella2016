@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   
-  const { signIn } = useSupabaseAuth()
+  const { signIn, signInWithGoogle, signInWithFacebook } = useSupabaseAuth()
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,6 +41,44 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error('Login page: Unexpected error:', err)
+      setError('حدث خطأ غير متوقع')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const { error } = await signInWithGoogle()
+      
+      if (error) {
+        console.error('Google login error:', error)
+        setError(error.message || 'حدث خطأ أثناء تسجيل الدخول بـ Google')
+      }
+    } catch (err) {
+      console.error('Unexpected Google login error:', err)
+      setError('حدث خطأ غير متوقع')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleFacebookLogin = async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const { error } = await signInWithFacebook()
+      
+      if (error) {
+        console.error('Facebook login error:', error)
+        setError(error.message || 'حدث خطأ أثناء تسجيل الدخول بـ Facebook')
+      }
+    } catch (err) {
+      console.error('Unexpected Facebook login error:', err)
       setError('حدث خطأ غير متوقع')
     } finally {
       setIsLoading(false)
@@ -298,20 +336,28 @@ export default function LoginPage() {
 
                 {/* Social Login */}
                 <div className="grid grid-cols-2 gap-3">
-                  <button
+                  <motion.button
                     type="button"
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Globe className="w-5 h-5" />
                     <span className="text-sm">Google</span>
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="button"
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300"
+                    onClick={handleFacebookLogin}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <MessageCircle className="w-5 h-5" />
                     <span className="text-sm">Facebook</span>
-                  </button>
+                  </motion.button>
                 </div>
               </form>
 
@@ -363,44 +409,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Testimonials */}
-            <div>
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="text-2xl font-bold text-white mb-6 text-center"
-              >
-                آراء عملائنا
-              </motion.h3>
-              <div className="space-y-4">
-                {testimonials.map((testimonial, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                    className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
-                  >
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        {testimonial.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-white">{testimonial.name}</h4>
-                        <p className="text-sm text-gray-300">{testimonial.location}</p>
-                      </div>
-                      <div className="ml-auto flex items-center gap-1">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm leading-relaxed">{testimonial.text}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+
           </motion.div>
         </div>
       </div>

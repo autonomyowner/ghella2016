@@ -64,8 +64,8 @@ const PremiumFooter: React.FC<PremiumFooterProps> = ({ settings }) => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 space-x-reverse mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
-                <i className="fas fa-seedling text-white text-2xl"></i>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-emerald-400/30">
+                <img src="/assets/logo o.jpg" alt="الغلة" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="text-2xl font-black text-white">{settings.site_title}</h3>

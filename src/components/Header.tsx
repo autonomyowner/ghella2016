@@ -94,8 +94,8 @@ const Header: React.FC = () => {
           
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 space-x-reverse">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-              <img src="/assets/logowhite.jpg" alt="الغلة" className="w-full h-full object-cover" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-110">
+              <img src="/assets/logo o.jpg" alt="الغلة" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className={`text-2xl font-bold transition-colors duration-300 ${

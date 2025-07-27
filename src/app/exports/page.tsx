@@ -174,9 +174,9 @@ export default function ExportsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-yellow-50 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 pt-20">
       {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-r from-green-800 to-yellow-700 text-white">
+      <section className="py-16 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
             <motion.div
@@ -208,11 +208,11 @@ export default function ExportsPage() {
       </section>
 
       {/* Markets Overview */}
-      <section className="py-16">
+      <section className="py-16 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-green-800 mb-6">الأسواق العالمية</h2>
-            <p className="text-xl text-green-600 max-w-3xl mx-auto">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">الأسواق العالمية</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               نربط المنتجين الجزائريين بأهم الأسواق العالمية
             </p>
           </div>
@@ -224,16 +224,16 @@ export default function ExportsPage() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="product-card p-6 text-center"
+                className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-6 text-center"
               >
                 <div className="text-4xl mb-4">{market.flag}</div>
-                <h3 className="text-xl font-bold text-green-800 mb-3">{market.name}</h3>
-                <p className="text-green-600 mb-4">{market.description}</p>
+                <h3 className="text-xl font-bold text-white mb-3">{market.name}</h3>
+                <p className="text-gray-300 mb-4">{market.description}</p>
                 <div className="space-y-2 text-sm">
-                  <div className="font-bold text-green-700">الفرص:</div>
-                  <div className="text-green-600">{market.opportunities}</div>
-                  <div className="font-bold text-green-700 mt-3">المتطلبات:</div>
-                  <div className="text-green-600">{market.requirements}</div>
+                  <div className="font-bold text-green-400">الفرص:</div>
+                  <div className="text-gray-300">{market.opportunities}</div>
+                  <div className="font-bold text-green-400 mt-3">المتطلبات:</div>
+                  <div className="text-gray-300">{market.requirements}</div>
                 </div>
               </motion.div>
             ))}
