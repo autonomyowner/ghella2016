@@ -9,6 +9,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment } from '@/types/database.types'
 import EquipmentCard from '@/components/equipment/EquipmentCard'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   Search, Filter, MapPin, DollarSign, Calendar, 
   Star, Grid, List, SlidersHorizontal, X,
@@ -258,8 +259,18 @@ const EquipmentCardEnhanced = ({ item, viewMode }: { item: any, viewMode: 'grid'
       }`}
     >
       {/* Equipment Image */}
-      <div className={`${viewMode === 'grid' ? 'w-full h-48' : 'w-32 h-32'} bg-gradient-to-br from-emerald-200 to-teal-400 rounded-lg flex items-center justify-center`}>
-        <div className="text-6xl">{getEquipmentIcon(item.category_id)}</div>
+      <div className={`${viewMode === 'grid' ? 'w-full h-48' : 'w-32 h-32'} relative overflow-hidden rounded-lg`}>
+        {item.images && item.images.length > 0 ? (
+          <img
+            src={item.images[0]}
+            alt={item.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-emerald-200 to-teal-400 flex items-center justify-center">
+            <div className="text-6xl">{getEquipmentIcon(item.category_id)}</div>
+          </div>
+        )}
       </div>
       
       {/* Badges */}
@@ -297,6 +308,14 @@ const EquipmentCardEnhanced = ({ item, viewMode }: { item: any, viewMode: 'grid'
           <MapPin className="w-4 h-4 mr-1" />
           {item.location}
         </div>
+        
+        {/* Contact Phone */}
+        {item.contact_phone && (
+          <div className="text-sm text-white/70 mb-2 flex items-center">
+            <span className="mr-1">📞</span>
+            {item.contact_phone}
+          </div>
+        )}
         
         <div className="flex gap-2">
           <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center transition-colors">
@@ -379,7 +398,7 @@ export default function EquipmentPage() {
     if (isHydrated) {
       loadInitialData()
     }
-  }, [isHydrated, fetchEquipment])
+  }, [isHydrated]) // Remove fetchEquipment from dependencies
 
   // Fetch equipment when filters change (but not on initial load)
   useEffect(() => {

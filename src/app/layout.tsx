@@ -90,9 +90,29 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         <link rel="dns-prefetch" href="//puvmqdnvofbtmqpcjmia.supabase.co" />
         
-        {/* Preload critical resources */}
-        <link rel="preload" href="/assets/Videoplayback1.mp4" as="video" type="video/mp4" />
-        <link rel="preload" href="/assets/hero-bg.jpg" as="image" />
+        {/* Preload critical resources - only on main pages */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (!window.location.pathname.includes('/test-') && 
+                  !window.location.pathname.includes('/debug') && 
+                  !window.location.pathname.includes('/fix-')) {
+                const videoLink = document.createElement('link');
+                videoLink.rel = 'preload';
+                videoLink.href = '/assets/Videoplayback1.mp4';
+                videoLink.as = 'video';
+                videoLink.type = 'video/mp4';
+                document.head.appendChild(videoLink);
+                
+                const imageLink = document.createElement('link');
+                imageLink.rel = 'preload';
+                imageLink.href = '/assets/hero-bg.jpg';
+                imageLink.as = 'image';
+                document.head.appendChild(imageLink);
+              }
+            `
+          }}
+        />
         
         {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />

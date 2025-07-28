@@ -86,6 +86,8 @@ const LandListingsPage: React.FC = () => {
       
       const data = await getLand(filters);
       console.log('Fetched land data:', data);
+      console.log('Sample land record:', data[0]);
+      console.log('Contact phone fields:', data.map(item => ({ id: item.id, contact_phone: item.contact_phone })));
       
       // Apply search filter after fetch
       let landData = data;
@@ -517,10 +519,16 @@ const LandListingsPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center text-white/60 text-sm mb-4">
+                        <div className="flex items-center text-white/60 text-sm mb-2">
                           <MapPin className="w-4 h-4 mr-1" />
                           {listing.location}
                         </div>
+                        {listing.contact_phone && (
+                          <div className="flex items-center text-white/60 text-sm mb-4">
+                            <span className="mr-1">📞</span>
+                            {listing.contact_phone}
+                          </div>
+                        )}
                       </div>
 
                       <Link

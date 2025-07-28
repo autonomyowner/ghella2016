@@ -235,6 +235,16 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
 
   // Advanced resource hints injection
   const injectResourceHints = useCallback(() => {
+    // Skip preloading on test pages to avoid warnings
+    const isTestPage = window.location.pathname.includes('/test-') || 
+                      window.location.pathname.includes('/debug') ||
+                      window.location.pathname.includes('/fix-');
+    
+    if (isTestPage) {
+      console.log('🚫 Skipping resource preloading on test page to avoid warnings');
+      return;
+    }
+
     criticalResources.forEach((hint) => {
       if (!document.querySelector(`link[href="${hint.href}"]`)) {
         const link = document.createElement('link');
@@ -360,6 +370,18 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
 
   // Main effect
   useEffect(() => {
+    // Check if we're on a test page
+    const isTestPage = typeof window !== 'undefined' && (
+      window.location.pathname.includes('/test-') || 
+      window.location.pathname.includes('/debug') ||
+      window.location.pathname.includes('/fix-')
+    );
+    
+    if (isTestPage) {
+      console.log('🚫 Skipping advanced optimizations on test page');
+      return;
+    }
+
     // Setup all advanced optimizations
     setupAdvancedIntersectionObserver();
     setupAdvancedPerformanceMonitoring();

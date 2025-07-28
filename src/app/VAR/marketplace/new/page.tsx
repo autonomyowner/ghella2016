@@ -23,8 +23,7 @@ const NewVegetableListingPage: React.FC = () => {
     unit: 'kg',
     location: '',
     harvest_date: '',
-    contact_phone: '',
-    contact_email: ''
+    contact_phone: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -94,12 +93,11 @@ const NewVegetableListingPage: React.FC = () => {
         description: formData.description,
         vegetable_type: formData.vegetable_type,
         price: parseFloat(formData.price),
-        quantity: parseFloat(formData.quantity),
+        quantity: parseInt(formData.quantity) || 0,
         unit: formData.unit,
         location: formData.location,
         harvest_date: formData.harvest_date || new Date().toISOString().split('T')[0],
         contact_phone: formData.contact_phone,
-        contact_email: formData.contact_email,
         images: images,
         is_available: true,
         is_featured: false,
@@ -230,7 +228,7 @@ const NewVegetableListingPage: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="مثال: 50"
                       min="0"
-                      step="0.1"
+                      step="1"
                       required
                     />
                   </div>
@@ -300,34 +298,18 @@ const NewVegetableListingPage: React.FC = () => {
 
 
               {/* Contact Information */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم الهاتف
-                  </label>
-                  <input
-                    type="tel"
-                    name="contact_phone"
-                    value={formData.contact_phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: 0770123456"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    type="email"
-                    name="contact_email"
-                    value={formData.contact_email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: example@email.com"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  name="contact_phone"
+                  value={formData.contact_phone}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="مثال: 0770123456"
+                />
               </div>
 
               {/* Images */}

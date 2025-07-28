@@ -263,12 +263,12 @@ const LandDetailPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {listing.soil_type && (
+                  {listing.contact_phone && (
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-seedling text-green-600 text-xl"></i>
+                      <i className="fas fa-phone text-green-600 text-xl"></i>
                       <div>
-                        <p className="text-green-600 text-sm">نوع التربة</p>
-                        <p className="text-green-800 font-medium">{listing.soil_type}</p>
+                        <p className="text-green-600 text-sm">رقم الهاتف</p>
+                        <p className="text-green-800 font-medium">{listing.contact_phone}</p>
                       </div>
                     </div>
                   )}
@@ -340,13 +340,15 @@ const LandDetailPage: React.FC = () => {
                     <i className="fas fa-user text-green-600"></i>
                     <span className="text-green-700">المالك</span>
                   </div>
+                  {listing.contact_phone && (
+                    <div className="flex items-center gap-3">
+                      <i className="fas fa-phone text-green-600"></i>
+                      <span className="text-green-700">{listing.contact_phone}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
-                    <i className="fas fa-phone text-green-600"></i>
-                    <span className="text-green-700">+213 XXX XXX XXX</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <i className="fas fa-envelope text-green-600"></i>
-                    <span className="text-green-700">owner@example.com</span>
+                    <i className="fas fa-map-marker-alt text-green-600"></i>
+                    <span className="text-green-700">{listing.location}</span>
                   </div>
                 </div>
               ) : (

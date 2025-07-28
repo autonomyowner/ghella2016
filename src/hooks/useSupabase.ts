@@ -151,7 +151,7 @@ export function useEquipment() {
     } finally {
       setLoading(false);
     }
-  }, [user, equipment.length, loading]); // Include all dependencies
+  }, [user]); // Only depend on user
 
   // Initial fetch when component mounts with retry logic
   useEffect(() => {
@@ -184,7 +184,7 @@ export function useEquipment() {
     if (!hasInitialized) {
       initializeData();
     }
-  }, [fetchEquipment, hasInitialized]);
+  }, [hasInitialized]); // Remove fetchEquipment from dependencies
 
   const addEquipment = async (equipmentData: Partial<Equipment>) => {
     if (!user) {

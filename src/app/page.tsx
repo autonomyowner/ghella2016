@@ -320,7 +320,7 @@ export default function HomePage() {
                   <span className="text-4xl">🚜</span>
                 </div>
                 <h3 className="text-sm font-bold text-blue-200 group-hover:text-blue-100 transition-colors">
-                  كراء المعدات الفلاحية
+                  بيع و كراء المعدات
                 </h3>
               </div>
             </Link>
@@ -332,7 +332,7 @@ export default function HomePage() {
                   <span className="text-4xl">🌾</span>
                 </div>
                 <h3 className="text-sm font-bold text-yellow-200 group-hover:text-yellow-100 transition-colors">
-                  كراء الأراضي الفلاحية
+                  بيع و كراء الاراضي
                 </h3>
               </div>
             </Link>
@@ -409,14 +409,14 @@ export default function HomePage() {
             </div>
             </Link>
 
-            {/* Bubble 10 - السوق */}
-            <Link href="/marketplace" className="group">
+            {/* Bubble 10 - سوق المواشي */}
+            <Link href="/animals" className="group">
               <div className="text-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-500/30 to-red-600/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/25 border border-red-500/40 mx-auto mb-3">
-                  <span className="text-4xl">🏪</span>
+                  <span className="text-4xl">🐄</span>
                 </div>
                 <h3 className="text-sm font-bold text-red-200 group-hover:text-red-100 transition-colors">
-                  السوق
+                  سوق المواشي
                 </h3>
               </div>
             </Link>

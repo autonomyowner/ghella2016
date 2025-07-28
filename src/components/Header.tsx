@@ -18,7 +18,8 @@ import {
   ShoppingCart,
   Settings,
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  Store
 } from 'lucide-react';
 
 const Header: React.FC = () => {
@@ -145,15 +146,14 @@ const Header: React.FC = () => {
             ) : user ? (
               <div className="flex items-center space-x-3 space-x-reverse">
                 <Link 
-                  href="/equipment/new"
-                  className={`px-4 py-2 rounded-lg font-medium flex items-center transition-all duration-300 hover:scale-105 ${
+                  href="/marketplace"
+                  className={`p-3 rounded-lg font-medium flex items-center transition-all duration-300 hover:scale-105 ${
                     isScrolled 
                       ? 'bg-green-600 text-white hover:bg-green-700' 
                       : 'bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30'
                   }`}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  أضف إعلان
+                  <Store className="w-5 h-5" />
                 </Link>
                 
                 {/* User Dropdown */}
@@ -198,12 +198,12 @@ const Header: React.FC = () => {
                       </Link>
                       
                       <Link
-                        href="/equipment/new"
+                        href="/marketplace"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         onClick={() => setShowUserDropdown(false)}
                       >
-                        <Plus className="w-4 h-4 mr-3" />
-                        إضافة إعلان
+                        <Store className="w-4 h-4 mr-3" />
+                        السوق
                       </Link>
                       
                       <div className="border-t border-gray-100 mt-2 pt-2">
@@ -313,12 +313,12 @@ const Header: React.FC = () => {
                     </Link>
                     
                     <Link 
-                      href="/equipment/new"
+                      href="/marketplace"
                       className="flex items-center space-x-3 space-x-reverse px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       onClick={() => setShowMobileMenu(false)}
                     >
-                      <Plus className="w-5 h-5" />
-                      <span className="font-medium">أضف إعلان</span>
+                      <Store className="w-5 h-5" />
+                      <span className="font-medium">السوق</span>
                     </Link>
                     
                     <button 

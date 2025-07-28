@@ -25,8 +25,7 @@ CREATE TABLE IF NOT EXISTS public.vegetables (
     is_available BOOLEAN DEFAULT TRUE,
     is_featured BOOLEAN DEFAULT FALSE,
     view_count INTEGER DEFAULT 0,
-    contact_phone VARCHAR(50),
-    contact_email VARCHAR(255)
+    contact_phone VARCHAR(50)
 );
 
 -- Create updated_at trigger for vegetables

@@ -25,7 +25,7 @@ const AddLandPage: React.FC = () => {
     area_size: '',
     area_unit: 'hectare' as 'hectare' | 'acre' | 'dunum',
     location: '',
-    soil_type: '',
+    contact_phone: '',
     water_source: '',
   });
 
@@ -123,7 +123,7 @@ const AddLandPage: React.FC = () => {
         area_size: parseFloat(formData.area_size),
         area_unit: formData.area_unit,
         location: formData.location,
-        soil_type: formData.soil_type || null,
+        contact_phone: formData.contact_phone || null,
         water_source: formData.water_source || null,
         images: imageUrls,
         is_available: true,
@@ -307,14 +307,14 @@ const AddLandPage: React.FC = () => {
             {/* Soil and Water */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-green-700 font-bold mb-2">نوع التربة</label>
+                <label className="block text-green-700 font-bold mb-2">رقم الهاتف</label>
                 <input
-                  type="text"
-                  name="soil_type"
-                  value={formData.soil_type}
+                  type="tel"
+                  name="contact_phone"
+                  value={formData.contact_phone}
                   onChange={handleInputChange}
                   className="search-arabic w-full"
-                  placeholder="مثال: تربة طينية خصبة"
+                  placeholder="مثال: 0770123456"
                 />
               </div>
 

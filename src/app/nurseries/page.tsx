@@ -31,6 +31,7 @@ interface NurseryListing {
   pot_size: string | null;
   care_instructions: string | null;
   seasonality: 'spring' | 'summer' | 'autumn' | 'winter' | 'all_year';
+  contact_phone: string | null;
 }
 
 const NurseriesPage: React.FC = () => {
@@ -532,6 +533,12 @@ const NurseriesPage: React.FC = () => {
                               <div className="flex items-center text-gray-300 text-sm">
                                 <span className="mr-2">اسم النبات:</span>
                                 {nursery.plant_name}
+                              </div>
+                            )}
+                            {nursery.contact_phone && (
+                              <div className="flex items-center text-gray-300 text-sm">
+                                <span className="mr-1">📞</span>
+                                {nursery.contact_phone}
                               </div>
                             )}
                           </div>

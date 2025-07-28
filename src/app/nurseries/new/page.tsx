@@ -18,15 +18,9 @@ const NurseriesFormPage: React.FC = () => {
     price: '',
     currency: 'دج',
     plant_type: 'fruit_trees' as 'fruit_trees' | 'ornamental' | 'vegetables' | 'herbs' | 'forest' | 'other',
-    plant_name: '',
-    age_months: '',
-    size: 'medium' as 'seedling' | 'small' | 'medium' | 'large' | 'mature',
     quantity: '1',
-    health_status: '',
     location: '',
-    pot_size: '',
-    care_instructions: '',
-    seasonality: 'all_year' as 'spring' | 'summer' | 'autumn' | 'winter' | 'all_year',
+    contact_phone: '',
     images: [] as string[]
   });
 
@@ -99,7 +93,6 @@ const NurseriesFormPage: React.FC = () => {
       const nurseryData = {
         ...formData,
         price: parseFloat(formData.price),
-        age_months: formData.age_months ? parseInt(formData.age_months) : null,
         quantity: parseInt(formData.quantity),
         images: base64Images,
         user_id: user.id,
@@ -157,7 +150,7 @@ const NurseriesFormPage: React.FC = () => {
                   <input
                     type="text"
                     name="title"
-                    value={formData.title}
+                    value={formData.title || ''}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -171,7 +164,7 @@ const NurseriesFormPage: React.FC = () => {
                   </label>
                   <select
                     name="plant_type"
-                    value={formData.plant_type}
+                    value={formData.plant_type || 'fruit_trees'}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -185,38 +178,7 @@ const NurseriesFormPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    اسم النبات
-                  </label>
-                  <input
-                    type="text"
-                    name="plant_name"
-                    value={formData.plant_name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: برتقال، ليمون، تفاح"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الحجم *
-                  </label>
-                  <select
-                    name="size"
-                    value={formData.size}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="seedling">بذرة</option>
-                    <option value="small">صغير</option>
-                    <option value="medium">متوسط</option>
-                    <option value="large">كبير</option>
-                    <option value="mature">ناضج</option>
-                  </select>
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -225,7 +187,7 @@ const NurseriesFormPage: React.FC = () => {
                   <input
                     type="number"
                     name="price"
-                    value={formData.price}
+                    value={formData.price || ''}
                     onChange={handleInputChange}
                     required
                     min="0"
@@ -241,7 +203,7 @@ const NurseriesFormPage: React.FC = () => {
                   </label>
                   <select
                     name="currency"
-                    value={formData.currency}
+                    value={formData.currency || 'دج'}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
@@ -258,7 +220,7 @@ const NurseriesFormPage: React.FC = () => {
                   <input
                     type="number"
                     name="quantity"
-                    value={formData.quantity}
+                    value={formData.quantity || '1'}
                     onChange={handleInputChange}
                     required
                     min="1"
@@ -267,38 +229,9 @@ const NurseriesFormPage: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    العمر (بالأشهر)
-                  </label>
-                  <input
-                    type="number"
-                    name="age_months"
-                    value={formData.age_months}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الموسم
-                  </label>
-                  <select
-                    name="seasonality"
-                    value={formData.seasonality}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="all_year">طوال السنة</option>
-                    <option value="spring">الربيع</option>
-                    <option value="summer">الصيف</option>
-                    <option value="autumn">الخريف</option>
-                    <option value="winter">الشتاء</option>
-                  </select>
-                </div>
+
+
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -307,7 +240,7 @@ const NurseriesFormPage: React.FC = () => {
                   <input
                     type="text"
                     name="location"
-                    value={formData.location}
+                    value={formData.location || ''}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -317,15 +250,15 @@ const NurseriesFormPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    حجم الوعاء
+                    رقم الهاتف
                   </label>
                   <input
-                    type="text"
-                    name="pot_size"
-                    value={formData.pot_size}
+                    type="tel"
+                    name="contact_phone"
+                    value={formData.contact_phone || ''}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="مثال: 20 سم"
+                    placeholder="مثال: 0770123456"
                   />
                 </div>
               </div>
@@ -337,7 +270,7 @@ const NurseriesFormPage: React.FC = () => {
                 </label>
                 <textarea
                   name="description"
-                  value={formData.description}
+                  value={formData.description || ''}
                   onChange={handleInputChange}
                   required
                   rows={4}
@@ -346,35 +279,9 @@ const NurseriesFormPage: React.FC = () => {
                 />
               </div>
 
-              {/* Health Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الحالة الصحية
-                </label>
-                <input
-                  type="text"
-                  name="health_status"
-                  value={formData.health_status}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="مثال: ممتازة، خالية من الأمراض"
-                />
-              </div>
 
-              {/* Care Instructions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  تعليمات العناية
-                </label>
-                <textarea
-                  name="care_instructions"
-                  value={formData.care_instructions}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="تعليمات العناية بالشتلات..."
-                />
-              </div>
+
+
 
               {/* Images */}
               <div>

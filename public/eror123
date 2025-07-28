@@ -1,0 +1,29 @@
+Error: Error creating vegetables record: Failed to create vegetables: Could not find the 'contact_phone' column of 'vegetables' in the schema cache
+    at useSupabaseData.useCallback[createRecord] (webpack-internal:///(app-pages-browser)/./src/hooks/useSupabase.ts:570:27)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/VAR/marketplace/new/page.tsx:110:13)
+
+    Error: Full error object: "{}"
+    at createConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/console-error.js:27:71)
+    at handleConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/use-error-handler.js:47:54)
+    at console.error (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/globals/intercept-console-error.js:47:57)
+    at useSupabaseData.useCallback[createRecord] (webpack-internal:///(app-pages-browser)/./src/hooks/useSupabase.ts:568:25)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/VAR/marketplace/new/page.tsx:110:13)
+
+        Error: Failed to create vegetables: Could not find the 'contact_phone' column of 'vegetables' in the schema cache
+    at useSupabaseData.useCallback[createRecord] (webpack-internal:///(app-pages-browser)/./src/hooks/useSupabase.ts:562:27)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/VAR/marketplace/new/page.tsx:110:13)
+
+        Error: Error details: {}
+    at createConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/console-error.js:27:71)
+    at handleConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/use-error-handler.js:47:54)
+    at console.error (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/globals/intercept-console-error.js:47:57)
+    at useSupabaseData.useCallback[createRecord] (webpack-internal:///(app-pages-browser)/./src/hooks/useSupabase.ts:556:29)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/VAR/marketplace/new/page.tsx:110:13)
+
+
+        Error: Supabase error creating vegetables record: {}
+    at createConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/console-error.js:27:71)
+    at handleConsoleError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/errors/use-error-handler.js:47:54)
+    at console.error (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/globals/intercept-console-error.js:47:57)
+    at useSupabaseData.useCallback[createRecord] (webpack-internal:///(app-pages-browser)/./src/hooks/useSupabase.ts:555:29)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/VAR/marketplace/new/page.tsx:110:13)

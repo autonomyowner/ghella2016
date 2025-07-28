@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS public.vegetables (
     harvest_date DATE,
     expiry_date DATE,
     certification TEXT,
-    packaging TEXT DEFAULT 'loose'
+    packaging TEXT DEFAULT 'loose',
+    contact_phone VARCHAR(50)
 );
 
 -- 2. Nurseries table

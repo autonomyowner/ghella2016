@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { useEquipment } from '@/hooks/useSupabase'
+import { supabase } from '@/lib/supabase/supabaseClient'
 import { motion } from 'framer-motion'
 import { 
   Upload, 
@@ -33,10 +34,7 @@ export default function EquipmentForm() {
     price: '',
     condition: 'good' as const,
     location: '',
-    brand: '',
-    model: '',
-    year: '',
-    hours_used: '',
+    contact_phone: '',
   })
   
   const [files, setFiles] = useState<FileList | null>(null)
@@ -127,19 +125,15 @@ export default function EquipmentForm() {
     try {
       const imageUrls = await uploadImages()
 
-      const equipmentData = {
+            const equipmentData = {
         user_id: user.id,
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
         condition: formData.condition,
         location: formData.location,
-        brand: formData.brand || null,
-        model: formData.model || null,
-        year: formData.year ? parseInt(formData.year) : null,
-        hours_used: formData.hours_used ? parseInt(formData.hours_used) : null,
+        contact_phone: formData.contact_phone,
         images: imageUrls,
-        category_id: undefined,
         currency: 'DZD',
         is_available: true,
         is_featured: false,
@@ -148,12 +142,28 @@ export default function EquipmentForm() {
         updated_at: new Date().toISOString()
       }
 
-      await addEquipment(equipmentData)
+      console.log('🔍 Equipment data being sent:', equipmentData)
+
+      // Try direct Supabase insert to bypass TypeScript types
+      const { data, error } = await supabase
+        .from('equipment')
+        .insert([equipmentData])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('🔍 Direct Supabase error:', error)
+        throw error
+      }
+
+      console.log('🔍 Direct Supabase success:', data)
       setSuccess(true)
       
       setTimeout(() => {
         router.push('/equipment')
       }, 2000)
+      
+      return data
     } catch (error) {
       console.error('Error creating equipment:', error)
       setError((error as Error).message)
@@ -192,9 +202,17 @@ export default function EquipmentForm() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <div className="text-6xl mb-6">✅</div>
+          <motion.div 
+            className="text-6xl mb-6"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            ✅
+          </motion.div>
           <h1 className="text-3xl font-bold text-white mb-4">تم إضافة المعدات بنجاح!</h1>
-          <p className="text-white/70 mb-8">سيتم توجيهك إلى صفحة المعدات قريباً...</p>
+          <p className="text-white/70 mb-6">تم نشر إعلانك في السوق الزراعي</p>
+          <p className="text-emerald-300 mb-8">سيتم توجيهك إلى صفحة المعدات خلال ثانيتين...</p>
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </motion.div>
       </div>
@@ -336,84 +354,29 @@ export default function EquipmentForm() {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* Technical Details Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <Settings className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">المواصفات التقنية</h2>
-                </div>
-
-                {/* Brand, Model, Year */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label htmlFor="brand" className="block text-sm font-medium text-white/90 mb-3">
-                      الماركة
-                    </label>
-                    <input
-                      id="brand"
-                      name="brand"
-                      type="text"
-                      value={formData.brand}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                      placeholder="جون دير، ماسي فيرغسون..."
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="model" className="block text-sm font-medium text-white/90 mb-3">
-                      الموديل
-                    </label>
-                    <input
-                      id="model"
-                      name="model"
-                      type="text"
-                      value={formData.model}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                      placeholder="5000، M135..."
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="year" className="block text-sm font-medium text-white/90 mb-3">
-                      سنة الصنع
-                    </label>
-                    <input
-                      id="year"
-                      name="year"
-                      type="number"
-                      value={formData.year}
-                      onChange={handleChange}
-                      min="1900"
-                      max={new Date().getFullYear()}
-                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                      placeholder="2020"
-                    />
-                  </div>
-                </div>
-
-                {/* Hours Used */}
+                {/* Contact Phone */}
                 <div>
-                  <label htmlFor="hours_used" className="block text-sm font-medium text-white/90 mb-3">
-                    عدد ساعات الاستخدام
+                  <label htmlFor="contact_phone" className="block text-sm font-medium text-white/90 mb-3">
+                    رقم الهاتف للتواصل *
                   </label>
-                  <input
-                    id="hours_used"
-                    name="hours_used"
-                    type="number"
-                    value={formData.hours_used}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                    placeholder="500"
-                  />
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50">📞</div>
+                    <input
+                      id="contact_phone"
+                      name="contact_phone"
+                      type="tel"
+                      value={formData.contact_phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                      placeholder="0770123456"
+                    />
+                  </div>
                 </div>
               </div>
+
+
 
               {/* Description Section */}
               <div className="space-y-6">

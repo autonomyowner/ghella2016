@@ -32,6 +32,7 @@ interface VegetableListing {
   expiry_date: string | null;
   certification: string | null;
   packaging: 'loose' | 'packaged' | 'bulk';
+  contact_phone: string | null;
 }
 
 const VegetablesMarketplacePage: React.FC = () => {
@@ -602,6 +603,12 @@ const VegetablesMarketplacePage: React.FC = () => {
                               <div className="flex items-center text-gray-300 text-sm">
                                 <span className="mr-2">النوع:</span>
                                 {vegetable.variety}
+                              </div>
+                            )}
+                            {vegetable.contact_phone && (
+                              <div className="flex items-center text-gray-300 text-sm">
+                                <span className="mr-1">📞</span>
+                                {vegetable.contact_phone}
                               </div>
                             )}
                           </div>
