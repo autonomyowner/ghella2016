@@ -17,149 +17,7 @@ import {
   Heart, Share2, CalendarCheck, Shield, Award
 } from 'lucide-react'
 
-// Sample equipment data for fallback (will be replaced with Supabase data)
-const sampleEquipment = [
-  {
-    id: 1,
-    title: "جرار زراعي 75 حصان",
-    category_id: "tractor",
-    price: 8000,
-    currency: "د.ج",
-    location: "سطيف",
-    rating: 4.8,
-    reviews: 89,
-    image: "🚜",
-    is_available: true,
-    condition: "excellent",
-    brand: "John Deere",
-    model: "75HP",
-    year: 2022,
-    description: "جرار حديث مناسب لجميع الأعمال الزراعية",
-    features: ["مكيف", "هيدروليك", "4WD", "GPS"],
-    availability: 75,
-    maxAvailability: 100,
-    is_insured: true,
-    specifications: {
-      power: "75 حصان",
-      fuel: "ديزل",
-      transmission: "أوتوماتيك",
-      weight: "3.5 طن"
-    },
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 2,
-    title: "حصادة قمح",
-    category_id: "harvester",
-    price: 15000,
-    currency: "د.ج",
-    location: "تيارت",
-    rating: 4.6,
-    reviews: 67,
-    image: "🌾",
-    is_available: true,
-    condition: "good",
-    brand: "Case IH",
-    model: "WheatMaster",
-    year: 2021,
-    description: "حصادة متطورة لجميع أنواع الحبوب",
-    features: ["أوتوماتيك", "GPS", "تحكم ذكي", "صيانة دورية"],
-    availability: 60,
-    maxAvailability: 100,
-    is_insured: true,
-    specifications: {
-      width: "6 متر",
-      capacity: "8 طن/ساعة",
-      fuel: "ديزل",
-      storage: "9000 لتر"
-    },
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 3,
-    title: "محراث قلاب 4 سكة",
-    category_id: "plow",
-    price: 2500,
-    currency: "د.ج",
-    location: "قسنطينة",
-    rating: 4.4,
-    reviews: 45,
-    image: "⚔️",
-    is_available: false,
-    condition: "new",
-    brand: "Lemken",
-    model: "4-Furrow",
-    year: 2023,
-    description: "محراث عالي الكفاءة للحراثة العميقة",
-    features: ["قابل للتعديل", "مقاوم للتآكل", "سهل الصيانة"],
-    availability: 0,
-    maxAvailability: 100,
-    is_insured: true,
-    specifications: {
-      width: "1.8 متر",
-      depth: "35 سم",
-      blades: "4 سكك",
-      weight: "850 كغ"
-    },
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 4,
-    title: "آلة بذر ذكية",
-    category_id: "seeder",
-    price: 5000,
-    currency: "د.ج",
-    location: "البليدة",
-    rating: 4.7,
-    reviews: 34,
-    image: "🌱",
-    is_available: true,
-    condition: "excellent",
-    brand: "Amazone",
-    model: "SmartSeeder",
-    year: 2022,
-    description: "آلة بذر متطورة مع نظام GPS للدقة العالية",
-    features: ["GPS", "تحكم إلكتروني", "قابل للتعديل", "صيانة سهلة"],
-    availability: 90,
-    maxAvailability: 100,
-    is_insured: true,
-    specifications: {
-      width: "4 متر",
-      rows: "12 صف",
-      capacity: "500 كغ",
-      depth: "2-8 سم"
-    },
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 5,
-    title: "رشاش محوري",
-    category_id: "sprayer",
-    price: 12000,
-    currency: "د.ج",
-    location: "مستغانم",
-    rating: 4.5,
-    reviews: 28,
-    image: "💧",
-    is_available: true,
-    condition: "good",
-    brand: "Valley",
-    model: "PivotMaster",
-    year: 2020,
-    description: "رشاش محوري كبير للمساحات الواسعة",
-    features: ["تحكم عن بعد", "أوتوماتيك", "تغطية واسعة", "اقتصادي"],
-    availability: 45,
-    maxAvailability: 100,
-    is_insured: true,
-    specifications: {
-      coverage: "65 هكتار",
-      length: "500 متر",
-      flow: "120 م³/ساعة",
-      pressure: "2.5 بار"
-    },
-    created_at: new Date().toISOString()
-  }
-]
+// Equipment data will be loaded from Supabase
 
 const categories = [
   { id: "all", label: "جميع الآلات", icon: "🚜" },
@@ -439,8 +297,8 @@ export default function EquipmentPage() {
     setCurrentPage(1)
   }
 
-  // Determine what data to show
-  const displayEquipment = equipment && equipment.length > 0 ? equipment : sampleEquipment
+  // Determine what data to show - only use real data, no fallback
+  const displayEquipment = equipment || []
   const isLoading = loading || isFiltering || !isHydrated
   const hasData = displayEquipment && displayEquipment.length > 0
 
