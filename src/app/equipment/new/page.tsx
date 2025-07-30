@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { useEquipment } from '@/hooks/useSupabase'
@@ -17,7 +17,8 @@ import {
   DollarSign,
   MapPin,
   Settings,
-  FileText
+  FileText,
+  Info
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -35,7 +36,30 @@ export default function EquipmentForm() {
     condition: 'good' as const,
     location: '',
     contact_phone: '',
+    category_id: '', // Will be handled by database trigger
+    brand: '',
+    model: '',
+    year: '',
+    hours_used: ''
   })
+
+  // Remove category selection for now - let database handle it
+  // const categoryOptions = [
+  //   { value: 'tractor', label: 'جرارات', icon: '🚜' },
+  //   { value: 'harvester', label: 'حصادات', icon: '🌾' },
+  //   { value: 'plow', label: 'محاريث', icon: '⚒️' },
+  //   { value: 'seeder', label: 'آلات بذر', icon: '🌱' },
+  //   { value: 'sprayer', label: 'رشاشات', icon: '💧' },
+  //   { value: 'irrigation', label: 'أنظمة ري', icon: '🌀' },
+  //   { value: 'tools', label: 'أدوات زراعية', icon: '🔧' }
+  // ]
+
+  // Set default category on component mount
+  // useEffect(() => {
+  //   if (!formData.category_id && categoryOptions.length > 0) {
+  //     setFormData(prev => ({ ...prev, category_id: categoryOptions[0].value }))
+  //   }
+  // }, [])
   
   const [files, setFiles] = useState<FileList | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -119,32 +143,53 @@ export default function EquipmentForm() {
       return
     }
 
+    // Basic validation - only require title, price, and location
+    if (!formData.title.trim()) {
+      setError('عنوان المعدة مطلوب')
+      return
+    }
+
+    if (!formData.price.trim()) {
+      setError('سعر المعدة مطلوب')
+      return
+    }
+
+    if (!formData.location.trim()) {
+      setError('موقع المعدة مطلوب')
+      return
+    }
+
     setUploading(true)
     setError(null)
 
     try {
       const imageUrls = await uploadImages()
 
-            const equipmentData = {
+      // Create equipment data with smart defaults
+      const equipmentData = {
         user_id: user.id,
-        title: formData.title,
-        description: formData.description,
+        title: formData.title.trim(),
+        description: formData.description.trim() || null,
         price: parseFloat(formData.price),
-        condition: formData.condition,
-        location: formData.location,
-        contact_phone: formData.contact_phone,
-        images: imageUrls,
         currency: 'DZD',
+        // category_id will be set by database trigger
+        condition: formData.condition,
+        location: formData.location.trim(),
+        contact_phone: formData.contact_phone.trim() || null,
+        brand: formData.brand.trim() || null,
+        model: formData.model.trim() || null,
+        year: formData.year ? parseInt(formData.year) : null,
+        hours_used: formData.hours_used ? parseInt(formData.hours_used) : null,
+        images: imageUrls,
         is_available: true,
         is_featured: false,
         view_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        coordinates: null
       }
 
       console.log('🔍 Equipment data being sent:', equipmentData)
 
-      // Try direct Supabase insert to bypass TypeScript types
+      // Try direct Supabase insert
       const { data, error } = await supabase
         .from('equipment')
         .insert([equipmentData])
@@ -159,8 +204,11 @@ export default function EquipmentForm() {
       console.log('🔍 Direct Supabase success:', data)
       setSuccess(true)
       
+      // Force refresh and redirect
       setTimeout(() => {
         router.push('/equipment')
+        // Force a page refresh to ensure data is updated
+        window.location.reload()
       }, 2000)
       
       return data
@@ -227,277 +275,338 @@ export default function EquipmentForm() {
           <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300"
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              رجوع
+              <ArrowLeft className="w-5 h-5" />
+              <span>العودة</span>
             </button>
-            
-            <div className="text-center">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
-                إضافة معدات جديدة
-              </h1>
-              <p className="text-white/70 mt-2">أضف معداتك الزراعية بسهولة</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                <Settings className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">إضافة معدات جديدة</h1>
+                <p className="text-sm text-white/60">أضف معداتك للبيع أو التأجير</p>
+              </div>
             </div>
-            
-            <div className="w-24"></div> {/* Spacer for centering */}
           </div>
-        </div>
-      </div>
 
-      {/* Main Form */}
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="max-w-4xl mx-auto">
-          <motion.div 
-            className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {error && (
-              <motion.div 
-                className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-3"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+          {/* Info Alert */}
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-blue-300 mb-1">نصائح للنشر السريع</h3>
+                <p className="text-sm text-blue-200/80">
+                  الحقول المطلوبة فقط: العنوان، السعر، الموقع. باقي الحقول اختيارية ويمكنك إضافتها لاحقاً.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <motion.div 
+              className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400" />
                 <span className="text-red-300">{error}</span>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Information Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">المعلومات الأساسية</h2>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-emerald-400" />
                 </div>
+                <h2 className="text-xl font-semibold text-white">المعلومات الأساسية</h2>
+              </div>
 
-                {/* Title */}
+              {/* Title - Required */}
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-white/90 mb-3">
+                  عنوان المعدة * <span className="text-red-400">(مطلوب)</span>
+                </label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                  placeholder="مثال: جرار زراعي جديد"
+                />
+              </div>
+
+              {/* Price - Required */}
+              <div>
+                <label htmlFor="price" className="block text-sm font-medium text-white/90 mb-3">
+                  السعر (دينار جزائري) * <span className="text-red-400">(مطلوب)</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50">💰</div>
+                  <input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="500000"
+                  />
+                </div>
+              </div>
+
+              {/* Location - Required */}
+              <div>
+                <label htmlFor="location" className="block text-sm font-medium text-white/90 mb-3">
+                  الموقع * <span className="text-red-400">(مطلوب)</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50">📍</div>
+                  <input
+                    id="location"
+                    name="location"
+                    type="text"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="مثال: الجزائر العاصمة"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Phone - Optional */}
+              <div>
+                <label htmlFor="contact_phone" className="block text-sm font-medium text-white/90 mb-3">
+                  رقم الهاتف للتواصل <span className="text-gray-400">(اختياري)</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50">📞</div>
+                  <input
+                    id="contact_phone"
+                    name="contact_phone"
+                    type="tel"
+                    value={formData.contact_phone}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="0770123456"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Optional Details Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-blue-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">تفاصيل إضافية <span className="text-sm text-white/60">(اختيارية)</span></h2>
+              </div>
+
+              {/* Description - Optional */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-white/90 mb-3">
+                  الوصف التفصيلي <span className="text-gray-400">(اختياري)</span>
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300 resize-none"
+                  placeholder="وصف تفصيلي للمعدة، الحالة، الاستخدام..."
+                />
+              </div>
+
+              {/* Condition */}
+              <div>
+                <label htmlFor="condition" className="block text-sm font-medium text-white/90 mb-3">
+                  حالة المعدة
+                </label>
+                <select
+                  id="condition"
+                  name="condition"
+                  value={formData.condition}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                >
+                  <option value="new">جديد</option>
+                  <option value="excellent">ممتاز</option>
+                  <option value="good">جيد</option>
+                  <option value="fair">مقبول</option>
+                  <option value="poor">يحتاج صيانة</option>
+                </select>
+              </div>
+
+              {/* Brand and Model */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-white/90 mb-3">
-                    عنوان الإعلان *
+                  <label htmlFor="brand" className="block text-sm font-medium text-white/90 mb-3">
+                    الماركة
                   </label>
                   <input
-                    id="title"
-                    name="title"
+                    id="brand"
+                    name="brand"
                     type="text"
-                    value={formData.title}
+                    value={formData.brand}
                     onChange={handleChange}
-                    required
                     className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                    placeholder="مثال: جرار زراعي جون دير 5000 - حالة ممتازة"
+                    placeholder="مثال: John Deere"
                   />
                 </div>
-
-                {/* Price and Condition */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-white/90 mb-3">
-                      السعر (دينار جزائري) *
-                    </label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-                      <input
-                        id="price"
-                        name="price"
-                        type="number"
-                        value={formData.price}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        step="0.01"
-                        className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="condition" className="block text-sm font-medium text-white/90 mb-3">
-                      حالة المعدات *
-                    </label>
-                    <select
-                      id="condition"
-                      name="condition"
-                      value={formData.condition}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                    >
-                      <option value="new">جديد</option>
-                      <option value="excellent">ممتاز</option>
-                      <option value="good">جيد</option>
-                      <option value="fair">مقبول</option>
-                      <option value="poor">يحتاج صيانة</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Location */}
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-white/90 mb-3">
-                    الموقع *
+                  <label htmlFor="model" className="block text-sm font-medium text-white/90 mb-3">
+                    الموديل
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-                    <input
-                      id="location"
-                      name="location"
-                      type="text"
-                      value={formData.location}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                      placeholder="المدينة، المحافظة"
-                    />
-                  </div>
-                </div>
-
-                {/* Contact Phone */}
-                <div>
-                  <label htmlFor="contact_phone" className="block text-sm font-medium text-white/90 mb-3">
-                    رقم الهاتف للتواصل *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50">📞</div>
-                    <input
-                      id="contact_phone"
-                      name="contact_phone"
-                      type="tel"
-                      value={formData.contact_phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
-                      placeholder="0770123456"
-                    />
-                  </div>
-                </div>
-              </div>
-
-
-
-              {/* Description Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">الوصف التفصيلي</h2>
-                </div>
-
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-white/90 mb-3">
-                    وصف المعدات *
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
+                  <input
+                    id="model"
+                    name="model"
+                    type="text"
+                    value={formData.model}
                     onChange={handleChange}
-                    required
-                    rows={5}
-                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300 resize-none"
-                    placeholder="اكتب وصفاً تفصيلياً للمعدات، الميزات، المواصفات، وأي معلومات مهمة أخرى..."
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="مثال: 5075E"
                   />
                 </div>
               </div>
 
-              {/* Images Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">صور المعدات</h2>
-                </div>
-
+              {/* Year and Hours */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-3">
-                    صور المعدات * (حتى 5 صور)
+                  <label htmlFor="year" className="block text-sm font-medium text-white/90 mb-3">
+                    سنة الصنع
                   </label>
-                  
-                  {/* File Upload Area */}
-                  <div
-                    className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center hover:border-emerald-400 transition-all duration-300 cursor-pointer bg-white/5 backdrop-blur-lg"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      name="images"
-                      type="file"
-                      onChange={handleFileChange}
-                      multiple
-                      accept="image/*"
-                      className="hidden"
-                      required
-                    />
-                    <Upload className="w-12 h-12 text-white/50 mx-auto mb-4" />
-                    <p className="text-white/80 mb-2 font-medium">اضغط لاختيار الصور أو اسحبها هنا</p>
-                    <p className="text-sm text-white/60">
-                      الحد الأقصى: 5 صور، كل صورة حتى 5 ميجابايت
-                    </p>
-                  </div>
-
-                  {/* Selected Files Preview */}
-                  {files && files.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-sm font-medium text-white/90 mb-3">الصور المختارة:</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {Array.from(files).map((file, index) => (
-                          <div key={index} className="relative group">
-                            <Image
-                              src={URL.createObjectURL(file)}
-                              alt={`Preview ${index + 1}`}
-                              width={100}
-                              height={60}
-                              className="w-full h-24 object-cover rounded-lg border border-white/20"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeFile(index)}
-                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <input
+                    id="year"
+                    name="year"
+                    type="number"
+                    value={formData.year}
+                    onChange={handleChange}
+                    min="1900"
+                    max="2024"
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="2020"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="hours_used" className="block text-sm font-medium text-white/90 mb-3">
+                    ساعات الاستخدام
+                  </label>
+                  <input
+                    id="hours_used"
+                    name="hours_used"
+                    type="number"
+                    value={formData.hours_used}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/50 transition-all duration-300"
+                    placeholder="1000"
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Submit Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-white/20">
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="flex-1 px-6 py-3 bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300 font-medium"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className="flex-1 px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-600 disabled:to-gray-500 text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
-                >
-                  {uploading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      جاري النشر...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      نشر الإعلان
-                    </>
-                  )}
-                </button>
+            {/* Images Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-purple-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">الصور <span className="text-sm text-white/60">(اختيارية)</span></h2>
               </div>
-            </form>
-          </motion.div>
+
+              <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-white/40 transition-colors">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                
+                {!files || files.length === 0 ? (
+                  <div>
+                    <div className="text-6xl mb-4">📸</div>
+                    <h3 className="text-lg font-semibold mb-2">أضف صور للمعدة</h3>
+                    <p className="text-white/60 mb-4">اسحب الصور هنا أو اضغط لاختيار الملفات</p>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-6 py-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300 hover:bg-emerald-500/30 transition-all duration-300"
+                    >
+                      <Upload className="w-5 h-5 inline mr-2" />
+                      اختيار الصور
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                      {Array.from(files).map((file, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300 hover:bg-emerald-500/30 transition-all duration-300"
+                    >
+                      <Plus className="w-4 h-4 inline mr-2" />
+                      إضافة المزيد
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={uploading}
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    جاري النشر...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    نشر المعدة
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

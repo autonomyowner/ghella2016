@@ -17,12 +17,33 @@ export default function AdminPanel() {
   const { user, profile } = useSupabaseAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [stats, setStats] = useState<AdminStats>({
     totalProducts: 0,
     totalUsers: 0,
     totalOrders: 0,
     totalRevenue: 0
   });
+
+  // Handle hydration and browser extension cleanup
+  useEffect(() => {
+    const cleanupBrowserExtensions = () => {
+      const elements = document.querySelectorAll('[bis_skin_checked], [bis_use], [data-bis-config]');
+      elements.forEach(element => {
+        element.removeAttribute('bis_skin_checked');
+        element.removeAttribute('bis_use');
+        element.removeAttribute('data-bis-config');
+      });
+    };
+
+    // Run cleanup and set hydration state
+    const timer = setTimeout(() => {
+      cleanupBrowserExtensions();
+      setIsHydrated(true);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check if user is admin
   useEffect(() => {
@@ -99,6 +120,18 @@ export default function AdminPanel() {
     }
   }, [isAuthenticated]);
 
+  // Show loading state until hydration is complete
+  if (!isHydrated) {
+    return (
+      <div suppressHydrationWarning className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-emerald-700 font-semibold">جاري تحميل لوحة الإدارة...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
@@ -112,24 +145,19 @@ export default function AdminPanel() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center"
-        >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-lock text-red-500 text-3xl"></i>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">غير مصرح</h1>
-          <p className="text-gray-600 mb-6">ليس لديك صلاحية للوصول إلى لوحة الإدارة</p>
-          <Link
-            href="/"
-            className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            العودة للرئيسية
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">غير مصرح لك بالوصول</h2>
+          <p className="text-gray-600 mb-6">تحتاج إلى صلاحيات المدير للوصول إلى هذه الصفحة</p>
+          <Link href="/" className="text-emerald-600 hover:text-emerald-700">
+            العودة إلى الصفحة الرئيسية
           </Link>
-        </motion.div>
+        </div>
       </div>
     );
   }

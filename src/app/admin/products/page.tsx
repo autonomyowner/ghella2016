@@ -28,6 +28,27 @@ export default function AdminProducts() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Handle hydration and browser extension cleanup
+  useEffect(() => {
+    const cleanupBrowserExtensions = () => {
+      const elements = document.querySelectorAll('[bis_skin_checked], [bis_use], [data-bis-config]');
+      elements.forEach(element => {
+        element.removeAttribute('bis_skin_checked');
+        element.removeAttribute('bis_use');
+        element.removeAttribute('data-bis-config');
+      });
+    };
+
+    // Run cleanup and set hydration state
+    const timer = setTimeout(() => {
+      cleanupBrowserExtensions();
+      setIsHydrated(true);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check admin access
   useEffect(() => {
@@ -88,6 +109,18 @@ export default function AdminProducts() {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Show loading state until hydration is complete
+  if (!isHydrated) {
+    return (
+      <div suppressHydrationWarning className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-emerald-700 font-semibold">جاري تحميل المنتجات...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

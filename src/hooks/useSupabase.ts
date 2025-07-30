@@ -93,7 +93,7 @@ export function useEquipment() {
         .from('equipment')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50); // Limit to 50 items for better performance
+        .limit(20); // Reduced limit for better performance
 
       // Apply filters
       if (filters?.category && filters.category !== 'all') {
@@ -138,25 +138,24 @@ export function useEquipment() {
         );
       }
 
+      console.log('📊 Final filtered data:', filteredData.length, 'items');
       setEquipment(filteredData);
-      setHasInitialized(true);
-      console.log('✅ Setting equipment state:', filteredData.length, 'items');
       return filteredData;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error loading equipment';
-      setError(errorMessage);
       console.error('❌ Error fetching equipment:', err);
-      setHasInitialized(true);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [user]); // Only depend on user
+  }, [equipment.length, loading, user?.id, hasInitialized]);
 
-  // Initial fetch when component mounts with retry logic
+  // Initialize data on mount
   useEffect(() => {
     const initializeData = async () => {
-      console.log('🚀 Component mounted, initializing equipment data...');
+      console.log('🚀 Initializing equipment data...');
+      setHasInitialized(true);
       
       // Try to fetch data with retry logic
       let retryCount = 0;
@@ -164,14 +163,18 @@ export function useEquipment() {
       
       while (retryCount < maxRetries) {
         try {
-          await fetchEquipment();
-          break; // Success, exit retry loop
-        } catch (error) {
+          const data = await fetchEquipment();
+          if (data && data.length >= 0) {
+            console.log('✅ Equipment data initialized successfully');
+            break;
+          }
           retryCount++;
-          console.log(`⚠️ Retry ${retryCount}/${maxRetries} failed:`, error);
+        } catch (err) {
+          console.error(`❌ Equipment initialization attempt ${retryCount + 1} failed:`, err);
+          retryCount++;
           
           if (retryCount >= maxRetries) {
-            console.error('❌ Max retries reached, giving up');
+            console.error('❌ Failed to initialize equipment data after multiple attempts');
             setError('Failed to load equipment data after multiple attempts');
           } else {
             // Wait before retrying
@@ -192,6 +195,8 @@ export function useEquipment() {
     }
 
     try {
+      console.log('➕ Adding equipment:', equipmentData);
+      
       const newEquipment = {
         ...equipmentData,
         user_id: user.id,
@@ -206,15 +211,21 @@ export function useEquipment() {
         .single();
 
       if (supabaseError) {
+        console.error('❌ Error adding equipment:', supabaseError);
         throw supabaseError;
       }
 
+      console.log('✅ Equipment added successfully:', data);
+
       // Force refresh by clearing the cache and refetching
       setLastFetchParams('');
-      await fetchEquipment();
+      setEquipment([]); // Clear current data
+      await fetchEquipment(); // Refetch fresh data
+      
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error adding equipment';
+      console.error('❌ Error in addEquipment:', err);
       setError(errorMessage);
       throw err;
     }
@@ -259,7 +270,6 @@ export function useEquipment() {
 
       // Refresh the equipment list
       await fetchEquipment();
-      return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error deleting equipment';
       setError(errorMessage);
@@ -267,52 +277,16 @@ export function useEquipment() {
     }
   };
 
-  const fetchUserEquipment = async () => {
-    if (!user) {
-      setEquipment([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: supabaseError } = await supabase
-        .from('equipment')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (supabaseError) {
-        throw supabaseError;
-      }
-
-      setEquipment(data || []);
-    } catch (err) {
-      setError('Error loading user equipment');
-      console.error('Error fetching user equipment:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial load
-  useEffect(() => {
-    fetchEquipment();
-  }, []);
-
   return {
     equipment,
     loading,
     error,
-    fetchEquipment: useCallback(fetchEquipment, []),
+    fetchEquipment,
     addEquipment,
     updateEquipment,
     deleteEquipment,
-    fetchUserEquipment,
   };
-}
+};
 
 // Hook for user equipment management (for user's own equipment)
 export function useUserEquipment() {
@@ -344,7 +318,7 @@ export function useUserEquipment() {
 
       setEquipment(data || []);
     } catch (err) {
-      setError('Error loading equipment');
+      setError('Error loading user equipment');
       console.error('Error fetching user equipment:', err);
     } finally {
       setLoading(false);

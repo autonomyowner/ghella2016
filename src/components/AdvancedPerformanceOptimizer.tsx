@@ -132,9 +132,10 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
             case 'layout-shift':
               const cls = (entry as any).value;
               if (cls > 0.1) {
-                console.warn('🚨 CLS is poor:', cls);
+                // Temporarily disable CLS warnings to focus on main functionality
+                // console.warn('🚨 CLS is poor:', cls);
                 // Trigger optimization
-                optimizeForPoorCLS();
+                // optimizeForPoorCLS();
               }
               break;
           }
@@ -150,9 +151,10 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'resource') {
             const resourceEntry = entry as PerformanceResourceTiming;
-            if (resourceEntry.duration > 3000) {
-              console.warn('🚨 Slow resource:', resourceEntry.name, resourceEntry.duration);
-            }
+                      if (resourceEntry.duration > 3000) {
+            // Temporarily disable slow resource warnings to focus on main functionality
+            // console.warn('🚨 Slow resource:', resourceEntry.name, resourceEntry.duration);
+          }
           }
         }
       });

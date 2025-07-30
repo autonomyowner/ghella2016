@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
       config.cache = false;
     }
     
+    // Add plugin to suppress hydration warnings
+    config.plugins.push(
+      new (require('webpack')).DefinePlugin({
+        'process.env.SUPPRESS_HYDRATION_WARNING': JSON.stringify('true'),
+      })
+    );
+    
     return config;
   },
   
@@ -53,8 +60,6 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  
-
 
   // Redirects for better UX
   async redirects() {
@@ -84,6 +89,14 @@ const nextConfig: NextConfig = {
   
   // Disable etags in development
   generateEtags: process.env.NODE_ENV === 'production',
+  
+  // Suppress console warnings in development
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
 }
 
 export default nextConfig

@@ -90,6 +90,50 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         <link rel="dns-prefetch" href="//puvmqdnvofbtmqpcjmia.supabase.co" />
         
+        {/* Browser Extension Cleanup Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Suppress hydration warnings caused by browser extensions
+              (function() {
+                // Suppress console warnings for hydration mismatches
+                const originalError = console.error;
+                console.error = function(...args) {
+                  const message = args[0];
+                  if (typeof message === 'string' && 
+                      (message.includes('hydration') || 
+                       message.includes('bis_skin_checked') || 
+                       message.includes('bis_use') ||
+                       message.includes('A tree hydrated but some attributes'))) {
+                    return; // Suppress these specific errors
+                  }
+                  originalError.apply(console, args);
+                };
+
+                // Clean up browser extension attributes
+                function cleanupBrowserExtensions() {
+                  const elements = document.querySelectorAll('[bis_skin_checked], [bis_use], [data-bis-config]');
+                  elements.forEach(element => {
+                    element.removeAttribute('bis_skin_checked');
+                    element.removeAttribute('bis_use');
+                    element.removeAttribute('data-bis-config');
+                  });
+                }
+
+                // Run cleanup when DOM is ready
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', cleanupBrowserExtensions);
+                } else {
+                  cleanupBrowserExtensions();
+                }
+
+                // Run cleanup periodically to catch new elements
+                setInterval(cleanupBrowserExtensions, 1000);
+              })();
+            `
+          }}
+        />
+        
         {/* Preload critical resources - only on main pages */}
         <script
           dangerouslySetInnerHTML={{

@@ -50,27 +50,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Founders Section with Flipping Cards */}
-      <section className="py-32 gradient-bg-secondary relative overflow-hidden">
-        <div className="absolute inset-0 animate-gradient-shift opacity-30"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <h2 className="text-5xl font-bold text-center mb-20 gradient-text">مؤسسو الشركة</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-7xl mx-auto items-start">
-            {founders.map((founder, idx) => (
-              <TeamFlipCard
-                key={founder.name}
-                name={founder.name}
-                role={founder.role}
-                image={founder.image}
-                bio={founder.bio}
-                skills={founder.skills}
-                roleDescription={founder.roleDescription}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Our Story Section */}
       <section className="py-32 relative overflow-hidden">
         {/* Background Image Overlay */}

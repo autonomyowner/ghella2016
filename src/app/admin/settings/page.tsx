@@ -12,6 +12,7 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [isHydrated, setIsHydrated] = useState(false);
   const { settings: defaultSettings, updateSettings, loading: settingsLoading } = useWebsiteSettings();
   const [localSettings, setLocalSettings] = useState<WebsiteSettings>({
     id: '',
@@ -58,6 +59,26 @@ export default function AdminSettings() {
     updated_at: new Date().toISOString()
   });
 
+  // Handle hydration and browser extension cleanup
+  useEffect(() => {
+    const cleanupBrowserExtensions = () => {
+      const elements = document.querySelectorAll('[bis_skin_checked], [bis_use], [data-bis-config]');
+      elements.forEach(element => {
+        element.removeAttribute('bis_skin_checked');
+        element.removeAttribute('bis_use');
+        element.removeAttribute('data-bis-config');
+      });
+    };
+
+    // Run cleanup and set hydration state
+    const timer = setTimeout(() => {
+      cleanupBrowserExtensions();
+      setIsHydrated(true);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Update local settings when default settings load
   useEffect(() => {
     if (!settingsLoading && defaultSettings) {
@@ -100,44 +121,46 @@ export default function AdminSettings() {
     }));
   };
 
-  if (loading || settingsLoading) {
+  // Show loading state until hydration is complete
+  if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+      <div suppressHydrationWarning className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-emerald-700 font-semibold">جاري التحميل...</p>
-          <p className="text-emerald-600 text-sm mt-2">تحميل الإعدادات من قاعدة البيانات</p>
-          <div className="mt-4 text-xs text-gray-500">
-            <p>Loading: {loading ? 'Yes' : 'No'}</p>
-            <p>Settings Loading: {settingsLoading ? 'Yes' : 'No'}</p>
-            <p>User: {user?.email || 'Not logged in'}</p>
-            <p>Profile: {profile ? 'Loaded' : 'Not loaded'}</p>
-          </div>
+          <p className="text-emerald-700 font-semibold">جاري تحميل لوحة الإدارة...</p>
         </div>
       </div>
     );
   }
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-emerald-700 font-semibold">جاري التحقق من الصلاحيات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center"
-        >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-lock text-red-500 text-3xl"></i>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">غير مصرح</h1>
-          <p className="text-gray-600 mb-6">ليس لديك صلاحية للوصول إلى هذه الصفحة</p>
-          <Link
-            href="/admin"
-            className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            العودة للوحة الإدارة
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">غير مصرح لك بالوصول</h2>
+          <p className="text-gray-600 mb-6">تحتاج إلى صلاحيات المدير للوصول إلى هذه الصفحة</p>
+          <Link href="/admin" className="text-emerald-600 hover:text-emerald-700">
+            العودة إلى لوحة الإدارة
           </Link>
-        </motion.div>
+        </div>
       </div>
     );
   }
