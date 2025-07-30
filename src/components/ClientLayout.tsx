@@ -17,17 +17,10 @@ const ServiceWorkerRegistration = dynamic(() => import("@/components/ServiceWork
   ssr: false
 });
 
+// Keep only one performance optimizer to prevent conflicts
 const PerformanceOptimizer = dynamic(() => import("@/components/PerformanceOptimizer"), {
   ssr: false
 });
-
-const AdvancedPerformanceOptimizer = dynamic(() => import("@/components/AdvancedPerformanceOptimizer"), {
-  ssr: false
-});
-
-
-
-
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -62,7 +55,6 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
     <SupabaseAuthProvider>
       <SearchProvider>
         <PerformanceOptimizer />
-        <AdvancedPerformanceOptimizer />
         <ConditionalHeader />
         <main className="min-h-screen">
           {children}

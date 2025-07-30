@@ -324,22 +324,18 @@ img[loading="lazy"] {
   66% { transform: translateY(-10px) rotate(-5deg); }
 }
 
-/* Enhanced Glass Header - MAXIMUM VISIBILITY */
+/* Optimized Glass Header - Reduced Complexity */
 .glass-header {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.1) 0%, 
     rgba(248, 253, 248, 0.05) 50%, 
     rgba(255, 255, 255, 0.15) 100%
   ) !important;
-  backdrop-filter: blur(60px) saturate(300%) !important;
-  border-bottom: 6px solid #d4af37 !important;
-  border-top: 4px solid #ffd700 !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 3px solid #d4af37 !important;
   box-shadow: 
-    0 0 50px rgba(255, 215, 0, 0.8) !important,
-    0 20px 80px rgba(45, 80, 22, 0.4) !important,
-    0 10px 40px rgba(212, 175, 55, 0.6) !important,
-    0 5px 0px rgba(255, 255, 255, 1) inset !important,
-    0 -5px 0px rgba(212, 175, 55, 0.8) inset !important;
+    0 10px 30px rgba(45, 80, 22, 0.2) !important,
+    0 5px 15px rgba(212, 175, 55, 0.3) !important;
   position: relative;
   transform: translateZ(0) !important;
 }
@@ -979,12 +975,7 @@ img[loading="lazy"] {
     touch-action: manipulation;
   }
   
-  /* Improve touch feedback */
-  .touch-manipulation {
-    touch-action: manipulation;
-  }
-  
-  /* Reduce animation complexity */
+  /* Reduce animation complexity for better performance */
   .animate-pulse {
     animation: none;
   }
@@ -992,6 +983,16 @@ img[loading="lazy"] {
   /* Optimize for touch scrolling */
   .overflow-auto, .overflow-scroll {
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Reduce backdrop filter complexity on mobile */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Simplify shadows on mobile */
+  .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   }
 }
 

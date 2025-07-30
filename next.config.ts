@@ -1,42 +1,63 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Disable caching in development
+  // Performance optimizations
   experimental: {
     optimizeCss: true,
-    // Force fresh builds
-    forceSwcTransforms: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
   
-  // Suppress hydration warnings caused by browser extensions
-  reactStrictMode: false,
+  // Enable strict mode for better performance
+  reactStrictMode: true,
   
-  // Webpack configuration to prevent caching issues
+  // Optimized webpack configuration
   webpack: (config, { dev, isServer }) => {
-    if (dev && !isServer) {
-      // Disable caching for development
-      config.cache = false;
+    if (!dev && !isServer) {
+      // Optimize bundle splitting for production
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+          },
+        },
+      };
     }
     
-    // Add plugin to suppress hydration warnings
-    config.plugins.push(
-      new (require('webpack')).DefinePlugin({
-        'process.env.SUPPRESS_HYDRATION_WARNING': JSON.stringify('true'),
-      })
-    );
+    // Add compression for better performance
+    if (!dev) {
+      config.plugins.push(
+        new (require('compression-webpack-plugin'))({
+          test: /\.(js|css|html|svg)$/,
+          algorithm: 'gzip',
+        })
+      );
+    }
     
     return config;
   },
   
-  // Disable static optimization for dynamic content
+  // Optimize for better performance
   trailingSlash: false,
   
-  // Disable image optimization in development
+  // Optimize images
   images: {
     unoptimized: process.env.NODE_ENV === 'development',
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   
-  // Add headers to prevent caching
+  // Optimize caching headers
   async headers() {
     return [
       {
@@ -49,12 +70,25 @@ const nextConfig: NextConfig = {
               : 'public, max-age=31536000, immutable',
           },
           {
-            key: 'Pragma',
-            value: process.env.NODE_ENV === 'development' ? 'no-cache' : '',
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
           },
           {
-            key: 'Expires',
-            value: process.env.NODE_ENV === 'development' ? '0' : '',
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
@@ -100,3 +134,4 @@ const nextConfig: NextConfig = {
 }
 
 export default nextConfig
+

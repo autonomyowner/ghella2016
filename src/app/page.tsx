@@ -32,6 +32,7 @@ export default function HomePage() {
   const { searchTerm, setSearchTerm, search, results, loading: searchLoading } = useSearch();
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('جميع الفئات');
+  const [videoLoaded, setVideoLoaded] = useState(false);
   
   useEffect(() => {
     setIsHydrated(true);
@@ -45,7 +46,7 @@ export default function HomePage() {
     }
   };
 
-  // Prevent hydration mismatch with proper layout preservation
+  // Optimized loading state
   if (!isHydrated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 to-gray-900">
@@ -187,13 +188,24 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen min-w-[320px] mx-auto bg-gradient-to-br from-green-900 to-gray-900 text-white">
-      {/* Hero Section with Video Background */}
+      {/* Hero Section with Optimized Video Background */}
       <div id="hero" className="relative h-screen w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden max-w-none">
         <video 
           autoPlay 
           loop 
           playsInline 
+          muted
+          preload="metadata"
           className="object-cover w-screen h-full absolute top-0 left-0 z-0 min-w-full min-h-full"
+          onLoadedData={() => {
+            // Video loaded, remove loading state
+            const loadingElements = document.querySelectorAll('[class*="animate-spin"]');
+            loadingElements.forEach(el => {
+              if (el.classList.contains('animate-spin')) {
+                (el as HTMLElement).style.display = 'none';
+              }
+            });
+          }}
         >
           <source src="/assets/Videoplayback1.mp4" type="video/mp4" />
           Your browser does not support the video tag.

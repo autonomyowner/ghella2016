@@ -80,83 +80,10 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#2d5016" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Preconnect to external domains */}
+        {/* Critical preconnect only */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://puvmqdnvofbtmqpcjmia.supabase.co" />
-        
-        {/* DNS prefetch for performance */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-        <link rel="dns-prefetch" href="//puvmqdnvofbtmqpcjmia.supabase.co" />
-        
-        {/* Browser Extension Cleanup Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Suppress hydration warnings caused by browser extensions
-              (function() {
-                // Suppress console warnings for hydration mismatches
-                const originalError = console.error;
-                console.error = function(...args) {
-                  const message = args[0];
-                  if (typeof message === 'string' && 
-                      (message.includes('hydration') || 
-                       message.includes('bis_skin_checked') || 
-                       message.includes('bis_use') ||
-                       message.includes('A tree hydrated but some attributes'))) {
-                    return; // Suppress these specific errors
-                  }
-                  originalError.apply(console, args);
-                };
-
-                // Clean up browser extension attributes
-                function cleanupBrowserExtensions() {
-                  const elements = document.querySelectorAll('[bis_skin_checked], [bis_use], [data-bis-config]');
-                  elements.forEach(element => {
-                    element.removeAttribute('bis_skin_checked');
-                    element.removeAttribute('bis_use');
-                    element.removeAttribute('data-bis-config');
-                  });
-                }
-
-                // Run cleanup when DOM is ready
-                if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', cleanupBrowserExtensions);
-                } else {
-                  cleanupBrowserExtensions();
-                }
-
-                // Run cleanup periodically to catch new elements
-                setInterval(cleanupBrowserExtensions, 1000);
-              })();
-            `
-          }}
-        />
-        
-        {/* Preload critical resources - only on main pages */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (!window.location.pathname.includes('/test-') && 
-                  !window.location.pathname.includes('/debug') && 
-                  !window.location.pathname.includes('/fix-')) {
-                const videoLink = document.createElement('link');
-                videoLink.rel = 'preload';
-                videoLink.href = '/assets/Videoplayback1.mp4';
-                videoLink.as = 'video';
-                videoLink.type = 'video/mp4';
-                document.head.appendChild(videoLink);
-                
-                const imageLink = document.createElement('link');
-                imageLink.rel = 'preload';
-                imageLink.href = '/assets/hero-bg.jpg';
-                imageLink.as = 'image';
-                document.head.appendChild(imageLink);
-              }
-            `
-          }}
-        />
         
         {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
