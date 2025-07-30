@@ -101,8 +101,8 @@ export default function TestClearMarketplaces() {
                   {Object.entries(result.results || {}).map(([table, status]) => (
                     <div key={table} className="text-sm">
                       <span className="font-medium">{table}:</span>{' '}
-                      <span className={status.includes('Error') ? 'text-red-600' : 'text-green-600'}>
-                        {status}
+                      <span className={typeof status === 'string' && status.includes('Error') ? 'text-red-600' : 'text-green-600'}>
+                        {String(status)}
                       </span>
                     </div>
                   ))}

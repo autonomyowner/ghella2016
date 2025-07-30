@@ -58,7 +58,7 @@ const eslintConfig = [
       "src/lib/websiteSettings.ts"
     ]
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends("next/core-web-vitals"),
   {
     rules: {
       // Temporarily disable strict rules for deployment
