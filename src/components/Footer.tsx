@@ -1,11 +1,52 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useWebsiteSettings } from '@/lib/websiteSettings';
 import Link from 'next/link';
 
 export default function Footer() {
   const { settings } = useWebsiteSettings();
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          full_name: fullName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage('تم الاشتراك بنجاح! شكراً لك.');
+        setMessageType('success');
+        setEmail('');
+        setFullName('');
+      } else {
+        setMessage(data.error || 'حدث خطأ أثناء الاشتراك. يرجى المحاولة مرة أخرى.');
+        setMessageType('error');
+      }
+    } catch (error) {
+      setMessage('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -25,6 +66,56 @@ export default function Footer() {
             <p className="text-gray-300 mb-6 leading-relaxed">
               {settings.site_description}
             </p>
+            
+            {/* Newsletter Subscription */}
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold mb-3 text-emerald-400">اشترك في النشرة الإخبارية</h4>
+              <p className="text-sm text-gray-400 mb-4">احصل على آخر الأخبار والنصائح الزراعية</p>
+              
+              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    placeholder="الاسم الكامل (اختياري)"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500"
+                  />
+                  <input
+                    type="email"
+                    placeholder="البريد الإلكتروني *"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full sm:w-auto px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      جاري الاشتراك...
+                    </>
+                  ) : (
+                    'اشترك الآن'
+                  )}
+                </button>
+              </form>
+              
+              {message && (
+                <div className={`mt-3 p-3 rounded-lg text-sm ${
+                  messageType === 'success' 
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                    : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                }`}>
+                  {message}
+                </div>
+              )}
+            </div>
             
             {/* Social Media Links */}
             <div className="flex space-x-4 space-x-reverse">
@@ -115,17 +206,17 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/services" className="text-gray-300 hover:text-emerald-400 transition-colors">
-                  الخدمات
-                </Link>
-              </li>
-              <li>
-                <Link href="/marketplace" className="text-gray-300 hover:text-emerald-400 transition-colors">
-                  السوق
+                  خدماتنا
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-300 hover:text-emerald-400 transition-colors">
                   اتصل بنا
+                </Link>
+              </li>
+              <li>
+                <Link href="/marketplace" className="text-gray-300 hover:text-emerald-400 transition-colors">
+                  السوق
                 </Link>
               </li>
             </ul>

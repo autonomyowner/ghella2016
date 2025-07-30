@@ -1,48 +1,59 @@
--- Clear all test data from marketplace tables
--- This script will remove all posts from vegetables, land, equipment, animals, and nurseries tables
--- while preserving the table structure and RLS policies
+-- =====================================================
+-- Clear Test Data from Communication Tables
+-- =====================================================
 
--- First, let's check what data exists in each table
-SELECT 'vegetables' as table_name, COUNT(*) as record_count FROM vegetables
-UNION ALL
-SELECT 'land_listings' as table_name, COUNT(*) as record_count FROM land_listings
-UNION ALL
-SELECT 'equipment' as table_name, COUNT(*) as record_count FROM equipment
-UNION ALL
-SELECT 'animal_listings' as table_name, COUNT(*) as record_count FROM animal_listings
-UNION ALL
-SELECT 'nurseries' as table_name, COUNT(*) as record_count FROM nurseries;
+-- Clear contact messages (keep only real submissions)
+DELETE FROM contact_messages 
+WHERE email LIKE '%test%' 
+   OR email LIKE '%example%' 
+   OR name LIKE '%Test%' 
+   OR name LIKE '%API%'
+   OR subject LIKE '%Test%'
+   OR subject LIKE '%API%';
 
--- Clear vegetables table
-DELETE FROM vegetables WHERE id IS NOT NULL;
+-- Clear newsletter subscriptions (keep only real subscriptions)
+DELETE FROM newsletter_subscriptions 
+WHERE email LIKE '%test%' 
+   OR email LIKE '%example%'
+   OR full_name LIKE '%Test%'
+   OR full_name LIKE '%API%';
 
--- Clear land_listings table
-DELETE FROM land_listings WHERE id IS NOT NULL;
+-- Clear expert applications (keep only real applications)
+DELETE FROM expert_applications 
+WHERE email LIKE '%test%' 
+   OR email LIKE '%example%'
+   OR full_name LIKE '%Test%'
+   OR full_name LIKE '%API%'
+   OR specialization LIKE '%Test%';
 
--- Clear equipment table
-DELETE FROM equipment WHERE id IS NOT NULL;
+-- Clear admin messages (keep only real messages)
+DELETE FROM admin_messages 
+WHERE title LIKE '%Test%' 
+   OR title LIKE '%API%'
+   OR message LIKE '%Test%'
+   OR message LIKE '%API%';
 
--- Clear animal_listings table
-DELETE FROM animal_listings WHERE id IS NOT NULL;
+-- Display results
+SELECT '✅ Test data cleared successfully!' as status;
+SELECT '📊 Remaining data:' as info;
 
--- Clear nurseries table
-DELETE FROM nurseries WHERE id IS NOT NULL;
-
--- Verify all tables are empty
-SELECT 'vegetables' as table_name, COUNT(*) as record_count FROM vegetables
+-- Show remaining data counts
+SELECT 
+    'contact_messages' as table_name,
+    COUNT(*) as remaining_count
+FROM contact_messages
 UNION ALL
-SELECT 'land_listings' as table_name, COUNT(*) as record_count FROM land_listings
+SELECT 
+    'newsletter_subscriptions' as table_name,
+    COUNT(*) as remaining_count
+FROM newsletter_subscriptions
 UNION ALL
-SELECT 'equipment' as table_name, COUNT(*) as record_count FROM equipment
+SELECT 
+    'expert_applications' as table_name,
+    COUNT(*) as remaining_count
+FROM expert_applications
 UNION ALL
-SELECT 'animal_listings' as table_name, COUNT(*) as record_count FROM animal_listings
-UNION ALL
-SELECT 'nurseries' as table_name, COUNT(*) as record_count FROM nurseries;
-
--- Reset auto-increment sequences (if any)
--- Note: This is only needed if you want to reset the ID counters
--- ALTER SEQUENCE vegetables_id_seq RESTART WITH 1;
--- ALTER SEQUENCE land_listings_id_seq RESTART WITH 1;
--- ALTER SEQUENCE equipment_id_seq RESTART WITH 1;
--- ALTER SEQUENCE animal_listings_id_seq RESTART WITH 1;
--- ALTER SEQUENCE nurseries_id_seq RESTART WITH 1; 
+SELECT 
+    'admin_messages' as table_name,
+    COUNT(*) as remaining_count
+FROM admin_messages; 

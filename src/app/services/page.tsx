@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import ExpertApplicationForm from "@/components/ExpertApplicationForm";
 
 interface Service {
   id: number;
@@ -67,6 +68,23 @@ const services: Service[] = [
     },
     icon: "🚚",
     color: "from-blue-500 to-cyan-500"
+  },
+  {
+    id: 4,
+    title: "انضم كخبير في الغلة",
+    description: "هل أنت خبير في المجال الزراعي؟ انضم إلى فريق خبراء الغلة وشارك خبرتك مع المزارعين والمستثمرين في جميع أنحاء الجزائر.",
+    features: [
+      "فرصة للعمل مع أكبر منصة زراعية في الجزائر",
+      "دخل إضافي من خلال الاستشارات والدراسات",
+      "شبكة علاقات واسعة في القطاع الزراعي",
+      "دعم كامل وتدريب متخصص"
+    ],
+    cta: {
+      primary: "انضم كخبير",
+      secondary: "تواصل معنا"
+    },
+    icon: "👨‍🌾",
+    color: "from-green-500 to-emerald-500"
   }
 ];
 
@@ -74,15 +92,32 @@ const serviceCategories = [
   { id: "all", label: "جميع الخدمات", icon: "🌍" },
   { id: "analysis", label: "تحليل ودراسات", icon: "🔬" },
   { id: "consultation", label: "استشارات متقدمة", icon: "🏢" },
-  { id: "delivery", label: "خدمات التوصيل", icon: "🚚" }
+  { id: "delivery", label: "خدمات التوصيل", icon: "🚚" },
+  { id: "experts", label: "انضم كخبير", icon: "👨‍🌾" }
 ];
 
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showExpertForm, setShowExpertForm] = useState(false);
 
   const filteredServices = services.filter(service => {
-    return selectedCategory === "all" || service.id.toString() === selectedCategory;
+    if (selectedCategory === "all") return true;
+    if (selectedCategory === "analysis") return service.id === 1;
+    if (selectedCategory === "consultation") return service.id === 2;
+    if (selectedCategory === "delivery") return service.id === 3;
+    if (selectedCategory === "experts") return service.id === 4;
+    return false;
   });
+
+  const handleServiceAction = (serviceId: number, action: string) => {
+    if (serviceId === 4 && action === "primary") {
+      // Open expert application form
+      setShowExpertForm(true);
+    } else {
+      // Handle other service actions (contact, etc.)
+      console.log(`Service ${serviceId} action: ${action}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 pt-20">
@@ -120,7 +155,7 @@ export default function ServicesPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, index) => (
               <motion.div
                 key={service.id}
@@ -173,7 +208,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Services Grid */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredServices.map((service, index) => (
               <motion.div
                 key={service.id}
@@ -206,11 +241,17 @@ export default function ServicesPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="btn-primary-arabic flex-1">
+                  <button 
+                    className="btn-primary-arabic flex-1"
+                    onClick={() => handleServiceAction(service.id, 'primary')}
+                  >
                     <i className="fas fa-handshake ml-2"></i>
                     {service.cta.primary}
                   </button>
-                  <button className="btn-secondary-arabic flex-1">
+                  <button 
+                    className="btn-secondary-arabic flex-1"
+                    onClick={() => handleServiceAction(service.id, 'secondary')}
+                  >
                     <i className="fas fa-phone ml-2"></i>
                     {service.cta.secondary}
                   </button>
@@ -240,6 +281,12 @@ export default function ServicesPage() {
           )}
         </div>
       </section>
+
+      {/* Expert Application Form Modal */}
+      <ExpertApplicationForm 
+        isOpen={showExpertForm}
+        onClose={() => setShowExpertForm(false)}
+      />
     </div>
   );
 }

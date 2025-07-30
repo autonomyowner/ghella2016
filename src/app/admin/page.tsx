@@ -272,11 +272,22 @@ export default function AdminPanel() {
             </div>
           </Link>
 
+          {/* إدارة الرسائل */}
+          <Link href="/admin/messages" className="group">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-emerald-200 hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+                <i className="fas fa-envelope text-purple-600 text-2xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">إدارة الرسائل</h3>
+              <p className="text-gray-600 text-sm">إدارة رسائل الاتصال وطلبات الخبراء والقائمة البريدية</p>
+            </div>
+          </Link>
+
           {/* إدارة الطلبات */}
           <Link href="/admin/orders" className="group">
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-emerald-200 hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                <i className="fas fa-shopping-cart text-purple-600 text-2xl"></i>
+              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
+                <i className="fas fa-shopping-cart text-orange-600 text-2xl"></i>
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">إدارة الطلبات</h3>
               <p className="text-gray-600 text-sm">متابعة وإدارة طلبات الشراء والخدمات</p>

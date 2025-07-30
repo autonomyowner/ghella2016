@@ -14,7 +14,8 @@ const ProfilePage: React.FC = () => {
   const [userListings, setUserListings] = useState<{
     equipment: Equipment[];
     land: LandListing[];
-  }>({ equipment: [], land: [] });
+    animals: any[];
+  }>({ equipment: [], land: [], animals: [] });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -69,9 +70,21 @@ const ProfilePage: React.FC = () => {
         console.error('Error fetching land listings:', landError);
       }
 
+      // Fetch animals listings
+      const { data: animalsData, error: animalsError } = await supabase
+        .from('animals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (animalsError) {
+        console.error('Error fetching animals:', animalsError);
+      }
+
       setUserListings({
         equipment: equipmentData || [],
-        land: landData || []
+        land: landData || [],
+        animals: animalsData || []
       });
     } catch (error) {
       console.error('Error fetching user listings:', error);
@@ -106,11 +119,11 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleDeleteListing = async (type: 'equipment' | 'land', id: string) => {
+  const handleDeleteListing = async (type: 'equipment' | 'land' | 'animals', id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الإعلان؟')) return;
 
     try {
-      const tableName = type === 'equipment' ? 'equipment' : 'land_listings';
+      const tableName = type === 'equipment' ? 'equipment' : type === 'land' ? 'land_listings' : 'animals';
       const { error } = await supabase
         .from(tableName)
         .delete()
@@ -352,8 +365,34 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
 
+            {/* Animals Listings */}
+            {userListings.animals.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-white mb-4">الحيوانات</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {userListings.animals.map((animal) => (
+                    <div key={animal.id} className="bg-white/10 rounded-lg p-4 border border-white/20">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-white font-medium">{animal.title}</h4>
+                        <button
+                          onClick={() => handleDeleteListing('animals', animal.id)}
+                          className="text-red-400 hover:text-red-300 text-sm"
+                          aria-label="حذف الإعلان"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                      <p className="text-green-200 text-sm mb-2">{animal.description}</p>
+                      <p className="text-white font-bold">{formatPrice(animal.price, animal.currency)}</p>
+                      <p className="text-white/70 text-xs">{formatDate(animal.created_at)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Empty State */}
-            {userListings.equipment.length === 0 && userListings.land.length === 0 && (
+            {userListings.equipment.length === 0 && userListings.land.length === 0 && userListings.animals.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-white/70 mb-4">لا توجد إعلانات حتى الآن</p>
                 <div className="flex gap-4 justify-center">
@@ -368,6 +407,12 @@ const ProfilePage: React.FC = () => {
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
                     إضافة أرض
+                  </Link>
+                  <Link
+                    href="/animals/new"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    إضافة حيوانات
                   </Link>
                 </div>
               </div>
