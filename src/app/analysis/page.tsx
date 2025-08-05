@@ -127,24 +127,24 @@ const AnalysisPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
             {/* Main Title */}
-            <motion.h1 
+            <motion.div 
               className="text-5xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-green-300 via-green-200 to-green-400 bg-clip-text text-transparent drop-shadow-lg"
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
             >
-              خدمات التحليل والدراسات
-            </motion.h1>
+              <h1>خدمات التحليل والدراسات</h1>
+            </motion.div>
             
             {/* Subtitle */}
-            <motion.p 
+            <motion.div 
               className="text-xl lg:text-2xl mb-12 text-white/95 max-w-4xl mx-auto leading-relaxed font-medium"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.4 }}
             >
-              خدمات تحليل متقدمة للتربة والمحاصيل باستخدام أحدث التقنيات والأقمار الصناعية
-            </motion.p>
+              <p>خدمات تحليل متقدمة للتربة والمحاصيل باستخدام أحدث التقنيات والأقمار الصناعية</p>
+            </motion.div>
           </div>
         </div>
       </section>

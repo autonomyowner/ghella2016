@@ -151,22 +151,22 @@ export default function ServicesPage() {
       <section className="py-16 bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
-            <motion.h1 
+            <motion.div
               className="text-4xl lg:text-6xl font-bold mb-6 arabic-title"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              خدمات الغلة
-            </motion.h1>
-            <motion.p 
+              <h1>خدمات الغلة</h1>
+            </motion.div>
+            <motion.div
               className="text-xl lg:text-2xl mb-8 opacity-90 max-w-3xl mx-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              اربط منتجاتك بالأسواق العالمية ووسع نطاق تجارتك الزراعية
-            </motion.p>
+              <p>اربط منتجاتك بالأسواق العالمية ووسع نطاق تجارتك الزراعية</p>
+            </motion.div>
           </div>
         </div>
       </section>

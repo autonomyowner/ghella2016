@@ -275,7 +275,7 @@ export default function CategoriesPage() {
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm transition-all duration-300 border border-white/20 hover:border-emerald-500/50"
                 onClick={() => setSearchQuery(search)}
               >
-                {search}
+                <span>{search}</span>
               </motion.button>
             ))}
           </div>

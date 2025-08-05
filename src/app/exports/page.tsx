@@ -187,22 +187,22 @@ export default function ExportsPage() {
             >
               🚢
             </motion.div>
-            <motion.h1 
+            <motion.div
               className="text-4xl lg:text-6xl font-bold mb-6 arabic-title"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              صفقات التصدير
-            </motion.h1>
-            <motion.p 
+              <h1>صفقات التصدير</h1>
+            </motion.div>
+            <motion.div
               className="text-xl lg:text-2xl mb-8 opacity-90 max-w-3xl mx-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              اربط منتجاتك بالأسواق العالمية ووسع نطاق تجارتك الزراعية
-            </motion.p>
+              <p>اربط منتجاتك بالأسواق العالمية ووسع نطاق تجارتك الزراعية</p>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -469,22 +469,22 @@ export default function ExportsPage() {
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-green-800 to-yellow-700 text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.h2 
+          <motion.div
             className="text-3xl lg:text-4xl font-bold mb-6"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            ابدأ تصدير منتجاتك اليوم
-          </motion.h2>
-          <motion.p 
+            <h2>ابدأ تصدير منتجاتك اليوم</h2>
+          </motion.div>
+          <motion.div
             className="text-xl mb-8 opacity-90"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            انضم إلى شبكة المصدرين الجزائريين ووسع نطاق تجارتك
-          </motion.p>
+            <p>انضم إلى شبكة المصدرين الجزائريين ووسع نطاق تجارتك</p>
+          </motion.div>
           <motion.div 
             className="flex flex-col sm:flex-row gap-4 justify-center"
             initial={{ opacity: 0, y: 30 }}

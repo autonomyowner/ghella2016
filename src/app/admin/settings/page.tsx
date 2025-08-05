@@ -228,7 +228,7 @@ export default function AdminSettings() {
                 : 'bg-red-100 text-red-800 border border-red-200'
             }`}
           >
-            {message}
+            <span>{message}</span>
           </motion.div>
         )}
 

@@ -1,16 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/supabaseClient'
-import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
-
-// Dynamic import for framer-motion to avoid SSR issues
-const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { 
-  ssr: false,
-  loading: () => <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 max-w-md mx-auto" />
-})
 
 export default function AuthCallback() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -68,57 +62,59 @@ export default function AuthCallback() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 flex items-center justify-center" dir="rtl">
       <div className="text-center">
-        <MotionDiv
+        <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 max-w-md mx-auto"
         >
-          {status === 'loading' && (
-            <MotionDiv
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"
-            />
-          )}
-          
-          {status === 'success' && (
-            <MotionDiv
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <CheckCircle className="w-8 h-8 text-white" />
-            </MotionDiv>
-          )}
-          
-          {status === 'error' && (
-            <MotionDiv
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <XCircle className="w-8 h-8 text-white" />
-            </MotionDiv>
-          )}
+          <React.Fragment>
+            {status === 'loading' && (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"
+              />
+            )}
+            
+            {status === 'success' && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"
+              >
+                <CheckCircle className="w-8 h-8 text-white" />
+              </motion.div>
+            )}
+            
+            {status === 'error' && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4"
+              >
+                <XCircle className="w-8 h-8 text-white" />
+              </motion.div>
+            )}
 
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {status === 'loading' && 'جاري التحقق...'}
-            {status === 'success' && 'تم بنجاح!'}
-            {status === 'error' && 'حدث خطأ'}
-          </h2>
-          
-          <p className="text-gray-300 mb-6">
-            {message}
-          </p>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              {status === 'loading' && 'جاري التحقق...'}
+              {status === 'success' && 'تم بنجاح!'}
+              {status === 'error' && 'حدث خطأ'}
+            </h2>
+            
+            <p className="text-gray-300 mb-6">
+              {message}
+            </p>
 
-          {status === 'loading' && (
-            <div className="flex items-center justify-center gap-2 text-emerald-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm">يرجى الانتظار...</span>
-            </div>
-          )}
-        </MotionDiv>
+            {status === 'loading' && (
+              <div className="flex items-center justify-center gap-2 text-emerald-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">يرجى الانتظار...</span>
+              </div>
+            )}
+          </React.Fragment>
+        </motion.div>
       </div>
     </div>
   )

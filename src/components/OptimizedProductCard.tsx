@@ -94,7 +94,7 @@ const OptimizedProductCard = memo(({
   }, [id]);
 
   return (
-    <motion.article
+    <motion.div
       initial={{ opacity: 0, y: 24, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       whileHover={{ scale: 1.025, boxShadow: '0 8px 32px 0 rgba(34,197,94,0.16), 0 1.5px 6px 0 rgba(0,0,0,0.04)' }}
@@ -107,6 +107,7 @@ const OptimizedProductCard = memo(({
       aria-label={title}
       onClick={handleClick}
     >
+      <article>
     
       {/* Featured Ribbon */}
       {isFeatured && (
@@ -252,7 +253,8 @@ const OptimizedProductCard = memo(({
           )}
         </div>
       </div>
-    </motion.article>
+      </article>
+    </motion.div>
   );
 });
 

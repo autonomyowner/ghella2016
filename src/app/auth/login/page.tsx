@@ -200,22 +200,22 @@ export default function LoginPage() {
                 <Sparkles className="w-6 h-6 text-emerald-400 mr-2" />
                 <span className="text-emerald-400 font-medium">مرحباً بك مرة أخرى</span>
               </motion.div>
-              <motion.h1 
+              <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-4xl font-bold text-white mb-4"
               >
-                سجل دخولك
-              </motion.h1>
-              <motion.p 
+                <h1>سجل دخولك</h1>
+              </motion.div>
+              <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="text-xl text-gray-300"
               >
-                للوصول إلى حسابك والاستفادة من جميع الخدمات
-              </motion.p>
+                <p>للوصول إلى حسابك والاستفادة من جميع الخدمات</p>
+              </motion.div>
             </div>
 
             {/* Login Form */}
@@ -290,39 +290,42 @@ export default function LoginPage() {
 
                 {/* Error Message */}
                 <AnimatePresence>
-                  {error && (
+                  {error ? (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className="p-4 rounded-xl bg-red-500/20 border border-red-500/30 text-red-200 text-sm"
                     >
-                      {error}
+                      <span>{error}</span>
                     </motion.div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
 
                 {/* Submit Button */}
-                <motion.button
-                  type="submit"
-                  disabled={isLoading}
+                <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => console.log('Login button clicked')}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      جاري تسجيل الدخول...
-                    </>
-                  ) : (
-                    <>
-                      تسجيل الدخول
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </motion.button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    onClick={() => console.log('Login button clicked')}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        جاري تسجيل الدخول...
+                      </>
+                    ) : (
+                      <>
+                        تسجيل الدخول
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </motion.div>
 
                 {/* Divider */}
                 <div className="relative">
@@ -336,28 +339,34 @@ export default function LoginPage() {
 
                 {/* Social Login */}
                 <div className="grid grid-cols-2 gap-3">
-                  <motion.button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoading}
+                  <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Globe className="w-5 h-5" />
-                    <span className="text-sm">Google</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={handleFacebookLogin}
-                    disabled={isLoading}
+                    <button
+                      type="button"
+                      onClick={handleGoogleLogin}
+                      disabled={isLoading}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Globe className="w-5 h-5" />
+                      <span className="text-sm">Google</span>
+                    </button>
+                  </motion.div>
+                  <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    <span className="text-sm">Facebook</span>
-                  </motion.button>
+                    <button
+                      type="button"
+                      onClick={handleFacebookLogin}
+                      disabled={isLoading}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      <span className="text-sm">Facebook</span>
+                    </button>
+                  </motion.div>
                 </div>
               </form>
 
@@ -382,14 +391,14 @@ export default function LoginPage() {
           >
             {/* Features */}
             <div className="mb-12">
-              <motion.h2
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-bold text-white mb-8 text-center"
               >
-                لماذا تختار الغلة؟
-              </motion.h2>
+                <h2>لماذا تختار الغلة؟</h2>
+              </motion.div>
               <div className="grid grid-cols-2 gap-6">
                 {features.map((feature, index) => (
                   <motion.div

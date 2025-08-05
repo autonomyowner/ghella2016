@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Image from 'next/image';
 
-const AnalysisFormPage: React.FC = () => {
+const AnalysisFormPage = (): ReactElement => {
   const router = useRouter();
   const { addAnalysis, isOnline, isWithinLimits } = useSupabaseData();
   const { user } = useSupabaseAuth();
@@ -135,18 +135,19 @@ const AnalysisFormPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">إضافة خدمة تحليل ودراسات</h1>
-            <p className="text-gray-600">سجل خدمات التحليل والدراسات الخاصة بك للمنتجات الزراعية</p>
-          </div>
+          <React.Fragment>
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">إضافة خدمة تحليل ودراسات</h1>
+              <p className="text-gray-600">سجل خدمات التحليل والدراسات الخاصة بك للمنتجات الزراعية</p>
+            </div>
 
           {/* Status Indicator */}
           {(!isOnline || !isWithinLimits) && (
             <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-700">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
-                {!isOnline ? 'وضع عدم الاتصال - سيتم حفظ البيانات محلياً' : 'استخدام التخزين المحلي'}
+                <span>{!isOnline ? 'وضع عدم الاتصال - سيتم حفظ البيانات محلياً' : 'استخدام التخزين المحلي'}</span>
               </div>
             </div>
           )}
@@ -154,7 +155,7 @@ const AnalysisFormPage: React.FC = () => {
           {/* Error Message */}
           {error && (
             <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-700">
-              {error}
+              <span>{error}</span>
             </div>
           )}
 
@@ -517,6 +518,7 @@ const AnalysisFormPage: React.FC = () => {
               </button>
             </div>
           </form>
+          </React.Fragment>
         </motion.div>
       </div>
     </div>

@@ -82,11 +82,12 @@ const BottomNav: React.FC = () => {
   return (
     <>
       {/* Bottom Navigation */}
-      <motion.nav
+      <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
       >
+        <nav>
         <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 mx-4 mb-4 rounded-2xl">
           <div className="flex items-center justify-around p-2">
             {navItems.map((item) => (
@@ -172,7 +173,8 @@ const BottomNav: React.FC = () => {
             </div>
           </div>
         </div>
-      </motion.nav>
+        </nav>
+      </motion.div>
 
       {/* Backdrop for menu */}
       <AnimatePresence>

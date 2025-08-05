@@ -190,9 +190,9 @@ const AnimalDetailPage: React.FC = () => {
     try {
       const result = await deleteAnimal(animal.id);
       
-      if (result.error) {
+      if (!result.success) {
         alert('حدث خطأ أثناء حذف الإعلان');
-        console.error('Error deleting animal:', result.error);
+        console.error('Error deleting animal:', result);
       } else {
         alert('تم حذف الإعلان بنجاح');
         router.push('/animals');

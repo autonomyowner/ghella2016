@@ -7,7 +7,7 @@ import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Image from 'next/image';
 
-const DeliveryFormPage: React.FC = () => {
+const DeliveryFormPage = (): React.JSX.Element => {
   const router = useRouter();
   const { addDelivery, isOnline, isWithinLimits } = useSupabaseData();
   const { user } = useSupabaseAuth();
@@ -151,21 +151,21 @@ const DeliveryFormPage: React.FC = () => {
           </div>
 
           {/* Status Indicator */}
-          {(!isOnline || !isWithinLimits) && (
+          {(!isOnline || !isWithinLimits) ? (
             <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-700">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
-                {!isOnline ? 'وضع عدم الاتصال - سيتم حفظ البيانات محلياً' : 'استخدام التخزين المحلي'}
+                <span>{!isOnline ? 'وضع عدم الاتصال - سيتم حفظ البيانات محلياً' : 'استخدام التخزين المحلي'}</span>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Error Message */}
-          {error && (
+          {error ? (
             <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-700">
-              {error}
+              <span>{error}</span>
             </div>
-          )}
+          ) : null}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8">
@@ -595,7 +595,7 @@ const DeliveryFormPage: React.FC = () => {
                 disabled={loading}
                 className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
               >
-                {loading ? 'جاري الإضافة...' : 'إضافة الخدمة'}
+                <span>{loading ? 'جاري الإضافة...' : 'إضافة الخدمة'}</span>
               </button>
               <button
                 type="button"

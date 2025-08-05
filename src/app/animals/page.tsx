@@ -251,28 +251,28 @@ const AnimalsListingsPage: React.FC = () => {
               transition={{ duration: 1, ease: "easeOut" }}
               className="text-8xl mb-8 drop-shadow-2xl"
             >
-              🐄
+              <span>🐄</span>
             </motion.div>
 
             {/* Main Title */}
-            <motion.h1 
+            <motion.div 
               className="text-5xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-orange-300 via-red-300 to-yellow-400 bg-clip-text text-transparent drop-shadow-lg"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              الحيوانات الزراعية
-            </motion.h1>
+              <h1>الحيوانات الزراعية</h1>
+            </motion.div>
 
             {/* Subtitle */}
-            <motion.p 
+            <motion.div 
               className="text-xl lg:text-2xl mb-12 opacity-90 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.4 }}
             >
-              اكتشف أفضل الحيوانات الزراعية للبيع في جميع أنحاء الجزائر
-            </motion.p>
+              <p>اكتشف أفضل الحيوانات الزراعية للبيع في جميع أنحاء الجزائر</p>
+            </motion.div>
 
             {/* Status Indicator */}
             {(!isOnline || !isWithinLimits) && (
@@ -282,7 +282,7 @@ const AnimalsListingsPage: React.FC = () => {
                 className="inline-flex items-center px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm mb-8"
               >
                 <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
-                {!isOnline ? 'وضع عدم الاتصال' : 'استخدام التخزين المحلي'}
+                <span>{!isOnline ? 'وضع عدم الاتصال' : 'استخدام التخزين المحلي'}</span>
               </motion.div>
             )}
 
@@ -382,7 +382,7 @@ const AnimalsListingsPage: React.FC = () => {
 
             {/* Advanced Filters */}
             <AnimatePresence>
-              {showFilters && (
+              {showFilters ? (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -461,7 +461,7 @@ const AnimalsListingsPage: React.FC = () => {
             </button>
                   </div>
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
         </div>
 
@@ -493,15 +493,14 @@ const AnimalsListingsPage: React.FC = () => {
           ) : listings.length > 0 ? (
             <>
               <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-4'}`}>
-                <AnimatePresence>
-                  {listings.map((animal, index) => (
-                    <motion.div
-                      key={animal.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
-                    >
+                {listings.map((animal, index) => (
+                  <motion.div
+                    key={animal.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${viewMode === 'list' ? 'flex gap-4' : ''}`}
+                  >
                       {/* Animal Image */}
                       <div className={`${viewMode === 'list' ? 'w-32 h-24 flex-shrink-0' : 'h-48'} bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center overflow-hidden`}>
                         {animal.images && animal.images.length > 0 && animal.images[0] ? (
@@ -574,7 +573,6 @@ const AnimalsListingsPage: React.FC = () => {
                       </div>
                     </motion.div>
                   ))}
-                </AnimatePresence>
               </div>
 
             {/* Load More Button */}

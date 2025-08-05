@@ -99,24 +99,24 @@ const DeliveryPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
             {/* Main Title */}
-            <motion.h1 
+            <motion.div
               className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl"
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              تنقل مع الغلة
-            </motion.h1>
+              <h1>تنقل مع الغلة</h1>
+            </motion.div>
             
             {/* Subtitle */}
-            <motion.p 
+            <motion.div
               className="text-lg md:text-xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              نحن نسهّل على الفلاحين نقل منتجاتهم، معداتهم، واحتياجاتهم الزراعية أينما كانوا.
-            </motion.p>
+              <p>نحن نسهّل على الفلاحين نقل منتجاتهم، معداتهم، واحتياجاتهم الزراعية أينما كانوا.</p>
+            </motion.div>
           </div>
         </div>
       </section>

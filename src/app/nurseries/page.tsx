@@ -235,24 +235,24 @@ const NurseriesPage: React.FC = () => {
             </motion.div>
 
             {/* Main Title */}
-            <motion.h1 
+            <motion.div
               className="text-5xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-green-300 via-emerald-300 to-teal-400 bg-clip-text text-transparent drop-shadow-lg"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              المشاتل والشتلات
-            </motion.h1>
+              <h1>المشاتل والشتلات</h1>
+            </motion.div>
 
             {/* Subtitle */}
-            <motion.p 
+            <motion.div
               className="text-xl lg:text-2xl mb-12 opacity-90 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.4 }}
             >
-              اكتشف أفضل الشتلات والنباتات من مشاتل معتمدة في جميع أنحاء الجزائر
-            </motion.p>
+              <p>اكتشف أفضل الشتلات والنباتات من مشاتل معتمدة في جميع أنحاء الجزائر</p>
+            </motion.div>
 
             {/* Status Indicator */}
             {(!isOnline || !isWithinLimits) && (

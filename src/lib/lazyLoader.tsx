@@ -110,11 +110,14 @@ class LazyLoader {
       loadingPromise.then(component => ({ default: component }))
     );
 
-    return (props: React.ComponentProps<T>) => (
+    const WrappedComponent = (props: React.ComponentProps<T>) => (
       <Suspense fallback={fallback || this.getDefaultFallback(componentName)}>
         <LazyComponent {...props} />
       </Suspense>
     );
+    
+    WrappedComponent.displayName = `LazyLoaded(${componentName})`;
+    return WrappedComponent;
   }
 
   /**
