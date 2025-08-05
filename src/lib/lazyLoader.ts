@@ -25,7 +25,7 @@ class LazyLoader {
     importFn: () => Promise<{ default: T }>,
     componentName: string,
     options: LazyLoaderOptions = {}
-  ): ComponentType<T> {
+  ): ComponentType<React.ComponentProps<T>> {
     const { fallback, preload = false, timeout = 10000 } = options;
 
     // Check if already loaded
@@ -105,12 +105,12 @@ class LazyLoader {
     loadingPromise: Promise<T>,
     componentName: string,
     fallback?: React.ReactNode
-  ): ComponentType<T> {
+  ): ComponentType<React.ComponentProps<T>> {
     const LazyComponent = lazy(() => 
       loadingPromise.then(component => ({ default: component }))
     );
 
-    return (props: T) => (
+    return (props: React.ComponentProps<T>) => (
       <Suspense fallback={fallback || this.getDefaultFallback(componentName)}>
         <LazyComponent {...props} />
       </Suspense>
