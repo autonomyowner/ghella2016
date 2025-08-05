@@ -66,6 +66,9 @@ export default function AdminMessagesPage() {
   const [notesText, setNotesText] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [newsletterSubject, setNewsletterSubject] = useState('');
+  const [newsletterContent, setNewsletterContent] = useState('');
+  const [showNewsletterForm, setShowNewsletterForm] = useState(false);
 
   const tabs = [
     { id: 'contact', label: 'رسائل الاتصال', icon: MessageCircle, count: messages.filter(m => m.status === 'unread').length },
@@ -180,6 +183,11 @@ export default function AdminMessagesPage() {
   };
 
   const handleReply = async (id: string, type: string) => {
+    if (!replyText.trim()) {
+      alert('يرجى كتابة رد قبل الإرسال');
+      return;
+    }
+
     setActionLoading(id);
     try {
       const endpoint = type === 'contact' ? '/api/contact' : '/api/expert-application';
@@ -192,14 +200,56 @@ export default function AdminMessagesPage() {
         })
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        alert(result.message || 'تم إرسال الرد بنجاح!');
         setReplyText('');
         setSelectedMessage(null);
         setSelectedApplication(null);
         fetchData();
+      } else {
+        alert(result.error || 'حدث خطأ أثناء إرسال الرد');
       }
     } catch (error) {
       console.error('Error sending reply:', error);
+      alert('حدث خطأ في الاتصال بالخادم');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleSendNewsletter = async () => {
+    if (!newsletterSubject.trim() || !newsletterContent.trim()) {
+      alert('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    setActionLoading('newsletter');
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          subject: newsletterSubject,
+          content: newsletterContent
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(result.message || 'تم إرسال النشرة البريدية بنجاح!');
+        setNewsletterSubject('');
+        setNewsletterContent('');
+        setShowNewsletterForm(false);
+        fetchData();
+      } else {
+        alert(result.error || 'حدث خطأ أثناء إرسال النشرة البريدية');
+      }
+    } catch (error) {
+      console.error('Error sending newsletter:', error);
+      alert('حدث خطأ في الاتصال بالخادم');
     } finally {
       setActionLoading(null);
     }
@@ -490,45 +540,113 @@ export default function AdminMessagesPage() {
 
                 {activeTab === 'newsletter' && (
                   <div className="space-y-4">
-                    {newsletterSubscriptions.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Mail className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>لا توجد اشتراكات في القائمة البريدية حالياً</p>
-                      </div>
-                    ) : (
-                      newsletterSubscriptions.map((subscription) => (
-                        <div
-                          key={subscription.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    {/* Newsletter Send Form */}
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-800">إرسال نشرة بريدية</h3>
+                        <button
+                          onClick={() => setShowNewsletterForm(!showNewsletterForm)}
+                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                         >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="flex items-center space-x-2 space-x-reverse">
-                                <span className="font-semibold text-gray-800">{subscription.email}</span>
-                                {subscription.full_name && (
-                                  <>
-                                    <span className="text-gray-500">•</span>
-                                    <span className="text-gray-600">{subscription.full_name}</span>
-                                  </>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">{formatDate(subscription.subscribed_at)}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 space-x-reverse">
-                              <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(subscription.status)}`}>
-                                {subscription.status === 'active' ? 'نشط' : 'ملغي'}
-                              </span>
-                              <button 
-                                onClick={() => setDeleteConfirm(subscription.id)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+                          {showNewsletterForm ? 'إخفاء النموذج' : 'إرسال نشرة بريدية'}
+                        </button>
+                      </div>
+                      
+                      {showNewsletterForm && (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">عنوان النشرة</label>
+                            <input
+                              type="text"
+                              value={newsletterSubject}
+                              onChange={(e) => setNewsletterSubject(e.target.value)}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                              placeholder="أدخل عنوان النشرة البريدية"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">محتوى النشرة</label>
+                            <textarea
+                              value={newsletterContent}
+                              onChange={(e) => setNewsletterContent(e.target.value)}
+                              rows={6}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                              placeholder="أدخل محتوى النشرة البريدية..."
+                            />
+                          </div>
+                          <div className="flex space-x-2 space-x-reverse">
+                            <button
+                              onClick={handleSendNewsletter}
+                              disabled={actionLoading === 'newsletter'}
+                              className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center"
+                            >
+                              {actionLoading === 'newsletter' ? (
+                                <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                              ) : (
+                                <Mail className="w-4 h-4 mr-2" />
+                              )}
+                              إرسال النشرة
+                            </button>
+                            <button
+                              onClick={() => {
+                                setNewsletterSubject('');
+                                setNewsletterContent('');
+                                setShowNewsletterForm(false);
+                              }}
+                              className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            >
+                              إلغاء
+                            </button>
                           </div>
                         </div>
-                      ))
-                    )}
+                      )}
+                    </div>
+
+                    {/* Newsletter Subscriptions List */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h3 className="text-lg font-bold text-gray-800 mb-4">المشتركين في النشرة البريدية</h3>
+                      {newsletterSubscriptions.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Mail className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p>لا توجد اشتراكات في القائمة البريدية حالياً</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {newsletterSubscriptions.map((subscription) => (
+                            <div
+                              key={subscription.id}
+                              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="flex items-center space-x-2 space-x-reverse">
+                                    <span className="font-semibold text-gray-800">{subscription.email}</span>
+                                    {subscription.full_name && (
+                                      <>
+                                        <span className="text-gray-500">•</span>
+                                        <span className="text-gray-600">{subscription.full_name}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-500">{formatDate(subscription.subscribed_at)}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 space-x-reverse">
+                                  <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(subscription.status)}`}>
+                                    {subscription.status === 'active' ? 'نشط' : 'ملغي'}
+                                  </span>
+                                  <button 
+                                    onClick={() => setDeleteConfirm(subscription.id)}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import ExpertApplicationForm from "@/components/ExpertApplicationForm";
 
 interface Service {
@@ -97,6 +98,7 @@ const serviceCategories = [
 ];
 
 export default function ServicesPage() {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showExpertForm, setShowExpertForm] = useState(false);
 
@@ -110,9 +112,33 @@ export default function ServicesPage() {
   });
 
   const handleServiceAction = (serviceId: number, action: string) => {
+    console.log(`Button clicked: Service ${serviceId}, Action: ${action}`);
+    
     if (serviceId === 4 && action === "primary") {
       // Open expert application form
       setShowExpertForm(true);
+    } else if (serviceId === 3) {
+      // Handle delivery service actions
+      if (action === "primary") {
+        // Navigate to marketplace for "ابدأ البيع"
+        console.log("Navigating to marketplace...");
+        router.push("/marketplace");
+      } else if (action === "secondary") {
+        // Navigate to delivery for "اطلب توصيل"
+        console.log("Navigating to delivery...");
+        router.push("/delivery");
+      }
+    } else if (serviceId === 1 || serviceId === 4) {
+      // Handle contact actions for Analysis Services and Expert Services
+      if (action === "secondary") {
+        // Navigate to contact for "تواصل معنا"
+        console.log("Navigating to contact...");
+        router.push("/contact");
+      } else if (serviceId === 1 && action === "primary") {
+        // Handle "اطلب دراسة" for Analysis Services
+        console.log("Request study action...");
+        router.push("/contact");
+      }
     } else {
       // Handle other service actions (contact, etc.)
       console.log(`Service ${serviceId} action: ${action}`);
@@ -242,15 +268,39 @@ export default function ServicesPage() {
 
                 <div className="flex gap-2">
                   <button 
-                    className="btn-primary-arabic flex-1"
-                    onClick={() => handleServiceAction(service.id, 'primary')}
+                    className="btn-primary-arabic flex-1 cursor-pointer"
+                    onClick={() => {
+                      console.log(`Primary button clicked for service ${service.id}`);
+                      handleServiceAction(service.id, 'primary');
+                    }}
+                    onMouseDown={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.95)';
+                    }}
+                    onMouseUp={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
                   >
                     <i className="fas fa-handshake ml-2"></i>
                     {service.cta.primary}
                   </button>
                   <button 
-                    className="btn-secondary-arabic flex-1"
-                    onClick={() => handleServiceAction(service.id, 'secondary')}
+                    className="btn-secondary-arabic flex-1 cursor-pointer"
+                    onClick={() => {
+                      console.log(`Secondary button clicked for service ${service.id}`);
+                      handleServiceAction(service.id, 'secondary');
+                    }}
+                    onMouseDown={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.95)';
+                    }}
+                    onMouseUp={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
                   >
                     <i className="fas fa-phone ml-2"></i>
                     {service.cta.secondary}

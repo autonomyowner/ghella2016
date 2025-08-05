@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { emailService } from '@/lib/emailService';
 
 // Server-side client that bypasses RLS
 const supabaseUrl = 'https://puvmqdnvofbtmqpcjmia.supabase.co';
@@ -111,6 +112,21 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // First, get the original message to send email
+    const { data: originalMessage, error: fetchError } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching original message:', fetchError);
+      return NextResponse.json(
+        { success: false, error: 'حدث خطأ أثناء جلب الرسالة الأصلية' },
+        { status: 500 }
+      );
+    }
+
     const updateData: any = {};
     if (status) updateData.status = status;
     if (admin_reply) updateData.admin_reply = admin_reply;
@@ -129,7 +145,32 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, message: 'تم تحديث الرسالة بنجاح' });
+    // Send email if admin_reply is provided
+    if (admin_reply && originalMessage) {
+      try {
+        const emailResult = await emailService.sendAdminReply(
+          originalMessage.email,
+          originalMessage.name || 'عزيزي المستخدم',
+          originalMessage.subject || 'رسالة من الغلة',
+          admin_reply
+        );
+
+        if (!emailResult.success) {
+          console.warn('Email sending failed:', emailResult.error);
+          // Don't fail the entire request if email fails
+        } else {
+          console.log('Admin reply email sent successfully');
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't fail the entire request if email fails
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'تم تحديث الرسالة بنجاح' + (admin_reply ? ' وتم إرسال الرد بالبريد الإلكتروني' : '')
+    });
 
   } catch (error) {
     console.error('Contact PATCH error:', error);

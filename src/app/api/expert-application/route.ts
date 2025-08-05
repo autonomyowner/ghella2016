@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { emailService } from '@/lib/emailService';
 
 // Server-side client that bypasses RLS
 const supabaseUrl = 'https://puvmqdnvofbtmqpcjmia.supabase.co';
@@ -140,6 +141,21 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // First, get the original application to send email
+    const { data: originalApplication, error: fetchError } = await supabase
+      .from('expert_applications')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching original application:', fetchError);
+      return NextResponse.json(
+        { success: false, error: 'حدث خطأ أثناء جلب الطلب الأصلي' },
+        { status: 500 }
+      );
+    }
+
     const updateData: any = {};
     if (status) updateData.status = status;
     if (admin_notes) updateData.admin_notes = admin_notes;
@@ -159,7 +175,32 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, message: 'تم تحديث الطلب بنجاح' });
+    // Send email if status is approved or rejected
+    if (status && (status === 'approved' || status === 'rejected') && originalApplication) {
+      try {
+        const emailResult = await emailService.sendExpertResponse(
+          originalApplication.email,
+          originalApplication.full_name,
+          status,
+          admin_notes
+        );
+
+        if (!emailResult.success) {
+          console.warn('Email sending failed:', emailResult.error);
+          // Don't fail the entire request if email fails
+        } else {
+          console.log('Expert application response email sent successfully');
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't fail the entire request if email fails
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'تم تحديث الطلب بنجاح' + (status && (status === 'approved' || status === 'rejected') ? ' وتم إرسال الإشعار بالبريد الإلكتروني' : '')
+    });
 
   } catch (error) {
     console.error('Expert application PATCH error:', error);

@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSupabaseData } from '@/hooks/useSupabase';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useRouter } from 'next/navigation';
 
 interface AnimalListing {
   id: string;
@@ -46,7 +48,9 @@ interface Profile {
 const AnimalDetailPage: React.FC = () => {
   const params = useParams();
   const animalId = params.id as string;
-  const { getAnimals, isOnline, isWithinLimits } = useSupabaseData();
+  const { getAnimals, deleteAnimal, isOnline, isWithinLimits } = useSupabaseData();
+  const { user } = useSupabaseAuth();
+  const router = useRouter();
   
   const [animal, setAnimal] = useState<AnimalListing | null>(null);
   const [seller, setSeller] = useState<Profile | null>(null);
@@ -173,6 +177,29 @@ const AnimalDetailPage: React.FC = () => {
         sub: `للكمية الإجمالية (${quantity} رؤوس)`,
         total: null
       };
+    }
+  };
+
+  const handleDeleteAnimal = async () => {
+    if (!animal || !user) return;
+    
+    if (!confirm('هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      return;
+    }
+
+    try {
+      const result = await deleteAnimal(animal.id);
+      
+      if (result.error) {
+        alert('حدث خطأ أثناء حذف الإعلان');
+        console.error('Error deleting animal:', result.error);
+      } else {
+        alert('تم حذف الإعلان بنجاح');
+        router.push('/animals');
+      }
+    } catch (error) {
+      console.error('Error deleting animal:', error);
+      alert('حدث خطأ غير متوقع');
     }
   };
 
@@ -382,6 +409,19 @@ const AnimalDetailPage: React.FC = () => {
                   إضافة للمفضلة
                 </button>
               </div>
+
+              {/* Delete Button for Owner */}
+              {user && animal.user_id === user.id && (
+                <div className="mt-4">
+                  <button 
+                    onClick={handleDeleteAnimal}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                    aria-label="حذف الإعلان"
+                  >
+                    🗑️ حذف الإعلان
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Related Animals */}

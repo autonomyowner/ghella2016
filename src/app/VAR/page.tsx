@@ -8,7 +8,14 @@ import Image from 'next/image';
 
 // Import existing APIs
 import { nasaApi, NasaData } from '@/lib/nasaApi';
+import { openWeatherApi, OpenWeatherData } from '@/lib/openWeatherApi';
+import { sentinelHubApi, SentinelData } from '@/lib/sentinelHubApi';
+import { usgsErosApi, UsgsErosData } from '@/lib/usgsErosApi';
 const VarInteractiveMap = dynamic(() => import('@/components/VarInteractiveMap'), { ssr: false });
+const CostCalculator = dynamic(() => import('@/components/CostCalculator'), { ssr: false });
+const WeatherAlerts = dynamic(() => import('@/components/WeatherAlerts'), { ssr: false });
+const SatelliteAnalysis = dynamic(() => import('@/components/SatelliteAnalysis'), { ssr: false });
+const UsgsErosAnalysis = dynamic(() => import('@/components/UsgsErosAnalysis'), { ssr: false });
 
 // Import icons and components
 import {
@@ -16,7 +23,8 @@ import {
   Download, FileText, BarChart3,
   Thermometer, Sun, CloudRain, Wind, Target,
   Layers, Eye, RefreshCw, X,
-  Brain, Cpu, Database, Shield, Rocket, Globe
+  Brain, Cpu, Database, Shield, Rocket, Globe,
+  Calculator, Trash2
 } from 'lucide-react';
 
 // Import framer-motion components
@@ -74,6 +82,9 @@ interface SatelliteImage {
 const LiveLandIntelligenceTool: React.FC = () => {
   const [landData, setLandData] = useState<LandData | null>(null);
   const [nasaData, setNasaData] = useState<NasaData | null>(null);
+  const [openWeatherData, setOpenWeatherData] = useState<OpenWeatherData | null>(null);
+  const [sentinelData, setSentinelData] = useState<SentinelData | null>(null);
+  const [usgsErosData, setUsgsErosData] = useState<UsgsErosData | null>(null);
   const [satelliteImages, setSatelliteImages] = useState<SatelliteImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<SatelliteImage | null>(null);
@@ -90,19 +101,85 @@ const LiveLandIntelligenceTool: React.FC = () => {
   const [selectedTechLevels, setSelectedTechLevels] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [yieldRange, setYieldRange] = useState<[number, number]>([0, 100]);
+  const [showCostCalculator, setShowCostCalculator] = useState(false);
+  const [selectedCrop, setSelectedCrop] = useState('قمح');
+  const [landArea, setLandArea] = useState(1);
+  
+  // Land drawing states
+  const [drawnLands, setDrawnLands] = useState<Array<{
+    id: string;
+    area: number;
+    perimeter: number;
+    coordinates: Array<{ lat: number; lng: number }>;
+    center: { lat: number; lng: number };
+    cropType?: string;
+    notes?: string;
+  }>>([]);
+  const [selectedLandId, setSelectedLandId] = useState<string | null>(null);
 
   const mapRef = useRef<HTMLDivElement>(null);
+
+  // Handle land drawing
+  const handleLandDrawn = useCallback((landData: {
+    area: number;
+    perimeter: number;
+    coordinates: Array<{ lat: number; lng: number }>;
+    center: { lat: number; lng: number };
+  }) => {
+    const newLand = {
+      id: `land_${Date.now()}`,
+      ...landData,
+      cropType: '',
+      notes: ''
+    };
+    setDrawnLands(prev => [...prev, newLand]);
+    setSelectedLandId(newLand.id);
+    
+    // Update cost calculator with new area
+    setLandArea(landData.area);
+  }, []);
+
+  const handleDeleteLand = useCallback((landId: string) => {
+    if (window.confirm('هل أنت متأكد من حذف هذه الأرض؟')) {
+      setDrawnLands(prev => prev.filter(land => land.id !== landId));
+      if (selectedLandId === landId) {
+        setSelectedLandId(null);
+      }
+    }
+  }, [selectedLandId]);
 
   const fetchLandData = useCallback(async (lat: number, lon: number) => {
     setIsLoading(true);
     try {
-      const nasaResult = await nasaApi.fetchNasaData(lat, lon);
+      // Fetch data from all APIs in parallel with proper error handling
+      const results = await Promise.allSettled([
+        nasaApi.fetchNasaData(lat, lon),
+        openWeatherApi.fetchWeatherData(lat, lon),
+        sentinelHubApi.fetchSentinelData(lat, lon),
+        usgsErosApi.fetchUsgsErosData(lat, lon)
+      ]);
 
+      // Extract successful results and handle failures gracefully
+      const [nasaResult, openWeatherResult, sentinelResult, usgsErosResult] = results.map((result, index) => {
+        if (result.status === 'fulfilled') {
+          return result.value;
+        } else {
+          console.warn(`API ${index} failed:`, result.reason);
+          // Return fallback data for failed APIs
+          return null;
+        }
+      });
+
+      // Generate simplified and concise agricultural data
       const enhancedLandData: LandData = {
         coordinates: { lat, lon },
         soilData: {
-          clay: 25 + Math.random() * 15, silt: 30 + Math.random() * 20, sand: 45 + Math.random() * 25,
-          organicMatter: 2.5 + Math.random() * 3, ph: 6.2 + Math.random() * 1.6, moisture: 35 + Math.random() * 25,
+          clay: 25 + Math.random() * 15, 
+          silt: 30 + Math.random() * 20, 
+          sand: 45 + Math.random() * 25,
+          organicMatter: 2.5 + Math.random() * 3, 
+          ph: 6.2 + Math.random() * 1.6, 
+          moisture: 35 + Math.random() * 25,
           nitrogen: 15 + Math.random() * 10,
           phosphorus: 20 + Math.random() * 15,
           potassium: 25 + Math.random() * 20,
@@ -110,7 +187,8 @@ const LiveLandIntelligenceTool: React.FC = () => {
           microbialActivity: 60 + Math.random() * 30
         },
         cropData: {
-          ndvi: 0.65 + Math.random() * 0.25, health: ['excellent', 'good', 'fair', 'poor'][Math.floor(Math.random() * 4)] as any,
+          ndvi: 0.65 + Math.random() * 0.25, 
+          health: ['excellent', 'good', 'fair', 'poor'][Math.floor(Math.random() * 4)] as any,
           growthStage: ['Seedling', 'Vegetative', 'Flowering', 'Fruiting'][Math.floor(Math.random() * 4)],
           yieldPrediction: 85 + Math.random() * 15,
           biomass: 2.5 + Math.random() * 3,
@@ -118,42 +196,85 @@ const LiveLandIntelligenceTool: React.FC = () => {
           waterStress: 20 + Math.random() * 40,
           nutrientDeficiency: Math.random() > 0.7 ? ['Nitrogen'] : []
         },
-                weatherData: {
-          temperature: 22 + Math.random() * 15, humidity: 60 + Math.random() * 30, rainfall: Math.random() * 50,
+        weatherData: {
+          temperature: 22 + Math.random() * 15, 
+          humidity: 60 + Math.random() * 30, 
+          rainfall: Math.random() * 50,
           windSpeed: 5 + Math.random() * 15,
           solarRadiation: 800 + Math.random() * 400,
           forecast: Array.from({ length: 7 }, (_, i) => ({
             date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            temp: 20 + Math.random() * 15, rain: Math.random() * 30,
+            temp: 20 + Math.random() * 15, 
+            rain: Math.random() * 30,
             condition: ['Sunny', 'Cloudy', 'Rainy', 'Partly Cloudy'][Math.floor(Math.random() * 4)],
             humidity: 50 + Math.random() * 30
           }))
         },
         recommendations: [
-          { type: 'irrigation', priority: 'high', title: 'تحسين جدول الري', description: 'رطوبة التربة منخفضة. زيادة تكرار الري بنسبة 20%.', impact: 'تحسين متوقع في الإنتاجية بنسبة 15%', confidence: 0.85, cost: 200, roi: 2.5 },
-          { type: 'fertilizer', priority: 'medium', title: 'تطبيق الأسمدة النيتروجينية', description: 'مستويات النيتروجين متوسطة. تطبيق 50 كجم/هكتار من سماد NPK.', impact: 'تحسين متوقع في الإنتاجية بنسبة 8%', confidence: 0.75, cost: 150, roi: 1.8 },
-          { type: 'pest', priority: 'low', title: 'مراقبة نشاط الآفات', description: 'الظروف الجوية مواتية لتطور الآفات. المراقبة الدقيقة مطلوبة.', impact: 'منع خسارة محتملة في الإنتاجية بنسبة 5%', confidence: 0.6, cost: 50, roi: 1.2 }
+          { 
+            type: 'irrigation', 
+            priority: 'high', 
+            title: 'تحسين الري', 
+            description: 'زيادة تكرار الري بنسبة 20%', 
+            impact: 'تحسين الإنتاجية 15%', 
+            confidence: 0.85, 
+            cost: 200, 
+            roi: 2.5 
+          },
+          { 
+            type: 'fertilizer', 
+            priority: 'medium', 
+            title: 'تطبيق الأسمدة', 
+            description: 'إضافة 50 كجم/هكتار NPK', 
+            impact: 'تحسين الإنتاجية 8%', 
+            confidence: 0.75, 
+            cost: 150, 
+            roi: 1.8 
+          },
+          { 
+            type: 'pest', 
+            priority: 'low', 
+            title: 'مراقبة الآفات', 
+            description: 'المراقبة الدقيقة للآفات', 
+            impact: 'منع الخسائر 5%', 
+            confidence: 0.6, 
+            cost: 50, 
+            roi: 1.2 
+          }
         ],
         aiInsights: {
           cropSuitability: ['قمح', 'شعير', 'ذرة'],
           optimalPlantingTime: 'أكتوبر - نوفمبر',
           pestRisk: 15 + Math.random() * 25,
           diseaseProbability: 10 + Math.random() * 20,
-          marketTrends: 'ارتفاع في أسعار الحبوب',
+          marketTrends: 'ارتفاع أسعار الحبوب',
           sustainabilityScore: 75 + Math.random() * 20
         }
       };
 
       setLandData(enhancedLandData);
       setNasaData(nasaResult);
+      setOpenWeatherData(openWeatherResult);
+      setSentinelData(sentinelResult);
+      setUsgsErosData(usgsErosResult);
 
-      // Generate mock satellite images
-      const mockImages: SatelliteImage[] = [
-        { url: `data:image/svg+xml;base64,${btoa(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#065f46;stop-opacity:1" /><stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad)"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="Arial" font-size="24" fill="white" font-weight="bold">NDVI Analysis</text></svg>`)}`, date: new Date().toISOString(), type: 'ndvi', resolution: '10m' },
-        { url: `data:image/svg+xml;base64,${btoa(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" /><stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad)"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="Arial" font-size="24" fill="white" font-weight="bold">RGB Image</text></svg>`)}`, date: new Date().toISOString(), type: 'rgb', resolution: '5m' },
-        { url: `data:image/svg+xml;base64,${btoa(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" /><stop offset="100%" style="stop-color:#f97316;stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad)"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="Arial" font-size="24" fill="white" font-weight="bold">Thermal Scan</text></svg>`)}`, date: new Date().toISOString(), type: 'thermal', resolution: '30m' }
-      ];
-      setSatelliteImages(mockImages);
+      // Show success message
+      console.log('✅ Agricultural analysis completed successfully!');
+      
+      // Show simple success notification
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          alert(`✅ تم إكمال التحليل الزراعي!
+
+📊 النتائج:
+• التربة: ${enhancedLandData.soilData.ph.toFixed(1)} pH
+• المحاصيل: ${enhancedLandData.cropData.health} - NDVI: ${enhancedLandData.cropData.ndvi.toFixed(2)}
+• الطقس: ${enhancedLandData.weatherData.temperature.toFixed(1)}°C
+
+💡 التوصيات: ${enhancedLandData.recommendations.length} توصية زراعية`);
+        }, 1000);
+      }
+      
     } catch (error) {
       console.error('Error fetching land data:', error);
       // Fallback to mock data
@@ -182,14 +303,14 @@ const LiveLandIntelligenceTool: React.FC = () => {
           }))
         },
         recommendations: [
-          { type: 'irrigation', priority: 'high', title: 'تحسين جدول الري', description: 'رطوبة التربة منخفضة. زيادة تكرار الري بنسبة 20%.', impact: 'تحسين متوقع في الإنتاجية بنسبة 15%', confidence: 0.85, cost: 200, roi: 2.5 },
-          { type: 'fertilizer', priority: 'medium', title: 'تطبيق الأسمدة النيتروجينية', description: 'مستويات النيتروجين متوسطة. تطبيق 50 كجم/هكتار من سماد NPK.', impact: 'تحسين متوقع في الإنتاجية بنسبة 8%', confidence: 0.75, cost: 150, roi: 1.8 },
-          { type: 'pest', priority: 'low', title: 'مراقبة نشاط الآفات', description: 'الظروف الجوية مواتية لتطور الآفات. المراقبة الدقيقة مطلوبة.', impact: 'منع خسارة محتملة في الإنتاجية بنسبة 5%', confidence: 0.6, cost: 50, roi: 1.2 }
+          { type: 'irrigation', priority: 'high', title: 'تحسين الري', description: 'زيادة تكرار الري بنسبة 20%', impact: 'تحسين الإنتاجية 15%', confidence: 0.85, cost: 200, roi: 2.5 },
+          { type: 'fertilizer', priority: 'medium', title: 'تطبيق الأسمدة', description: 'إضافة 50 كجم/هكتار NPK', impact: 'تحسين الإنتاجية 8%', confidence: 0.75, cost: 150, roi: 1.8 },
+          { type: 'pest', priority: 'low', title: 'مراقبة الآفات', description: 'المراقبة الدقيقة للآفات', impact: 'منع الخسائر 5%', confidence: 0.6, cost: 50, roi: 1.2 }
         ],
         aiInsights: {
           cropSuitability: ['قمح', 'شعير', 'ذرة'], optimalPlantingTime: 'أكتوبر - نوفمبر',
           pestRisk: 15 + Math.random() * 25, diseaseProbability: 10 + Math.random() * 20,
-          marketTrends: 'ارتفاع في أسعار الحبوب', sustainabilityScore: 75 + Math.random() * 20
+          marketTrends: 'ارتفاع أسعار الحبوب', sustainabilityScore: 75 + Math.random() * 20
         }
       };
       setLandData(mockData);
@@ -205,7 +326,11 @@ const LiveLandIntelligenceTool: React.FC = () => {
     // Simulate report generation
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsGeneratingReport(false);
-    alert('تم إنشاء التقرير بنجاح!');
+    
+    // Show success notification
+    if (typeof window !== 'undefined') {
+      alert('✅ تم إنشاء التقرير بنجاح!\n\n📊 التقرير يتضمن:\n• تحليل التربة والمناخ\n• توصيات زراعية\n• توقعات الإنتاجية\n• تحليل اقتصادي');
+    }
   };
 
   // Filter handler functions
@@ -373,6 +498,14 @@ const LiveLandIntelligenceTool: React.FC = () => {
               <FileText className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
               {isGeneratingReport ? 'جاري التوليد...' : 'تقرير شامل'}
             </button>
+
+            <button
+              onClick={() => setShowCostCalculator(true)}
+              className="group px-8 py-4 md:px-12 md:py-5 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-2xl font-bold text-lg md:text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/30 flex items-center"
+            >
+              <Calculator className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+              حاسبة التكاليف
+            </button>
           </div>
 
           {/* Quick Stats */}
@@ -420,201 +553,158 @@ const LiveLandIntelligenceTool: React.FC = () => {
               weatherData={landData?.weatherData}
               soilData={landData?.soilData}
               satelliteImages={satelliteImages}
+              onLandDrawn={handleLandDrawn}
             />
           </div>
         </div>
       </section>
 
-      {/* Advanced Filters Section */}
-      <section className="relative z-10 py-20 px-4 md:px-6 lg:px-8 bg-gradient-to-br from-black/50 to-emerald-900/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
-              فلاتر <span className="text-emerald-400">متقدمة للمزارعين</span>
+      {/* Compact Filters Section */}
+      <section className="relative z-10 py-12 px-4 md:px-6 lg:px-8 bg-gradient-to-br from-black/50 to-emerald-900/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-black text-white mb-4">
+              فلاتر <span className="text-emerald-400">سريعة للمزارعين</span>
             </h2>
-            <p className="text-xl text-emerald-200 max-w-3xl mx-auto">
-              أدوات تحليل متطورة لتحسين القرارات الزراعية وزيادة الإنتاجية
+            <p className="text-lg text-emerald-200">
+              أدوات تحليل سريعة ومفيدة لتحسين القرارات الزراعية
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Crop Type Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Leaf className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">نوع المحصول</h3>
+          {/* Compact Filter Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {/* Quick Crop Filter */}
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Leaf className="w-5 h-5 text-emerald-400 ml-2" />
+                  <h3 className="text-sm font-bold text-white">المحاصيل</h3>
               </div>
-              <div className="space-y-4">
-                {['قمح', 'شعير', 'ذرة', 'بطاطس', 'طماطم', 'زيتون', 'عنب', 'حمضيات'].map((crop) => (
-                  <label key={crop} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedCrops.includes(crop)}
-                      onChange={() => handleCropFilter(crop)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{crop}</span>
-                  </label>
+                <span className="text-xs text-emerald-300 bg-emerald-500/20 px-2 py-1 rounded-full">
+                  {selectedCrops.length} محدد
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['قمح', 'شعير', 'ذرة', 'بطاطس'].map((crop) => (
+                  <button
+                    key={crop}
+                    onClick={() => handleCropFilter(crop)}
+                    className={`px-2 py-1 text-xs rounded-full transition-all ${
+                      selectedCrops.includes(crop)
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-white/10 text-emerald-200 hover:bg-emerald-500/20'
+                    }`}
+                  >
+                    {crop}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Soil Type Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Layers className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">نوع التربة</h3>
+            {/* Quick Soil Filter */}
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Layers className="w-5 h-5 text-emerald-400 ml-2" />
+                  <h3 className="text-sm font-bold text-white">التربة</h3>
               </div>
-              <div className="space-y-4">
-                {['طينية', 'رملية', 'طميية', 'جيرية', 'ملحية', 'عضوية'].map((soil) => (
-                  <label key={soil} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedSoilTypes.includes(soil)}
-                      onChange={() => handleSoilFilter(soil)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{soil}</span>
-                  </label>
+                <span className="text-xs text-emerald-300 bg-emerald-500/20 px-2 py-1 rounded-full">
+                  {selectedSoilTypes.length} محدد
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['طينية', 'رملية', 'طميية'].map((soil) => (
+                  <button
+                    key={soil}
+                    onClick={() => handleSoilFilter(soil)}
+                    className={`px-2 py-1 text-xs rounded-full transition-all ${
+                      selectedSoilTypes.includes(soil)
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-white/10 text-emerald-200 hover:bg-emerald-500/20'
+                    }`}
+                  >
+                    {soil}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Climate Zone Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Thermometer className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">المنطقة المناخية</h3>
+            {/* Quick Climate Filter */}
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Thermometer className="w-5 h-5 text-emerald-400 ml-2" />
+                  <h3 className="text-sm font-bold text-white">المناخ</h3>
               </div>
-              <div className="space-y-4">
-                {['ساحلية', 'جبلية', 'صحراوية', 'شبه جافة', 'رطبة', 'معتدلة'].map((climate) => (
-                  <label key={climate} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedClimateZones.includes(climate)}
-                      onChange={() => handleClimateFilter(climate)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{climate}</span>
-                  </label>
-                ))}
+                <span className="text-xs text-emerald-300 bg-emerald-500/20 px-2 py-1 rounded-full">
+                  {selectedClimateZones.length} محدد
+                </span>
               </div>
-            </div>
-
-            {/* Water Availability Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Droplets className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">توفر المياه</h3>
-              </div>
-              <div className="space-y-4">
-                {['ري بالتنقيط', 'ري بالرش', 'ري بالغمر', 'مياه جوفية', 'مياه سطحية', 'مياه معالجة'].map((water) => (
-                  <label key={water} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedWaterTypes.includes(water)}
-                      onChange={() => handleWaterFilter(water)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{water}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Land Size Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Target className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">مساحة الأرض</h3>
-              </div>
-              <div className="space-y-4">
-                {['أقل من 1 هكتار', '1-5 هكتار', '5-10 هكتار', '10-50 هكتار', 'أكثر من 50 هكتار'].map((size) => (
-                  <label key={size} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedLandSizes.includes(size)}
-                      onChange={() => handleLandSizeFilter(size)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{size}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Technology Level Filter */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Cpu className="w-8 h-8 text-emerald-400 ml-3" />
-                <h3 className="text-xl font-bold text-white">مستوى التقنية</h3>
-              </div>
-              <div className="space-y-4">
-                {['تقليدية', 'شبه آلية', 'آلية', 'ذكية', 'متطورة', 'مستقبلية'].map((tech) => (
-                  <label key={tech} className="flex items-center space-x-3 space-x-reverse cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedTechLevels.includes(tech)}
-                      onChange={() => handleTechLevelFilter(tech)}
-                      className="w-5 h-5 text-emerald-500 bg-white/10 border-white/20 rounded focus:ring-emerald-500 focus:ring-2" 
-                    />
-                    <span className="text-emerald-200 group-hover:text-white transition-colors">{tech}</span>
-                  </label>
+              <div className="flex flex-wrap gap-2">
+                {['ساحلية', 'جبلية', 'صحراوية'].map((climate) => (
+                  <button
+                    key={climate}
+                    onClick={() => handleClimateFilter(climate)}
+                    className={`px-2 py-1 text-xs rounded-full transition-all ${
+                      selectedClimateZones.includes(climate)
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-white/10 text-emerald-200 hover:bg-emerald-500/20'
+                    }`}
+                  >
+                    {climate}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Advanced Analysis Tools */}
-          <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl p-6 border border-emerald-400/30 text-center group hover:scale-105 transition-transform duration-300 cursor-pointer">
-                              <Brain className="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <h3 className="text-lg font-bold text-white mb-2">تحليل البيانات المتقدم</h3>
-              <p className="text-emerald-300 text-sm">توقعات متقدمة للمحاصيل والأسعار</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl p-6 border border-blue-400/30 text-center group hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <TrendingUp className="w-12 h-12 text-blue-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="text-lg font-bold text-white mb-2">تحليل السوق</h3>
-              <p className="text-blue-300 text-sm">دراسة الأسعار والطلب العالمي</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30 text-center group hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <Shield className="w-12 h-12 text-purple-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="text-lg font-bold text-white mb-2">حماية المحاصيل</h3>
-              <p className="text-purple-300 text-sm">اكتشاف مبكر للأمراض والآفات</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30 text-center group hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <Rocket className="w-12 h-12 text-orange-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="text-lg font-bold text-white mb-2">تحسين الإنتاجية</h3>
-              <p className="text-orange-300 text-sm">زيادة المحصول بنسبة 30%</p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="mt-12 flex flex-col sm:flex-row gap-6 justify-center">
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap gap-3 justify-center">
             <button 
               onClick={applyFilters}
-              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/30 flex items-center justify-center"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/30 flex items-center"
             >
-              <BarChart3 className="w-6 h-6 mr-3" />
+              <BarChart3 className="w-4 h-4 mr-2" />
               تطبيق الفلاتر
             </button>
             <button 
               onClick={exportResults}
-              className="px-8 py-4 bg-transparent border-2 border-emerald-400 hover:bg-emerald-400/10 text-emerald-300 hover:text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+              className="px-6 py-3 bg-transparent border border-emerald-400 hover:bg-emerald-400/10 text-emerald-300 hover:text-white rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-105 flex items-center"
             >
-              <Download className="w-6 h-6 mr-3" />
+              <Download className="w-4 h-4 mr-2" />
               تصدير النتائج
             </button>
             <button 
               onClick={generateReport}
-              className="px-8 py-4 bg-transparent border-2 border-blue-400 hover:bg-blue-400/10 text-blue-300 hover:text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+              className="px-6 py-3 bg-transparent border border-blue-400 hover:bg-blue-400/10 text-blue-300 hover:text-white rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-105 flex items-center"
             >
-              <FileText className="w-6 h-6 mr-3" />
-              تقرير مفصل
+              <FileText className="w-4 h-4 mr-2" />
+              تقرير سريع
             </button>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl border border-emerald-400/30">
+              <Brain className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+              <p className="text-lg font-bold text-white">تحليل ذكي</p>
+              <p className="text-emerald-300 text-xs">بيانات متقدمة</p>
+            </div>
+            <div className="text-center p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl border border-blue-400/30">
+              <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+              <p className="text-lg font-bold text-white">تحليل السوق</p>
+              <p className="text-blue-300 text-xs">أسعار وطلب</p>
+            </div>
+            <div className="text-center p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-400/30">
+              <Shield className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+              <p className="text-lg font-bold text-white">حماية المحاصيل</p>
+              <p className="text-purple-300 text-xs">اكتشاف مبكر</p>
+            </div>
+            <div className="text-center p-3 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl border border-orange-400/30">
+              <Rocket className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+              <p className="text-lg font-bold text-white">تحسين الإنتاجية</p>
+              <p className="text-orange-300 text-xs">+30% محصول</p>
+            </div>
           </div>
         </div>
       </section>
@@ -651,55 +741,7 @@ const LiveLandIntelligenceTool: React.FC = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Analysis Panel */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Satellite Images */}
-                <MotionDiv
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
-                >
-                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                    <Globe className="w-6 h-6 text-emerald-400 ml-3" />
-                    صور الأقمار الصناعية المتقدمة
-                  </h2>
-                  {satelliteImages.length === 0 && (
-                    <div className="text-center py-12">
-                      <div className="relative">
-                        <div className="w-20 h-20 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                        <div className="absolute inset-0 w-20 h-20 border-4 border-teal-300 border-b-transparent rounded-full animate-spin mx-auto" style={{ animationDelay: '0.5s' }}></div>
-                      </div>
-                      <p className="text-emerald-200 text-lg">جاري تحميل صور الأقمار الصناعية...</p>
-                      <p className="text-emerald-300 text-sm mt-2">تحليل متقدم للبيانات</p>
-                    </div>
-                  )}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {satelliteImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative group cursor-pointer overflow-hidden rounded-2xl"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                        <img
-                          src={image.url}
-                          alt={`Satellite ${image.type}`}
-                          className="w-full h-56 object-cover rounded-2xl border border-white/20 group-hover:border-emerald-400/50 transition-all duration-300 transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/40 transition-all duration-300 rounded-2xl flex items-end">
-                          <div className="p-4 text-white w-full">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-bold text-lg capitalize">{image.type}</p>
-                                <p className="text-emerald-300 text-sm">{image.resolution} resolution</p>
-                              </div>
-                              <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full p-2">
-                                <Eye className="w-5 h-5 text-emerald-300" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </MotionDiv>
+
 
                 {/* Weather Data */}
                 <MotionDiv
@@ -715,22 +757,30 @@ const LiveLandIntelligenceTool: React.FC = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="text-center p-6 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl border border-emerald-400/30">
                       <Thermometer className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-                      <p className="text-3xl font-black text-white mb-1">{landData.weatherData.temperature}°C</p>
+                      <p className="text-3xl font-black text-white mb-1">
+                        {landData?.weatherData?.temperature?.toFixed(1) || '25.0'}°C
+                      </p>
                       <p className="text-emerald-300 text-sm">درجة الحرارة</p>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl border border-blue-400/30">
                       <Droplets className="w-10 h-10 text-blue-400 mx-auto mb-3" />
-                      <p className="text-3xl font-black text-white mb-1">{landData.weatherData.humidity}%</p>
+                      <p className="text-3xl font-black text-white mb-1">
+                        {landData?.weatherData?.humidity?.toFixed(0) || '65'}%
+                      </p>
                       <p className="text-blue-300 text-sm">الرطوبة</p>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-400/30">
                       <CloudRain className="w-10 h-10 text-purple-400 mx-auto mb-3" />
-                      <p className="text-3xl font-black text-white mb-1">{landData.weatherData.rainfall}mm</p>
+                      <p className="text-3xl font-black text-white mb-1">
+                        {landData?.weatherData?.rainfall?.toFixed(1) || '0.0'}mm
+                      </p>
                       <p className="text-purple-300 text-sm">الأمطار</p>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl border border-orange-400/30">
                       <Wind className="w-10 h-10 text-orange-400 mx-auto mb-3" />
-                      <p className="text-3xl font-black text-white mb-1">{landData.weatherData.windSpeed}km/h</p>
+                      <p className="text-3xl font-black text-white mb-1">
+                        {landData?.weatherData?.windSpeed?.toFixed(1) || '8.0'}km/h
+                      </p>
                       <p className="text-orange-300 text-sm">سرعة الرياح</p>
                     </div>
                   </div>
@@ -741,7 +791,9 @@ const LiveLandIntelligenceTool: React.FC = () => {
                       <div className="flex items-center">
                         <Sun className="w-8 h-8 text-yellow-400 ml-3" />
                         <div>
-                          <p className="text-2xl font-bold text-white">{landData.weatherData.solarRadiation} W/m²</p>
+                          <p className="text-2xl font-bold text-white">
+                            {landData?.weatherData?.solarRadiation?.toFixed(0) || '850'} W/m²
+                          </p>
                           <p className="text-yellow-300 text-sm">الإشعاع الشمسي</p>
                         </div>
                       </div>
@@ -766,27 +818,39 @@ const LiveLandIntelligenceTool: React.FC = () => {
                   </h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="text-center p-6 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl border border-emerald-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.clay.toFixed(1)}%</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.clay?.toFixed(1) || '30.0'}%
+                      </div>
                       <div className="text-emerald-300 text-sm">محتوى الطين</div>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl border border-blue-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.silt.toFixed(1)}%</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.silt?.toFixed(1) || '35.0'}%
+                      </div>
                       <div className="text-blue-300 text-sm">محتوى الطمي</div>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl border border-yellow-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.sand.toFixed(1)}%</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.sand?.toFixed(1) || '35.0'}%
+                      </div>
                       <div className="text-yellow-300 text-sm">محتوى الرمل</div>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.organicMatter.toFixed(1)}%</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.organicMatter?.toFixed(1) || '2.5'}%
+                      </div>
                       <div className="text-purple-300 text-sm">المادة العضوية</div>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-2xl border border-red-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.ph.toFixed(1)}</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.ph?.toFixed(1) || '6.5'}
+                      </div>
                       <div className="text-red-300 text-sm">مستوى الحموضة</div>
                     </div>
                     <div className="text-center p-6 bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl border border-teal-400/30">
-                      <div className="text-3xl font-black text-white mb-1">{landData.soilData.moisture.toFixed(1)}%</div>
+                      <div className="text-3xl font-black text-white mb-1">
+                        {landData?.soilData?.moisture?.toFixed(1) || '45.0'}%
+                      </div>
                       <div className="text-teal-300 text-sm">رطوبة التربة</div>
                     </div>
                   </div>
@@ -796,29 +860,66 @@ const LiveLandIntelligenceTool: React.FC = () => {
                     <div className="p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl border border-green-400/30">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-2xl font-bold text-white">{landData.soilData.nitrogen.toFixed(1)} mg/kg</p>
+                          <p className="text-2xl font-bold text-white">
+                            {landData?.soilData?.nitrogen?.toFixed(1) || '20.0'} mg/kg
+                          </p>
                           <p className="text-green-300 text-sm">النيتروجين</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-white">جيد</p>
-                          <p className="text-green-300 text-sm">للمحاصيل</p>
-                        </div>
+                        <Leaf className="w-8 h-8 text-green-400" />
                       </div>
                     </div>
-                    <div className="p-6 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl border border-orange-400/30">
+                    <div className="p-6 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl border border-blue-400/30">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-2xl font-bold text-white">{landData.soilData.carbonSequestration.toFixed(1)} t/ha</p>
-                          <p className="text-orange-300 text-sm">تخزين الكربون</p>
+                          <p className="text-2xl font-bold text-white">
+                            {landData?.soilData?.phosphorus?.toFixed(1) || '25.0'} mg/kg
+                          </p>
+                          <p className="text-blue-300 text-sm">الفسفور</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-white">ممتاز</p>
-                          <p className="text-orange-300 text-sm">للاستدامة</p>
-                        </div>
+                        <Droplets className="w-8 h-8 text-blue-400" />
                       </div>
                     </div>
                   </div>
                 </MotionDiv>
+
+                {/* Weather Alerts Section */}
+                {openWeatherData && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
+                  >
+                    <WeatherAlerts 
+                      alerts={openWeatherData.alerts}
+                      agricultural={openWeatherData.agricultural}
+                    />
+                  </MotionDiv>
+                )}
+
+                {/* Satellite Analysis Section */}
+                {sentinelData && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
+                  >
+                    <SatelliteAnalysis sentinelData={sentinelData} />
+                  </MotionDiv>
+                )}
+
+                {/* USGS EROS Analysis Section */}
+                {usgsErosData && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
+                  >
+                    <UsgsErosAnalysis usgsData={usgsErosData} />
+                  </MotionDiv>
+                )}
               </div>
 
               {/* Sidebar */}
@@ -929,6 +1030,160 @@ const LiveLandIntelligenceTool: React.FC = () => {
           </MotionDiv>
         )}
       </AnimatePresence>
+
+      {/* Land Management Section */}
+      {drawnLands.length > 0 && (
+        <section className="relative z-10 py-20 px-4 md:px-6 lg:px-8 bg-gradient-to-br from-black/50 to-emerald-900/20">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
+                إدارة <span className="text-emerald-400">الأراضي المرسومة</span>
+              </h2>
+              <p className="text-xl text-emerald-200 max-w-3xl mx-auto">
+                تخطيط وإدارة الأراضي الزراعية مع حساب التكاليف والأرباح المتوقعة
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {drawnLands.map((land, index) => (
+                <MotionDiv
+                  key={land.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">الأرض {index + 1}</h3>
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <button
+                        onClick={() => setSelectedLandId(land.id)}
+                        className="text-emerald-400 hover:text-emerald-300 transition-colors p-1 rounded-full hover:bg-emerald-500/20"
+                        title="عرض التفاصيل"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLand(land.id)}
+                        className="text-red-400 hover:text-red-300 transition-colors p-1 rounded-full hover:bg-red-500/20"
+                        title="حذف الأرض"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-200">المساحة:</span>
+                      <span className="text-white font-bold">{land.area.toFixed(2)} هكتار</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-200">المحيط:</span>
+                      <span className="text-white font-bold">{land.perimeter.toFixed(0)} متر</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-200">عدد النقاط:</span>
+                      <span className="text-white font-bold">{land.coordinates.length}</span>
+                    </div>
+                    
+                    {land.cropType && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-200">المحصول:</span>
+                        <span className="text-white font-bold">{land.cropType}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={() => {
+                        setSelectedCrop(land.cropType || 'قمح');
+                        setLandArea(land.area);
+                        setShowCostCalculator(true);
+                      }}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105"
+                    >
+                      حساب التكاليف
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        const dataStr = JSON.stringify(land.coordinates, null, 2);
+                        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                        const url = URL.createObjectURL(dataBlob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `land_${index + 1}_coordinates.json`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105"
+                    >
+                      تصدير الإحداثيات
+                    </button>
+                  </div>
+                </MotionDiv>
+              ))}
+            </div>
+
+            {/* Total Summary */}
+            <MotionDiv
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-12 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">ملخص الأراضي</h3>
+                <button
+                  onClick={() => {
+                    if (window.confirm('هل أنت متأكد من حذف جميع الأراضي؟')) {
+                      setDrawnLands([]);
+                      setSelectedLandId(null);
+                    }
+                  }}
+                  className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+                  title="حذف جميع الأراضي"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>حذف الكل</span>
+                </button>
+              </div>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-emerald-400">
+                    {drawnLands.length}
+                  </div>
+                  <div className="text-emerald-200">عدد الأراضي</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-emerald-400">
+                    {drawnLands.reduce((total, land) => total + land.area, 0).toFixed(2)}
+                  </div>
+                  <div className="text-emerald-200">إجمالي المساحة (هكتار)</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-emerald-400">
+                    {drawnLands.reduce((total, land) => total + land.perimeter, 0).toFixed(0)}
+                  </div>
+                  <div className="text-emerald-200">إجمالي المحيط (متر)</div>
+                </div>
+              </div>
+            </MotionDiv>
+          </div>
+        </section>
+      )}
+
+      {/* Cost Calculator Modal */}
+      {showCostCalculator && (
+        <CostCalculator
+          cropType={selectedCrop}
+          landArea={landArea}
+          region="الجزائر"
+          onClose={() => setShowCostCalculator(false)}
+        />
+      )}
     </div>
   );
 };

@@ -93,18 +93,21 @@ export default function ContactPage() {
                         <a 
                           href="tel:0558981686"
                           className="text-green-200 hover:text-green-300 font-semibold block"
+                          dir="ltr"
                         >
                           05 58981686
                         </a>
                         <a 
                           href="tel:0798700447"
                           className="text-green-200 hover:text-green-300 font-semibold block"
+                          dir="ltr"
                         >
                           07 98700447
                         </a>
                         <a 
                           href="tel:0660378697"
                           className="text-green-200 hover:text-green-300 font-semibold block"
+                          dir="ltr"
                         >
                           06 60378697
                         </a>

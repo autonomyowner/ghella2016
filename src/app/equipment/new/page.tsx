@@ -6,6 +6,10 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { useEquipment } from '@/hooks/useSupabase'
 import { supabase } from '@/lib/supabase/supabaseClient'
 import { motion } from 'framer-motion'
+import ProgressIndicator, { ProgressStep } from '@/components/ProgressIndicator'
+import EnhancedErrorDisplay from '@/components/EnhancedErrorDisplay'
+import imageOptimizer, { OptimizedImage } from '@/lib/imageOptimizer'
+import offlineFormManager, { SavedForm } from '@/lib/offlineFormManager'
 import { 
   Upload, 
   X, 
@@ -43,6 +47,65 @@ export default function EquipmentForm() {
     hours_used: ''
   })
 
+  // Progress tracking
+  const [currentStep, setCurrentStep] = useState<string>('')
+  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([
+    {
+      id: 'validating',
+      title: 'التحقق من البيانات',
+      description: 'جاري التحقق من صحة المعلومات المدخلة',
+      status: 'pending'
+    },
+    {
+      id: 'uploading',
+      title: 'رفع الصور',
+      description: 'جاري معالجة ورفع الصور المرفقة',
+      status: 'pending'
+    },
+    {
+      id: 'processing',
+      title: 'معالجة الإعلان',
+      description: 'جاري إعداد الإعلان للنشر',
+      status: 'pending'
+    },
+    {
+      id: 'publishing',
+      title: 'نشر الإعلان',
+      description: 'جاري نشر الإعلان في السوق',
+      status: 'pending'
+    }
+  ])
+
+  const updateStepStatus = (stepId: string, status: ProgressStep['status']) => {
+    setProgressSteps(prev => prev.map(step => 
+      step.id === stepId ? { ...step, status } : step
+    ))
+  }
+
+  const [formId] = useState(() => offlineFormManager.generateFormId())
+  const [hasOfflineData, setHasOfflineData] = useState(false)
+
+  // Load offline form data on component mount
+  useEffect(() => {
+    const savedForm = offlineFormManager.loadForm(formId);
+    if (savedForm && savedForm.formType === 'equipment') {
+      setFormData(prev => ({ ...prev, ...savedForm.data }));
+      setHasOfflineData(true);
+      console.log('Loaded form data from offline storage');
+    }
+  }, [formId]);
+
+  // Auto-save form data when it changes
+  useEffect(() => {
+    const saveData = () => {
+      offlineFormManager.autoSaveForm('equipment', formId, formData);
+    };
+
+    // Debounce the save operation
+    const timeoutId = setTimeout(saveData, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [formData, formId]);
+
   // Remove category selection for now - let database handle it
   // const categoryOptions = [
   //   { value: 'tractor', label: 'جرارات', icon: '🚜' },
@@ -62,6 +125,7 @@ export default function EquipmentForm() {
   // }, [])
   
   const [files, setFiles] = useState<FileList | null>(null)
+  const [optimizedImages, setOptimizedImages] = useState<OptimizedImage[]>([])
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -71,14 +135,45 @@ export default function EquipmentForm() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files
-    if (selectedFiles && selectedFiles.length > 5) {
+    if (!selectedFiles) return
+
+    if (selectedFiles.length > 5) {
       setError('يمكنك تحميل حتى 5 صور فقط')
       return
     }
-    setFiles(selectedFiles)
+
     setError(null)
+    setFiles(selectedFiles)
+
+    try {
+      // Show loading state for optimization
+      setUploading(true)
+      
+      // Optimize images
+      const optimized = await imageOptimizer.optimizeImages(selectedFiles, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.8,
+        format: 'webp'
+      })
+
+      setOptimizedImages(optimized)
+      
+      // Log optimization results
+      const totalOriginalSize = optimized.reduce((sum, img) => sum + img.originalSize, 0)
+      const totalOptimizedSize = optimized.reduce((sum, img) => sum + img.optimizedSize, 0)
+      const totalCompression = ((totalOriginalSize - totalOptimizedSize) / totalOriginalSize) * 100
+      
+      console.log(`Image optimization complete: ${totalCompression.toFixed(1)}% size reduction`)
+      
+    } catch (error) {
+      console.error('Image optimization failed:', error)
+      setError('فشل في تحسين الصور. سيتم استخدام الصور الأصلية.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const removeFile = (index: number) => {
@@ -106,12 +201,16 @@ export default function EquipmentForm() {
   }
 
   const uploadImages = async (): Promise<string[]> => {
-    if (!files || files.length === 0) return []
+    // Use optimized images if available, otherwise fallback to original files
+    const imagesToProcess = optimizedImages.length > 0 ? optimizedImages : files
+    
+    if (!imagesToProcess || imagesToProcess.length === 0) return []
 
     const imageUrls: string[] = []
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
+    for (let i = 0; i < imagesToProcess.length; i++) {
+      const item = imagesToProcess[i]
+      const file = 'file' in item ? item.file : item
       
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
@@ -124,10 +223,16 @@ export default function EquipmentForm() {
       }
 
       try {
-        const base64String = await convertImageToBase64(file)
-        imageUrls.push(base64String)
+        // If we have optimized images, use their dataUrl
+        if (optimizedImages.length > 0 && optimizedImages[i]) {
+          imageUrls.push(optimizedImages[i].dataUrl)
+        } else {
+          // Fallback to original conversion
+          const base64String = await convertImageToBase64(file)
+          imageUrls.push(base64String)
+        }
       } catch (error) {
-        console.error('Error converting image:', error)
+        console.error('Error processing image:', error)
         imageUrls.push('/placeholder-image.jpg')
       }
     }
@@ -163,7 +268,23 @@ export default function EquipmentForm() {
     setError(null)
 
     try {
+      // Step 1: Validating
+      setCurrentStep('validating')
+      updateStepStatus('validating', 'active')
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate validation
+      updateStepStatus('validating', 'completed')
+
+      // Step 2: Uploading images
+      setCurrentStep('uploading')
+      updateStepStatus('uploading', 'active')
       const imageUrls = await uploadImages()
+      updateStepStatus('uploading', 'completed')
+
+      // Step 3: Processing
+      setCurrentStep('processing')
+      updateStepStatus('processing', 'active')
+      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate processing
+      updateStepStatus('processing', 'completed')
 
       // Create equipment data with smart defaults
       const equipmentData = {
@@ -189,6 +310,10 @@ export default function EquipmentForm() {
 
       console.log('🔍 Equipment data being sent:', equipmentData)
 
+      // Step 4: Publishing
+      setCurrentStep('publishing')
+      updateStepStatus('publishing', 'active')
+
       // Try direct Supabase insert
       const { data, error } = await supabase
         .from('equipment')
@@ -198,11 +323,16 @@ export default function EquipmentForm() {
 
       if (error) {
         console.error('🔍 Direct Supabase error:', error)
+        updateStepStatus('publishing', 'error')
         throw error
       }
 
       console.log('🔍 Direct Supabase success:', data)
+      updateStepStatus('publishing', 'completed')
       setSuccess(true)
+      
+      // Clear offline form data after successful submission
+      offlineFormManager.deleteForm(formId);
       
       // Force refresh and redirect
       setTimeout(() => {
@@ -304,17 +434,52 @@ export default function EquipmentForm() {
             </div>
           </div>
 
-          {/* Error Display */}
+          {/* Enhanced Error Display */}
           {error && (
+            <div className="mb-6">
+              <EnhancedErrorDisplay
+                error={error}
+                onRetry={() => {
+                  setError(null);
+                  // Retry the last action
+                  if (uploading) {
+                    handleSubmit(new Event('submit') as any);
+                  }
+                }}
+                onDismiss={() => setError(null)}
+              />
+            </div>
+          )}
+
+          {/* Offline Data Recovery Notification */}
+          {hasOfflineData && (
             <motion.div 
-              className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6"
+              className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-400" />
-                <span className="text-red-300">{error}</span>
+                <CheckCircle className="w-5 h-5 text-blue-400" />
+                <div>
+                  <p className="text-blue-300 font-medium">تم استعادة البيانات المحفوظة</p>
+                  <p className="text-blue-200/80 text-sm">تم تحميل البيانات من التخزين المحلي</p>
+                </div>
               </div>
+            </motion.div>
+          )}
+
+          {/* Progress Indicator */}
+          {uploading && (
+            <motion.div 
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <ProgressIndicator 
+                steps={progressSteps}
+                currentStep={currentStep}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6"
+              />
             </motion.div>
           )}
 
@@ -555,23 +720,55 @@ export default function EquipmentForm() {
                   </div>
                 ) : (
                   <div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                      {Array.from(files).map((file, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeFile(index)}
-                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
+                    {/* Optimization Info */}
+                    {optimizedImages.length > 0 && (
+                      <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-300 text-sm">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>تم تحسين الصور بنجاح</span>
                         </div>
-                      ))}
+                        <div className="mt-2 text-xs text-green-200/80">
+                          {(() => {
+                            const totalOriginal = optimizedImages.reduce((sum, img) => sum + img.originalSize, 0)
+                            const totalOptimized = optimizedImages.reduce((sum, img) => sum + img.optimizedSize, 0)
+                            const compression = ((totalOriginal - totalOptimized) / totalOriginal * 100).toFixed(1)
+                            return `تم تقليل الحجم بنسبة ${compression}% (${imageOptimizer.formatFileSize(totalOriginal)} → ${imageOptimizer.formatFileSize(totalOptimized)})`
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                      {(optimizedImages.length > 0 ? optimizedImages : Array.from(files)).map((item, index) => {
+                        const file = 'file' in item ? item.file : item
+                        const imageUrl = 'dataUrl' in item ? item.dataUrl : URL.createObjectURL(file)
+                        const originalSize = 'originalSize' in item ? item.originalSize : file.size
+                        const optimizedSize = 'optimizedSize' in item ? item.optimizedSize : file.size
+                        
+                        return (
+                          <div key={index} className="relative group">
+                            <img
+                              src={imageUrl}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            
+                            {/* Size info overlay */}
+                            {optimizedImages.length > 0 && (
+                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded">
+                                {imageOptimizer.formatFileSize(optimizedSize)}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                     <button
                       type="button"

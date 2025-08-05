@@ -54,7 +54,7 @@ export default function MarketplacePage() {
   const [sections, setSections] = useState<SectionData[]>([
     {
       title: 'الأراضي الزراعية',
-      emoji: '🌾',
+      emoji: '',
       color: 'bg-emerald-500',
       items: [],
       loading: true,
@@ -62,7 +62,7 @@ export default function MarketplacePage() {
     },
     {
       title: 'الشتلات والمشاتل',
-      emoji: '🌱',
+      emoji: '',
       color: 'bg-green-500',
       items: [],
       loading: true,
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
     },
     {
       title: 'المعدات الزراعية',
-      emoji: '🚜',
+      emoji: '',
       color: 'bg-blue-500',
       items: [],
       loading: true,
@@ -78,7 +78,7 @@ export default function MarketplacePage() {
     },
     {
       title: 'الحيوانات',
-      emoji: '🐄',
+      emoji: '',
       color: 'bg-orange-500',
       items: [],
       loading: true,
@@ -86,7 +86,7 @@ export default function MarketplacePage() {
     },
     {
       title: 'الخضروات والفواكه',
-      emoji: '🍅',
+      emoji: '',
       color: 'bg-red-500',
       items: [],
       loading: true,
@@ -287,8 +287,7 @@ export default function MarketplacePage() {
               {/* Section Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className={`${section.color} p-3 rounded-full text-2xl`}>
-                    {section.emoji}
+                  <div className={`${section.color} p-3 rounded-full`}>
                   </div>
                   <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-emerald-300">{section.title}</h2>
@@ -380,7 +379,6 @@ export default function MarketplacePage() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">😔</div>
                   <h3 className="text-xl font-bold text-white mb-2">لا توجد إعلانات</h3>
                   <p className="text-white/70">لم يتم العثور على إعلانات في هذه الفئة</p>
                 </div>

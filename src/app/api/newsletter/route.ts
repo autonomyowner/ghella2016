@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { emailService } from '@/lib/emailService';
 
 // Server-side client that bypasses RLS
 const supabaseUrl = 'https://puvmqdnvofbtmqpcjmia.supabase.co';
@@ -17,15 +18,23 @@ export async function POST(request: NextRequest) {
   try {
     const { email, full_name } = await request.json();
 
+    // Validate required fields
+    if (!email) {
+      return NextResponse.json(
+        { success: false, error: 'البريد الإلكتروني مطلوب' },
+        { status: 400 }
+      );
+    }
+
     // Validate email
-    if (!email || !email.includes('@')) {
+    if (!email.includes('@')) {
       return NextResponse.json(
         { success: false, error: 'يرجى إدخال بريد إلكتروني صحيح' },
         { status: 400 }
       );
     }
 
-    // Check if email already exists
+    // Check if already subscribed
     const { data: existingSubscription } = await supabase
       .from('newsletter_subscriptions')
       .select('*')
@@ -33,57 +42,32 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingSubscription) {
-      if (existingSubscription.status === 'active') {
-        return NextResponse.json(
-          { success: false, error: 'أنت مشترك بالفعل في النشرة الإخبارية' },
-          { status: 400 }
-        );
-      } else {
-        // Reactivate subscription
-        const { error: updateError } = await supabase
-          .from('newsletter_subscriptions')
-          .update({ 
-            status: 'active',
-            full_name: full_name || null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingSubscription.id);
-
-        if (updateError) {
-          console.error('Error reactivating subscription:', updateError);
-          return NextResponse.json(
-            { success: false, error: 'حدث خطأ أثناء إعادة تفعيل الاشتراك' },
-            { status: 500 }
-          );
-        }
-
-        return NextResponse.json(
-          { success: true, message: 'تم إعادة تفعيل اشتراكك بنجاح!' }
-        );
-      }
+      return NextResponse.json(
+        { success: false, error: 'أنت مشترك بالفعل في النشرة البريدية' },
+        { status: 400 }
+      );
     }
 
-    // Insert new subscription
+    // Insert newsletter subscription
     const { error: insertError } = await supabase
       .from('newsletter_subscriptions')
       .insert({
         email,
         full_name: full_name || null,
         status: 'active',
-        source: 'website',
         subscribed_at: new Date().toISOString()
       });
 
     if (insertError) {
       console.error('Error inserting newsletter subscription:', insertError);
       return NextResponse.json(
-        { success: false, error: 'حدث خطأ أثناء الاشتراك في النشرة الإخبارية' },
+        { success: false, error: 'حدث خطأ أثناء الاشتراك في النشرة البريدية' },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { success: true, message: 'تم الاشتراك بنجاح في النشرة الإخبارية!' }
+      { success: true, message: 'تم الاشتراك في النشرة البريدية بنجاح!' }
     );
 
   } catch (error) {
@@ -97,7 +81,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    console.log('Fetching newsletter subscriptions with server-side client...');
+    console.log('Fetching newsletter subscriptions...');
     const { data: subscriptions, error } = await supabase
       .from('newsletter_subscriptions')
       .select('*')
@@ -127,7 +111,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const { status } = await request.json();
+    const { status, subject, content } = await request.json();
 
     if (!id) {
       return NextResponse.json(
@@ -136,6 +120,48 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // If sending newsletter
+    if (subject && content) {
+      // Get all active subscribers
+      const { data: subscribers, error: fetchError } = await supabase
+        .from('newsletter_subscriptions')
+        .select('email')
+        .eq('status', 'active');
+
+      if (fetchError) {
+        console.error('Error fetching subscribers:', fetchError);
+        return NextResponse.json(
+          { success: false, error: 'حدث خطأ أثناء جلب المشتركين' },
+          { status: 500 }
+        );
+      }
+
+      if (!subscribers || subscribers.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'لا يوجد مشتركين نشطين' },
+          { status: 400 }
+        );
+      }
+
+      // Send newsletter to all subscribers
+      const subscriberEmails = subscribers.map(sub => sub.email);
+      const emailResult = await emailService.sendNewsletter(subscriberEmails, subject, content);
+
+      if (!emailResult.success) {
+        console.error('Newsletter sending failed:', emailResult.error);
+        return NextResponse.json(
+          { success: false, error: 'حدث خطأ أثناء إرسال النشرة البريدية' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `تم إرسال النشرة البريدية بنجاح إلى ${emailResult.sentCount} مشترك`
+      });
+    }
+
+    // Update subscription status
     const updateData: any = {};
     if (status) updateData.status = status;
     updateData.updated_at = new Date().toISOString();

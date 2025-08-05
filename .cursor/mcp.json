@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "node",
+      "args": ["mcp-simple.js", "users"],
+      "env": {
+        "NEXT_PUBLIC_SUPABASE_URL": "https://puvmqdnvofbtmqpcjmia.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1dm1xZG52b2ZidG1xcGNqbWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5ODc2MDcsImV4cCI6MjA2ODU2MzYwN30.9rLsQz3vi8rU46OqTYHCInVMSGdj5xgZTYZvq7ZBfjY"
+      }
+    },
+    "gibsonai": {
+      "command": "node",
+      "args": ["mcp-simple.js", "schema"]
+    },
+    "bucket": {
+      "command": "node",
+      "args": ["mcp-file-manager.js", "list"]
+    },
+    "postmark": {
+      "command": "node",
+      "args": ["mcp-email-manager.js", "logs"]
+    },
+    "peekaboo": {
+      "command": "node",
+      "args": ["mcp-web-scraper.js", "prices"]
+    }
+  }
+} 

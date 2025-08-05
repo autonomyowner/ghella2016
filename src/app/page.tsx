@@ -410,7 +410,7 @@ export default function HomePage() {
             </Link>
 
             {/* Bubble 9 - عروض خاصة */}
-            <Link href="/marketplace" className="group">
+            <Link href="/services" className="group">
               <div className="text-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-pink-500/30 to-pink-600/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/25 border border-pink-500/40 mx-auto mb-3">
                   <span className="text-4xl">🎁</span>
