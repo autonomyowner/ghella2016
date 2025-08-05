@@ -287,7 +287,7 @@ const VegetablesMarketplacePage: React.FC = () => {
                 className="inline-flex items-center px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm mb-8"
               >
                 <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
-                {!isOnline ? 'وضع عدم الاتصال' : 'استخدام التخزين المحلي'}
+                <span>{!isOnline ? 'وضع عدم الاتصال' : 'استخدام التخزين المحلي'}</span>
               </motion.div>
             )}
 
