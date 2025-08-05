@@ -256,7 +256,7 @@ const VegetablesMarketplacePage: React.FC = () => {
               transition={{ duration: 1, ease: "easeOut" }}
               className="text-8xl mb-8 drop-shadow-2xl"
             >
-              🥬
+              <span>🥬</span>
             </motion.div>
 
             {/* Main Title */}
