@@ -386,7 +386,7 @@ export default function EquipmentForm() {
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            ✅
+            <span>✅</span>
           </motion.div>
           <h1 className="text-3xl font-bold text-white mb-4">تم إضافة المعدات بنجاح!</h1>
           <p className="text-white/70 mb-6">تم نشر إعلانك في السوق الزراعي</p>

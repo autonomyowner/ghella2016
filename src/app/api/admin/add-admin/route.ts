@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email
-    const authUser = existingAuthUser.users.find(user => user.email === email);
+    const authUser = existingAuthUser.users.find((user: any) => user.email === email);
     let userId;
 
     if (authUser) {

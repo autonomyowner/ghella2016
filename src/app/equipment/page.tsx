@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic';
 const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), { ssr: false, loading: () => <div /> });
 import { AnimatePresence } from 'framer-motion';
@@ -339,7 +339,7 @@ export default function EquipmentPage() {
               transition={{ duration: 1, ease: "easeOut" }}
               className="text-8xl mb-8 drop-shadow-2xl"
             >
-              🚜
+              <span>🚜</span>
             </MotionDiv>
 
             {/* Main Title */}
@@ -349,7 +349,7 @@ export default function EquipmentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              تأجير الآلات الزراعية
+              <span>تأجير الآلات الزراعية</span>
             </MotionDiv>
 
             {/* Subtitle */}
@@ -359,7 +359,7 @@ export default function EquipmentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.4 }}
             >
-              اكتشف أحدث المعدات الزراعية المتطورة من جرارات وحصادات وأنظمة ري متقدمة
+              <span>اكتشف أحدث المعدات الزراعية المتطورة من جرارات وحصادات وأنظمة ري متقدمة</span>
             </MotionDiv>
 
             {/* Stats Section */}
@@ -630,9 +630,11 @@ export default function EquipmentPage() {
                   : 'grid-cols-1'
               }`}>
                 <AnimatePresence>
-                  {displayEquipment.map((item, index) => (
-                    <EquipmentCardEnhanced key={item.id || index} item={item} viewMode={viewMode} />
-                  ))}
+                  <React.Fragment>
+                    {displayEquipment.map((item, index) => (
+                      <EquipmentCardEnhanced key={item.id || index} item={item} viewMode={viewMode} />
+                    ))}
+                  </React.Fragment>
                 </AnimatePresence>
               </div>
 
