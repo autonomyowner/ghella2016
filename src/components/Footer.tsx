@@ -284,6 +284,17 @@ export default function Footer() {
           <p className="text-gray-400">
             © {new Date().getFullYear()} {settings.site_title}. جميع الحقوق محفوظة.
           </p>
+          <p className="text-gray-400 mt-2">
+            تم تطوير المنصة من طرف{' '}
+            <a 
+              href="https://sitedz.store" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors duration-200 underline"
+            >
+              sitedz.store
+            </a>
+          </p>
         </div>
       </div>
     </footer>

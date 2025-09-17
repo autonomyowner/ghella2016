@@ -693,6 +693,17 @@ export default function HomePage() {
 
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
             <p>&copy; 2024 منصة الغلة. جميع الحقوق محفوظة.</p>
+            <p className="mt-2">
+              تم تطوير المنصة من طرف{' '}
+              <a 
+                href="https://sitedz.store" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-green-300 hover:text-green-400 transition-colors duration-200 underline"
+              >
+                sitedz.store
+              </a>
+            </p>
           </div>
         </div>
       </footer>
