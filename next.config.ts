@@ -116,6 +116,11 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/var/:path*',
+        destination: '/VAR/:path*',
+        permanent: true,
+      },
     ]
   },
 
