@@ -5,6 +5,7 @@ import { useSupabaseData } from '@/hooks/useSupabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase/supabaseClient';
 
 const NewAnimalListingPage: React.FC = () => {
   const { addAnimal } = useSupabaseData();

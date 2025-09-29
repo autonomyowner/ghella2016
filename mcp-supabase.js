@@ -2,6 +2,7 @@
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const types = require('@modelcontextprotocol/sdk/dist/cjs/types.js');
 const { createClient } = require('@supabase/supabase-js');
 
 // Supabase configuration from environment variables
@@ -36,7 +37,7 @@ const server = new Server(
 );
 
 // Handle resource listing
-server.setRequestHandler('resources/list', async () => {
+server.setRequestHandler(types.ListResourcesRequestSchema, async () => {
   return {
     resources: Object.entries(TABLES).map(([key, table]) => ({
       uri: `supabase://${table}`,
@@ -48,7 +49,7 @@ server.setRequestHandler('resources/list', async () => {
 });
 
 // Handle resource reading (CRUD operations)
-server.setRequestHandler('resources/read', async (request) => {
+server.setRequestHandler(types.ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
   const tableName = uri.replace('supabase://', '');
   
@@ -79,7 +80,10 @@ server.setRequestHandler('resources/read', async (request) => {
 });
 
 // Handle resource creation (INSERT operations)
-server.setRequestHandler('resources/create', async (request) => {
+// NOTE: SDK does not define a create schema; expose via a tool instead in future.
+server.setRequestHandler({
+  parse: (value) => ({ method: 'resources/create', params: value.params }),
+}, async (request) => {
   const { uri, contents } = request.params;
   const tableName = uri.replace('supabase://', '');
   
@@ -111,7 +115,9 @@ server.setRequestHandler('resources/create', async (request) => {
 });
 
 // Handle resource updates (UPDATE operations)
-server.setRequestHandler('resources/update', async (request) => {
+server.setRequestHandler({
+  parse: (value) => ({ method: 'resources/update', params: value.params }),
+}, async (request) => {
   const { uri, contents } = request.params;
   const tableName = uri.replace('supabase://', '');
   
@@ -146,7 +152,9 @@ server.setRequestHandler('resources/update', async (request) => {
 });
 
 // Handle resource deletion (DELETE operations)
-server.setRequestHandler('resources/delete', async (request) => {
+server.setRequestHandler({
+  parse: (value) => ({ method: 'resources/delete', params: value.params }),
+}, async (request) => {
   const { uri } = request.params;
   const tableName = uri.replace('supabase://', '');
   
