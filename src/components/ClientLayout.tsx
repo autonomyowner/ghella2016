@@ -38,15 +38,16 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       }
     }
 
-    // Force loading to false after 5 seconds to prevent infinite loading
+    // Force loading to false after 3 seconds to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
+      console.log('🚨 ClientLayout: Force hiding loading spinners after timeout');
       const loadingElements = document.querySelectorAll('[class*="animate-spin"]');
       loadingElements.forEach(el => {
         if (el.classList.contains('animate-spin')) {
           (el as HTMLElement).style.display = 'none';
         }
       });
-    }, 5000);
+    }, 3000); // Reduced to 3 seconds
 
     return () => clearTimeout(loadingTimeout);
   }, []);

@@ -41,6 +41,18 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Emergency fallback to prevent infinite loading
+  useEffect(() => {
+    const emergencyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('🚨 Emergency timeout: Force setting loading to false')
+        setLoading(false)
+      }
+    }, 5000) // 5 second emergency timeout
+
+    return () => clearTimeout(emergencyTimeout)
+  }, [loading])
+
   // Fetch user profile
   const fetchProfile = async (userId: string) => {
     try {
@@ -102,29 +114,37 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session with timeout
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Fetching initial session...')
         const { data: { session } } = await supabase.auth.getSession()
+        console.log('📋 Session result:', { hasSession: !!session, hasUser: !!session?.user })
+        
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          console.log('👤 User found, fetching profile...')
           // Set a timeout for profile fetching to prevent long loading
           const profileTimeout = setTimeout(() => {
+            console.log('⏰ Profile fetch timeout, setting loading to false')
             setLoading(false)
-          }, 3000) // 3 second timeout
+          }, 2000) // Reduced to 2 seconds
           
           try {
             await fetchProfile(session.user.id)
+            console.log('✅ Profile fetched successfully')
           } catch (error) {
-            console.error('Profile fetch error:', error)
+            console.error('❌ Profile fetch error:', error)
           } finally {
             clearTimeout(profileTimeout)
             setLoading(false)
+            console.log('🏁 Loading set to false after profile fetch')
           }
         } else {
+          console.log('👤 No user found, setting loading to false')
           setLoading(false)
         }
       } catch (error) {
-        console.error('Session fetch error:', error)
+        console.error('❌ Session fetch error:', error)
         setLoading(false)
       }
     }
@@ -134,19 +154,24 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔄 Auth state change:', event, { hasSession: !!session, hasUser: !!session?.user })
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          console.log('👤 User authenticated, fetching profile...')
           try {
             await fetchProfile(session.user.id)
+            console.log('✅ Profile updated after auth change')
           } catch (error) {
-            console.error('Profile fetch error:', error)
+            console.error('❌ Profile fetch error after auth change:', error)
           }
         } else {
+          console.log('👤 User signed out, clearing profile')
           setProfile(null)
         }
         setLoading(false)
+        console.log('🏁 Loading set to false after auth state change')
       }
     )
 
@@ -156,28 +181,38 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Sign in
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('SupabaseAuthContext: Attempting sign in for email:', email)
+      console.log('🔐 SupabaseAuthContext: Attempting sign in for email:', email)
+      setLoading(true) // Set loading at start
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       
-      console.log('SupabaseAuthContext: Sign in response:', { data, error })
+      console.log('📋 SupabaseAuthContext: Sign in response:', { data, error })
       
       if (error) {
-        console.error('SupabaseAuthContext: Sign in error:', error)
+        console.error('❌ SupabaseAuthContext: Sign in error:', error)
+        setLoading(false) // Ensure loading is false on error
         return { error }
       }
       
       if (data.user) {
-        console.log('SupabaseAuthContext: User signed in successfully:', data.user.id)
+        console.log('✅ SupabaseAuthContext: User signed in successfully:', data.user.id)
         // Fetch profile after successful sign in
-        await fetchProfile(data.user.id)
+        try {
+          await fetchProfile(data.user.id)
+          console.log('✅ Profile fetched after sign in')
+        } catch (profileError) {
+          console.error('❌ Profile fetch error after sign in:', profileError)
+        }
       }
       
+      setLoading(false) // Ensure loading is false on success
       return { error: null }
     } catch (error) {
-      console.error('SupabaseAuthContext: Unexpected error during sign in:', error)
+      console.error('❌ SupabaseAuthContext: Unexpected error during sign in:', error)
+      setLoading(false) // Ensure loading is false on error
       return { error }
     }
   }
