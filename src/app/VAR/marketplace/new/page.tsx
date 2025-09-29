@@ -14,8 +14,20 @@ const NewVegetableListingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  // IMPORTANT: Declare all hooks before any conditional return to preserve hook order
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    vegetable_type: 'tomatoes',
+    price: '',
+    quantity: '',
+    unit: 'kg',
+    location: '',
+    harvest_date: '',
+    contact_phone: ''
+  });
 
-  // Check authentication
+  // Auth gate
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
@@ -34,17 +46,7 @@ const NewVegetableListingPage: React.FC = () => {
     );
   }
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    vegetable_type: 'tomatoes',
-    price: '',
-    quantity: '',
-    unit: 'kg',
-    location: '',
-    harvest_date: '',
-    contact_phone: ''
-  });
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
