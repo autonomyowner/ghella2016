@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -19,8 +19,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   
-  const { signIn, signInWithGoogle, signInWithFacebook } = useSupabaseAuth()
+  const { signIn, signInWithGoogle, signInWithFacebook, user } = useSupabaseAuth()
   const router = useRouter()
+
+  // Redirect immediately if already authenticated (or once auth becomes ready)
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard')
+    }
+  }, [user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
