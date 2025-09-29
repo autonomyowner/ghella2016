@@ -55,10 +55,10 @@ const UltraPerformanceOptimizer: React.FC = () => {
 
   // Ultra-critical resources with intelligent prioritization
   const ultraCriticalResources: ResourcePriority[] = useMemo(() => [
-    // Critical above-the-fold images with size optimization
-    { url: '/assets/n7l1.webp', priority: 'high', type: 'image', critical: true, size: 150000 },
-    { url: '/assets/n7l2.webp', priority: 'high', type: 'image', critical: true, size: 120000 },
-    { url: '/assets/sheep1.webp', priority: 'high', type: 'image', critical: true, size: 80000 },
+    // DISABLED: Let PreloadOptimizer handle this to avoid conflicts
+    // { url: '/assets/n7l1.webp', priority: 'high', type: 'image', critical: true, size: 150000 },
+    // { url: '/assets/n7l2.webp', priority: 'high', type: 'image', critical: true, size: 120000 },
+    // { url: '/assets/sheep1.webp', priority: 'high', type: 'image', critical: true, size: 80000 },
     
     // Critical fonts with preloading
     { url: 'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap', priority: 'high', type: 'font', critical: true },

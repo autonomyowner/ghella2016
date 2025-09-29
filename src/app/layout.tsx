@@ -7,6 +7,7 @@ import MobileOptimizedInterface from '@/components/MobileOptimizedInterface';
 import CLSOptimizer from '@/components/CLSOptimizer';
 import PreloadOptimizer from '@/components/PreloadOptimizer';
 import AnimationOptimizer from '@/components/AnimationOptimizer';
+import AggressiveCLSPrevention from '@/components/AggressiveCLSPrevention';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -83,10 +84,9 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#2d5016" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Critical preconnect only */}
+        {/* Critical preconnect only - reduced to prevent conflicts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://puvmqdnvofbtmqpcjmia.supabase.co" />
         
         {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -119,19 +119,21 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <CLSOptimizer>
-          <PreloadOptimizer>
-            <AnimationOptimizer>
-              <HydrationSuppressor>
-                <MobileOptimizedInterface>
-                  <ClientLayout>
-                    {children}
-                  </ClientLayout>
-                </MobileOptimizedInterface>
-              </HydrationSuppressor>
-            </AnimationOptimizer>
-          </PreloadOptimizer>
-        </CLSOptimizer>
+        <AggressiveCLSPrevention>
+          <CLSOptimizer>
+            <PreloadOptimizer>
+              <AnimationOptimizer>
+                <HydrationSuppressor>
+                  <MobileOptimizedInterface>
+                    <ClientLayout>
+                      {children}
+                    </ClientLayout>
+                  </MobileOptimizedInterface>
+                </HydrationSuppressor>
+              </AnimationOptimizer>
+            </PreloadOptimizer>
+          </CLSOptimizer>
+        </AggressiveCLSPrevention>
       </body>
     </html>
   );

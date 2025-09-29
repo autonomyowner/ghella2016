@@ -5,6 +5,45 @@ img {
   max-width: 100%;
   height: auto;
   aspect-ratio: attr(width) / attr(height);
+  min-height: 1px;
+  object-fit: cover;
+}
+
+/* Aggressive CLS prevention for all elements */
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent layout shifts for all containers */
+.container, .max-w-\[.*\], .w-full, .h-full {
+  min-height: 1px;
+}
+
+/* Prevent layout shifts for motion components */
+[class*="motion"], [data-framer-motion] {
+  min-height: 1px;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Prevent layout shifts for text content */
+h1, h2, h3, h4, h5, h6, p, span {
+  line-height: 1.5;
+  min-height: 1.2em;
+}
+
+/* Prevent layout shifts for video elements */
+video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+/* Prevent layout shifts for loading states */
+[class*="loading"], [class*="skeleton"] {
+  min-height: 200px;
+  background-color: #f0f0f0;
 }
 
 /* Set explicit dimensions for common elements */

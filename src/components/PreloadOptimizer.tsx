@@ -45,24 +45,9 @@ export default function PreloadOptimizer({ children }: PreloadOptimizerProps) {
     }
 
     const addCriticalPreloads = () => {
-      // Only preload critical resources that are above the fold
-      const criticalResources = [
-        { href: '/favicon.ico', as: 'image' },
-        { href: '/assets/n7l1.webp', as: 'image' },
-        { href: '/assets/n7l2.webp', as: 'image' }
-      ]
-
-      criticalResources.forEach((resource) => {
-        if (!preloadedResources.current.has(resource.href)) {
-          const link = document.createElement('link')
-          link.rel = 'preload'
-          link.href = resource.href
-          link.as = resource.as
-          link.setAttribute('fetchpriority', 'high')
-          document.head.appendChild(link)
-          preloadedResources.current.add(resource.href)
-        }
-      })
+      // DISABLED: Don't preload any resources to avoid warnings
+      // Only preload resources that are actually used immediately
+      console.log('🚫 Preloading disabled to prevent CLS and warnings')
     }
 
     // Delay preloading to avoid blocking critical resources
