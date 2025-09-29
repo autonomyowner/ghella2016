@@ -185,7 +185,7 @@ export default function ExportsPage() {
               transition={{ duration: 0.8 }}
               className="text-8xl mb-6"
             >
-              🚢
+              <span>🚢</span>
             </motion.div>
             <motion.div
               className="text-4xl lg:text-6xl font-bold mb-6 arabic-title"

@@ -301,7 +301,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   whileTap={{ scale: 0.95 }}
                   className="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-full shadow-lg hover:bg-emerald-600 transition-colors"
                 >
-                  عرض التفاصيل
+                  <span>عرض التفاصيل</span>
                 </motion.button>
               </Link>
             </motion.div>

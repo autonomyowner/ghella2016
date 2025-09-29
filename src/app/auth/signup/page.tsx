@@ -227,7 +227,7 @@ export default function SignupPage(): React.JSX.Element {
                 animate={{ opacity: 1, x: 0 }}
                 className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400"
               >
-                {error}
+                <span>{error}</span>
               </motion.div>
             )}
 
@@ -238,7 +238,7 @@ export default function SignupPage(): React.JSX.Element {
                 animate={{ opacity: 1, x: 0 }}
                 className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400"
               >
-                {message}
+                <span>{message}</span>
               </motion.div>
             )}
 

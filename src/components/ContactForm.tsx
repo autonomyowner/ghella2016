@@ -80,7 +80,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               : 'bg-red-500/20 border border-red-500/30 text-red-400'
           }`}
         >
-          {message}
+          <span>{message}</span>
         </motion.div>
       )}
 
@@ -183,10 +183,10 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
           {loading ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-              جاري الإرسال...
+              <span>جاري الإرسال...</span>
             </>
           ) : (
-            'إرسال الرسالة'
+            <span>إرسال الرسالة</span>
           )}
         </motion.button>
       </form>

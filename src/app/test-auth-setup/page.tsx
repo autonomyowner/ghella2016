@@ -305,7 +305,7 @@ export default function TestAuthSetup() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
               >
                 <Plus className="w-4 h-4" />
-                إنشاء حساب تجريبي
+                <span>إنشاء حساب تجريبي</span>
               </motion.button>
 
               <motion.button
@@ -316,7 +316,7 @@ export default function TestAuthSetup() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
               >
                 <User className="w-4 h-4" />
-                تسجيل الدخول
+                <span>تسجيل الدخول</span>
               </motion.button>
 
               {user && (
@@ -328,7 +328,7 @@ export default function TestAuthSetup() {
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
                 >
                   <User className="w-4 h-4" />
-                  تسجيل الخروج
+                  <span>تسجيل الخروج</span>
                 </motion.button>
               )}
 
@@ -340,7 +340,7 @@ export default function TestAuthSetup() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
               >
                 <Database className="w-4 h-4" />
-                فحص الاتصال بقاعدة البيانات
+                <span>فحص الاتصال بقاعدة البيانات</span>
               </motion.button>
 
               <motion.button
@@ -351,7 +351,7 @@ export default function TestAuthSetup() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
               >
                 <RefreshCw className="w-4 h-4" />
-                جلب المستخدمين
+                <span>جلب المستخدمين</span>
               </motion.button>
 
               <motion.button
@@ -362,7 +362,7 @@ export default function TestAuthSetup() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-500 text-white rounded-xl font-medium transition-all"
               >
                 <Trash2 className="w-4 h-4" />
-                حذف البيانات التجريبية
+                <span>حذف البيانات التجريبية</span>
               </motion.button>
             </div>
           </div>
