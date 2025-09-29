@@ -29,6 +29,7 @@ const Header: React.FC = () => {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const { user, profile, signOut, loading } = useSupabaseAuth();
+  const [loadingGracePassed, setLoadingGracePassed] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Scroll handling
@@ -55,6 +56,13 @@ const Header: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Grace period: if auth loading persists > 2s (stale cache), show guest buttons
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => setLoadingGracePassed(true), 2000);
+    return () => clearTimeout(t);
+  }, [loading]);
 
   const handleSignOut = async () => {
     setLogoutLoading(true);
@@ -139,7 +147,7 @@ const Header: React.FC = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
-            {loading ? (
+            {loading && !loadingGracePassed ? (
               <div className={`w-4 h-4 border border-t-transparent rounded-full animate-spin transition-colors duration-300 opacity-50 ${
                 isScrolled ? 'border-green-500' : 'border-white'
               }`}></div>
@@ -282,7 +290,7 @@ const Header: React.FC = () => {
                 </Link>
               ))}
 
-                {loading ? (
+                {loading && !loadingGracePassed ? (
                   <div className="flex justify-center py-2">
                     <div className="w-4 h-4 border border-green-500 border-t-transparent rounded-full animate-spin opacity-50"></div>
                   </div>
