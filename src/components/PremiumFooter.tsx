@@ -192,6 +192,19 @@ const PremiumFooter: React.FC<PremiumFooterProps> = ({ settings }) => {
             </div>
 
             {/* Made with Love */}
+            <div className="text-center md:text-left">
+              <p className="text-emerald-400 text-sm">
+                تم تطوير المنصة من طرف{' '}
+                <a 
+                  href="https://sitedz.store" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-emerald-300 hover:text-emerald-200 transition-colors duration-200 underline font-semibold"
+                >
+                  sitedz.store
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

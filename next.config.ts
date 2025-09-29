@@ -70,9 +70,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: process.env.NODE_ENV === 'development' 
-              ? 'no-cache, no-store, must-revalidate, max-age=0'
-              : 'public, max-age=31536000, immutable',
+            // Never cache HTML pages; allow static assets elsewhere to be cached
+            value: 'no-store, no-cache, must-revalidate',
           },
           {
             key: 'X-Content-Type-Options',
@@ -90,6 +89,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/(.*)\.(css|js|woff|woff2|ttf|eot|png|jpg|jpeg|gif|webp|avif|svg)',
         headers: [
           {
             key: 'Cache-Control',

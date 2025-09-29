@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase/supabaseClient';
@@ -113,6 +113,49 @@ export default function MarketplacePage() {
       loadVegetableSection()
     ]);
   };
+
+  // Debounced auto-refresh when data changes in Supabase
+  const refreshTimeoutRef = useRef<number | null>(null);
+
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimeoutRef.current) {
+      window.clearTimeout(refreshTimeoutRef.current);
+    }
+    refreshTimeoutRef.current = window.setTimeout(() => {
+      loadAllSections();
+    }, 500);
+  }, []);
+
+  // Realtime updates for marketplace sections
+  useEffect(() => {
+    const channel = supabase.channel('marketplace_changes');
+
+    const tables = ['land_listings', 'nurseries', 'equipment', 'animal_listings', 'vegetables'];
+    tables.forEach((table) => {
+      channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table },
+        () => {
+          scheduleRefresh();
+        }
+      );
+    });
+
+    channel.subscribe((status) => {
+      console.log('Realtime subscription status:', status);
+    });
+
+    return () => {
+      try {
+        if (refreshTimeoutRef.current) {
+          window.clearTimeout(refreshTimeoutRef.current);
+        }
+        supabase.removeChannel(channel);
+      } catch (e) {
+        console.warn('Error cleaning up realtime channel', e);
+      }
+    };
+  }, [scheduleRefresh]);
 
   const loadLandSection = async () => {
     try {
