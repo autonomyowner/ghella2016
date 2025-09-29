@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useSupabaseData } from '@/hooks/useSupabase';
+import { supabase } from '@/lib/supabase/supabaseClient';
 
 const NewVegetableListingPage: React.FC = () => {
   const router = useRouter();
@@ -13,6 +14,25 @@ const NewVegetableListingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+
+  // Check authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
+          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خضار جديدة</p>
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
+          >
+            تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const [formData, setFormData] = useState({
     title: '',
@@ -83,6 +103,13 @@ const NewVegetableListingPage: React.FC = () => {
       return;
     }
 
+    // Double-check authentication before proceeding
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+      setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -116,16 +143,18 @@ const NewVegetableListingPage: React.FC = () => {
     } catch (error: unknown) {
       console.error('Error adding vegetable:', error);
       
-      // Better error handling
+      // Better error handling for RLS and authentication issues
       let errorMessage = 'حدث خطأ في إضافة الخضار. يرجى المحاولة مرة أخرى.';
       
       if (error instanceof Error) {
-        if (error.message.includes('RLS')) {
-          errorMessage = 'خطأ في الصلاحيات. يرجى التأكد من تسجيل الدخول.';
+        if (error.message.includes('permission denied') || error.message.includes('RLS')) {
+          errorMessage = 'خطأ في الصلاحيات. يرجى التأكد من تسجيل الدخول وإعادة المحاولة.';
         } else if (error.message.includes('duplicate')) {
           errorMessage = 'هذا الإعلان موجود بالفعل.';
         } else if (error.message.includes('invalid')) {
           errorMessage = 'بيانات غير صحيحة. يرجى التحقق من المعلومات المدخلة.';
+        } else if (error.message.includes('session') || error.message.includes('auth')) {
+          errorMessage = 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.';
         } else {
           errorMessage = `خطأ: ${error.message}`;
         }

@@ -161,6 +161,13 @@ const NewAnimalListingPage: React.FC = () => {
       return;
     }
 
+    // Double-check authentication before proceeding
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+      setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.');
+      return;
+    }
+
     // Validation
     if (!formData.title.trim()) {
       setError('عنوان الإعلان مطلوب');
@@ -230,7 +237,23 @@ const NewAnimalListingPage: React.FC = () => {
 
     } catch (err: any) {
       console.error('Error creating listing:', err);
-      setError(err.message || 'حدث خطأ في إنشاء الإعلان');
+      
+      // Better error handling for RLS and authentication issues
+      let errorMessage = 'حدث خطأ في إنشاء الإعلان';
+      
+      if (err.message?.includes('permission denied') || err.message?.includes('RLS')) {
+        errorMessage = 'خطأ في الصلاحيات. يرجى التأكد من تسجيل الدخول وإعادة المحاولة.';
+      } else if (err.message?.includes('duplicate')) {
+        errorMessage = 'هذا الإعلان موجود بالفعل.';
+      } else if (err.message?.includes('invalid')) {
+        errorMessage = 'بيانات غير صحيحة. يرجى التحقق من المعلومات المدخلة.';
+      } else if (err.message?.includes('session') || err.message?.includes('auth')) {
+        errorMessage = 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.';
+      } else {
+        errorMessage = `خطأ: ${err.message || 'حدث خطأ غير متوقع'}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
