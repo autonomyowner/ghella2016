@@ -4,6 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import CLS prevention styles */
+@import './cls-prevention.css';
+
 :root {
   /* Arabic Agricultural Color Palette */
   --primary-green: #2d5016;

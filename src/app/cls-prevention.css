@@ -1,0 +1,82 @@
+/* CLS Prevention Styles */
+
+/* Prevent layout shifts for images */
+img {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: attr(width) / attr(height);
+}
+
+/* Set explicit dimensions for common elements */
+.motion-div, [class*="motion"] {
+  min-height: 1px;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Optimize animations to reduce CLS */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Use transform instead of changing layout properties */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Prevent CLS for loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Optimize video elements */
+video {
+  object-fit: cover;
+  will-change: auto;
+}
+
+/* Prevent layout shifts for text content */
+.text-content {
+  min-height: 1.2em;
+  line-height: 1.5;
+}
+
+/* Optimize motion components */
+[data-framer-motion] {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimize for slow devices */
+@media (max-width: 768px) {
+  .motion-div, [class*="motion"] {
+    animation-duration: 0.2s !important;
+  }
+}

@@ -195,7 +195,7 @@ export default function HomePage() {
           loop 
           playsInline 
           muted
-          preload="metadata"
+          preload="none"
           className="object-cover w-screen h-full absolute top-0 left-0 z-0 min-w-full min-h-full"
           onLoadedData={() => {
             // Video loaded, remove loading state

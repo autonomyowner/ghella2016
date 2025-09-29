@@ -19,26 +19,17 @@ const AdvancedPerformanceOptimizer: React.FC = () => {
   const networkObserverRef = useRef<PerformanceObserver | null>(null);
   const memoryObserverRef = useRef<PerformanceObserver | null>(null);
 
-  // Advanced resource hints for optimal loading
+  // Advanced resource hints for optimal loading - Only critical resources
   const criticalResources: ResourceHint[] = [
-    // Critical images
+    // Only preload critical above-the-fold images
     { rel: 'preload', href: '/assets/n7l1.webp', as: 'image', fetchpriority: 'high' },
     { rel: 'preload', href: '/assets/n7l2.webp', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/sheep1.webp', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/tomato 2.jpg', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/machin01.jpg', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/seedings01.jpg', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/exporting1.jpg', as: 'image', fetchpriority: 'high' },
-    { rel: 'preload', href: '/assets/land01.jpg', as: 'image', fetchpriority: 'high' },
     
     // Critical fonts
     { rel: 'preload', href: 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Cairo:wght@300;400;600;700;900&display=swap', as: 'style' },
     
-    // Critical pages
+    // Only prefetch critical pages
     { rel: 'prefetch', href: '/marketplace' },
-    { rel: 'prefetch', href: '/equipment' },
-    { rel: 'prefetch', href: '/land' },
-    { rel: 'prefetch', href: '/auth/login' },
     
     // DNS prefetch for external domains
     { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },

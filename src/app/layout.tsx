@@ -4,6 +4,9 @@ import './globals.css';
 import ClientLayout from '@/components/ClientLayout';
 import HydrationSuppressor from '@/components/HydrationSuppressor';
 import MobileOptimizedInterface from '@/components/MobileOptimizedInterface';
+import CLSOptimizer from '@/components/CLSOptimizer';
+import PreloadOptimizer from '@/components/PreloadOptimizer';
+import AnimationOptimizer from '@/components/AnimationOptimizer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -116,13 +119,19 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <HydrationSuppressor>
-          <MobileOptimizedInterface>
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </MobileOptimizedInterface>
-        </HydrationSuppressor>
+        <CLSOptimizer>
+          <PreloadOptimizer>
+            <AnimationOptimizer>
+              <HydrationSuppressor>
+                <MobileOptimizedInterface>
+                  <ClientLayout>
+                    {children}
+                  </ClientLayout>
+                </MobileOptimizedInterface>
+              </HydrationSuppressor>
+            </AnimationOptimizer>
+          </PreloadOptimizer>
+        </CLSOptimizer>
       </body>
     </html>
   );
