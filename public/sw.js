@@ -25,6 +25,13 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('localhost') || event.request.url.includes('127.0.0.1')) {
     return;
   }
+  
+  // Skip caching for authentication-related requests
+  if (event.request.url.includes('/auth/') || 
+      event.request.url.includes('supabase') || 
+      event.request.url.includes('elghella-auth')) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
@@ -62,4 +69,4 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-}); 
+});

@@ -33,23 +33,53 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       // Clear cache on component mount (only once)
       const hasCleared = sessionStorage.getItem('cacheCleared');
       if (!hasCleared) {
+        // Use the updated BrowserCache.clearAll() which preserves auth data
         BrowserCache.clearAll();
         sessionStorage.setItem('cacheCleared', 'true');
       }
     }
 
-    // Force loading to false after 3 seconds to prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      console.log('🚨 ClientLayout: Force hiding loading spinners after timeout');
+    // Handle loading states more intelligently
+    const handleLoadingStates = () => {
+      // Check if auth is still loading after a reasonable time
       const loadingElements = document.querySelectorAll('[class*="animate-spin"]');
-      loadingElements.forEach(el => {
-        if (el.classList.contains('animate-spin')) {
-          (el as HTMLElement).style.display = 'none';
-        }
-      });
-    }, 3000); // Reduced to 3 seconds
+      if (loadingElements.length > 0) {
+        console.log('🚨 ClientLayout: Detected potential stuck loading spinners');
+        
+        // Only hide spinners that have been visible for too long
+        loadingElements.forEach(el => {
+          if (el.classList.contains('animate-spin')) {
+            // Check if this is an auth-related spinner
+            const isAuthSpinner = 
+              el.closest('[data-auth-component]') || 
+              el.closest('[class*="auth"]') ||
+              el.closest('[id*="auth"]');
+              
+            if (isAuthSpinner) {
+              console.log('🔄 Auth spinner detected - allowing more time');
+            } else {
+              (el as HTMLElement).style.display = 'none';
+            }
+          }
+        });
+      }
+    };
 
-    return () => clearTimeout(loadingTimeout);
+    // First check after 3 seconds
+    const loadingTimeout = setTimeout(handleLoadingStates, 3000);
+    
+    // Second check after 8 seconds for auth spinners
+    const authLoadingTimeout = setTimeout(() => {
+      console.log('🚨 ClientLayout: Force hiding all remaining loading spinners');
+      document.querySelectorAll('[class*="animate-spin"]').forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+    }, 8000);
+
+    return () => {
+      clearTimeout(loadingTimeout);
+      clearTimeout(authLoadingTimeout);
+    };
   }, []);
 
   return (
@@ -66,4 +96,4 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   );
 };
 
-export default ClientLayout; 
+export default ClientLayout;

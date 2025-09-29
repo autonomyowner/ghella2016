@@ -328,9 +328,22 @@ export const storage = {
     }
   },
   
-  clear: (): void => {
+  clear: (preserveAuth: boolean = true): void => {
     try {
-      localStorage.clear();
+      if (preserveAuth) {
+        // Save auth data before clearing
+        const authData = localStorage.getItem('elghella-auth');
+        
+        // Clear everything
+        localStorage.clear();
+        
+        // Restore auth data if it existed
+        if (authData) {
+          localStorage.setItem('elghella-auth', authData);
+        }
+      } else {
+        localStorage.clear();
+      }
     } catch (error) {
       console.error('Error clearing localStorage:', error);
     }
@@ -467,4 +480,4 @@ export const typeGuards = {
   isDate: (value: any): value is Date => value instanceof Date,
   isRegExp: (value: any): value is RegExp => value instanceof RegExp,
   isPromise: (value: any): value is Promise<any> => value instanceof Promise,
-}; 
+};

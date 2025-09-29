@@ -108,6 +108,8 @@ const AddLandPage: React.FC = () => {
 
     try {
       console.log('Starting land form submission...');
+      console.log('User ID:', user.id);
+      console.log('User authenticated:', !!user);
       
       // Upload images first
       const imageUrls = await uploadImages();
@@ -128,15 +130,20 @@ const AddLandPage: React.FC = () => {
         images: imageUrls,
         is_available: true,
         is_featured: false,
-        view_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        view_count: 0
       };
 
       console.log('Land data prepared:', landData);
 
-      // Use the addLand function from useSupabaseData hook
-      const newLand = await addLand(landData);
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout - please try again')), 30000);
+      });
+
+      // Use the addLand function from useSupabaseData hook with timeout
+      const addLandPromise = addLand(landData);
+      const newLand = await Promise.race([addLandPromise, timeoutPromise]);
+      
       console.log('Land added successfully:', newLand);
 
       // Show success message

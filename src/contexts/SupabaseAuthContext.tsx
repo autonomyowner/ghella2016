@@ -48,7 +48,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         console.log('🚨 Emergency timeout: Force setting loading to false')
         setLoading(false)
       }
-    }, 5000) // 5 second emergency timeout
+    }, 3000) // 3 second emergency timeout
 
     return () => clearTimeout(emergencyTimeout)
   }, [loading])
@@ -115,7 +115,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Fetching initial session...')
-        const { data: { session } } = await supabase.auth.getSession()
+        
+        // Try to get session with a timeout
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session fetch timeout')), 5000)
+        )
+        
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any
         console.log('📋 Session result:', { hasSession: !!session, hasUser: !!session?.user })
         
         setSession(session)

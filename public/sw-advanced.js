@@ -141,6 +141,13 @@ self.addEventListener('fetch', (event) => {
 function getCacheStrategy(request) {
   const url = new URL(request.url);
   
+  // Skip caching for authentication-related requests
+  if (url.pathname.includes('/auth/') || 
+      url.href.includes('supabase') || 
+      url.href.includes('elghella-auth')) {
+    return CACHE_STRATEGIES.NETWORK_ONLY;
+  }
+  
   // Static assets (CSS, JS, fonts)
   if (url.pathname.match(/\.(css|js|woff|woff2|ttf|eot)$/)) {
     return CACHE_STRATEGIES.STATIC_FIRST;
@@ -469,4 +476,4 @@ async function cleanupOldCaches() {
   }
 }
 
-console.log('🚀 Advanced Service Worker loaded successfully!'); 
+console.log('🚀 Advanced Service Worker loaded successfully!');

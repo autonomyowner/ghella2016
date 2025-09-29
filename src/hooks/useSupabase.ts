@@ -565,7 +565,14 @@ export function useSupabaseData() {
       };
 
       console.log(`Starting ${table} insert...`);
+      console.log(`Record data:`, recordData);
       progressTracker.checkProgress();
+
+      // Check if user is authenticated before making the request
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session found. Please log in again.');
+      }
 
       const { data: resultData, error } = await supabase
         .from(table)
@@ -584,6 +591,12 @@ export function useSupabaseData() {
           details: error.details,
           hint: error.hint
         });
+        
+        // Handle specific RLS errors
+        if (error.code === '42501') {
+          throw new Error('Permission denied. Please check if you are logged in and try again.');
+        }
+        
         throw new Error(`Failed to create ${table}: ${error.message || error.details || 'Unknown error'}`);
       }
       
@@ -756,8 +769,29 @@ export function useSupabaseData() {
   }, [fetchRecords]);
 
   const addLand = useCallback(async (landData: any) => {
-    return createRecord('land_listings', landData);
-  }, [createRecord]);
+    try {
+      console.log('🔄 addLand called with data:', landData);
+      
+      // Ensure user is authenticated
+      if (!user) {
+        throw new Error('User must be logged in to add land');
+      }
+      
+      // Ensure user_id matches authenticated user
+      if (landData.user_id !== user.id) {
+        console.warn('User ID mismatch, correcting...');
+        landData.user_id = user.id;
+      }
+      
+      console.log('✅ User authenticated, proceeding with land creation');
+      const result = await createRecord('land_listings', landData);
+      console.log('✅ Land created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error in addLand:', error);
+      throw error;
+    }
+  }, [createRecord, user]);
 
   const updateLand = useCallback(async (id: string, updates: any) => {
     return updateRecord('land_listings', id, updates);

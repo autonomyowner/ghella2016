@@ -2,7 +2,18 @@
 
 export const BrowserCache = {
   // Clear all browser caches
-  clearAll: async (): Promise<void> => {
+  clearAll: async (preserveAuth: boolean = true): Promise<void> => {
+    // Save auth data if needed
+    let authData = null;
+    if (preserveAuth && typeof localStorage !== 'undefined') {
+      try {
+        authData = localStorage.getItem('elghella-auth');
+      } catch (error) {
+        console.error('Failed to retrieve auth data before cache clear:', error);
+      }
+    }
+    
+    // Clear caches
     if ('caches' in window) {
       try {
         const cacheNames = await caches.keys();
@@ -12,6 +23,16 @@ export const BrowserCache = {
         console.log('✅ Browser cache cleared successfully');
       } catch (error) {
         console.error('❌ Failed to clear browser cache:', error);
+      }
+    }
+    
+    // Restore auth data if needed
+    if (preserveAuth && authData && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('elghella-auth', authData);
+        console.log('✅ Auth data preserved during cache clear');
+      } catch (error) {
+        console.error('❌ Failed to restore auth data after cache clear:', error);
       }
     }
   },
@@ -75,4 +96,4 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   }
 }
 
-export default BrowserCache; 
+export default BrowserCache;

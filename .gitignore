@@ -130,3 +130,9 @@ ui-debug.log
 # Temporary files
 *.tmp
 *.temp
+
+# Cursor MCP config (ignore sensitive MCP files)
+.cursor/
+
+# Development environment file
+.env.development

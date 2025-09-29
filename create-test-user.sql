@@ -1,56 +1,30 @@
--- Create Test User for Debugging
--- Run this in your Supabase SQL Editor
+-- Create a test user for testing purposes
+-- This script should be run in the Supabase SQL editor
 
--- First, let's check if we can create a test user
--- Note: This will create a user in the auth.users table
--- You'll need to use Supabase Auth API or Dashboard to create users
+-- First, let's check if there are any existing users
+SELECT id, email, created_at FROM auth.users LIMIT 5;
 
--- Check existing users
+-- Create a test user (this will need to be done through the Supabase Auth UI or API)
+-- For now, let's create a profile for an existing user if any exist
+INSERT INTO profiles (id, created_at, updated_at, full_name, phone, location, avatar_url, user_type, is_verified, bio, website, social_links, role, is_admin)
 SELECT 
-  'Existing users:' as info,
-  COUNT(*) as user_count
-FROM auth.users;
-
--- Check existing profiles
-SELECT 
-  'Existing profiles:' as info,
-  COUNT(*) as profile_count
-FROM profiles;
-
--- Show recent users
-SELECT 
-  'Recent users:' as info,
   id,
-  email,
-  created_at
+  NOW(),
+  NOW(),
+  'Test User',
+  '+213123456789',
+  'Algiers',
+  NULL,
+  'farmer',
+  true,
+  'Test user for development',
+  NULL,
+  '{}',
+  'user',
+  false
 FROM auth.users 
-ORDER BY created_at DESC 
-LIMIT 5;
+WHERE email = 'test@example.com'
+ON CONFLICT (id) DO NOTHING;
 
--- Show recent profiles
-SELECT 
-  'Recent profiles:' as info,
-  id,
-  full_name,
-  created_at
-FROM profiles 
-ORDER BY created_at DESC 
-LIMIT 5;
-
--- Check if there are any users at all
-SELECT 
-  'User status:' as info,
-  CASE 
-    WHEN COUNT(*) > 0 THEN 'Users exist'
-    ELSE 'No users found'
-  END as status
-FROM auth.users;
-
--- Check if there are any profiles at all
-SELECT 
-  'Profile status:' as info,
-  CASE 
-    WHEN COUNT(*) > 0 THEN 'Profiles exist'
-    ELSE 'No profiles found'
-  END as status
-FROM profiles; 
+-- Check if the profile was created
+SELECT * FROM profiles WHERE full_name = 'Test User';
