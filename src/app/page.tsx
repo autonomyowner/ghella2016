@@ -195,9 +195,10 @@ export default function HomePage() {
           loop 
           playsInline 
           muted
-          preload="none"
+          preload="metadata"
           className="object-cover w-screen h-full absolute top-0 left-0 z-0 min-w-full min-h-full"
           onLoadedData={() => {
+            setVideoLoaded(true);
             // Video loaded, remove loading state
             const loadingElements = document.querySelectorAll('[class*="animate-spin"]');
             loadingElements.forEach(el => {
@@ -206,10 +207,25 @@ export default function HomePage() {
               }
             });
           }}
+          onError={() => {
+            console.warn('Video failed to load, using fallback background');
+            setVideoLoaded(false);
+          }}
         >
           <source src="/assets/Videoplayback1.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
+        
+        {/* Fallback background image when video fails */}
+        {!videoLoaded && (
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+            style={{
+              backgroundImage: 'url(/assets/field.gif)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
+        )}
         
         {/* Dark overlay for better text readability */}
         <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-10 bg-black/40">
@@ -217,26 +233,16 @@ export default function HomePage() {
             {/* 3D Logo */}
             <div className="mx-auto mb-6 flex items-center justify-center">
               <div className="relative group">
-                {/* 3D Text Effect */}
+                {/* 3D Text Effect - Optimized for better CLS */}
                 <div className="relative transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-2">
-                  {/* Shadow layers for 3D effect */}
-                  <div className="absolute inset-0 transform translate-x-1 translate-y-1 text-3xl md:text-4xl font-black text-black/30 blur-sm">
-                    الغلة
-                  </div>
-                  <div className="absolute inset-0 transform translate-x-0.5 translate-y-0.5 text-3xl md:text-4xl font-black text-black/50">
-                    الغلة
-                  </div>
-                  <div className="absolute inset-0 transform translate-x-0.25 translate-y-0.25 text-3xl md:text-4xl font-black text-black/70">
-                    الغلة
-                  </div>
-                  
-                  {/* Main text with gradient */}
-                  <div className="relative text-3xl md:text-4xl font-black bg-gradient-to-br from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
-                    الغلة
-                  </div>
-                  
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 text-3xl md:text-4xl font-black bg-gradient-to-br from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent blur-sm opacity-50">
+                  {/* Main text with gradient and shadow */}
+                  <div 
+                    className="text-3xl md:text-4xl font-black bg-gradient-to-br from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-lg"
+                    style={{
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.5), 1px 1px 2px rgba(0,0,0,0.3), 0.5px 0.5px 1px rgba(0,0,0,0.2)',
+                      filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.3))'
+                    }}
+                  >
                     الغلة
                   </div>
                 </div>
@@ -529,6 +535,9 @@ export default function HomePage() {
                   src="/assets/land002.jpg" 
                   alt="Story Image 2" 
                   className="w-full h-auto object-cover"
+                  width="300"
+                  height="200"
+                  loading="lazy"
                 />
               </div>
               <div className="w-1/2 transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 shadow-lg hover:shadow-xl rounded-xl overflow-hidden">
@@ -536,6 +545,9 @@ export default function HomePage() {
                   src="/assets/land01.jpg" 
                   alt="Story Image 1" 
                   className="w-full h-auto object-cover"
+                  width="300"
+                  height="200"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -585,6 +597,8 @@ export default function HomePage() {
                   src="/assets/pexels-tomfisk-1595104.jpg" 
                   alt="About Us" 
                   className="w-full h-auto object-contain" 
+                  width="400"
+                  height="300"
                   loading="lazy"
                 />
               </div>
@@ -600,7 +614,14 @@ export default function HomePage() {
             <div>
               <div className="flex items-center space-x-3 space-x-reverse mb-4">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-white/20">
-                  <img src="/assets/logo o.jpg" alt="الغلة" className="w-full h-full object-cover" />
+                  <img 
+                    src="/assets/logo o.jpg" 
+                    alt="الغلة" 
+                    className="w-full h-full object-cover" 
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-white">الغلة</h3>
               </div>
