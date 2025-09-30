@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { updateWebsiteSettings } from '@/lib/websiteSettings';
+import Link from 'next/link';
 
 export default function ForceUpdatePage() {
   const [updating, setUpdating] = useState(false);
@@ -66,12 +66,12 @@ export default function ForceUpdatePage() {
         )}
 
         <div className="mt-6 text-center">
-          <a 
+          <Link 
             href="/" 
             className="text-emerald-600 hover:text-emerald-700 font-medium"
           >
             ← العودة للصفحة الرئيسية
-          </a>
+          </Link>
         </div>
       </div>
     </div>

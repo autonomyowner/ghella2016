@@ -16,7 +16,7 @@ interface VirtualizedListProps<T> {
   LoadingComponent?: React.ComponentType;
 }
 
-const VirtualizedList = <T extends any>({
+const VirtualizedList = <T,>({
   items,
   renderItem,
   itemHeight,

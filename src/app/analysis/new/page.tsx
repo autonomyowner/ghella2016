@@ -14,25 +14,6 @@ const AnalysisFormPage = (): ReactElement => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check authentication
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
-          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خدمات تحليل جديدة</p>
-          <button
-            onClick={() => router.push('/auth/login')}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
-          >
-            تسجيل الدخول
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -126,6 +107,25 @@ const AnalysisFormPage = (): ReactElement => {
       setLoading(false);
     }
   };
+
+  // Check authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
+          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خدمات تحليل جديدة</p>
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
+          >
+            تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-indigo-50 py-8">
@@ -309,6 +309,7 @@ const AnalysisFormPage = (): ReactElement => {
                   onChange={handleInputChange}
                   required
                   min="0"
+                  step="0.01"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
                   placeholder="0"
                 />
@@ -525,4 +526,4 @@ const AnalysisFormPage = (): ReactElement => {
   );
 };
 
-export default AnalysisFormPage; 
+export default AnalysisFormPage;

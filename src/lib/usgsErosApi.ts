@@ -119,7 +119,7 @@ class UsgsErosApiService {
   // Analyze vegetation health from NDVI
   analyzeVegetationHealth(ndvi: number): any {
     let health: 'excellent' | 'good' | 'fair' | 'poor';
-    let stressFactors: string[] = [];
+    const stressFactors: string[] = [];
     
     if (ndvi > 0.7) {
       health = 'excellent';
@@ -152,11 +152,10 @@ class UsgsErosApiService {
 
   // Analyze soil moisture from thermal data
   analyzeSoilMoisture(thermalData: number): any {
-    let level: number;
     let status: 'optimal' | 'adequate' | 'low' | 'critical';
     
     // Simulate soil moisture analysis
-    level = Math.max(0, Math.min(100, 60 + (thermalData - 20) * 2));
+    const level = Math.max(0, Math.min(100, 60 + (thermalData - 20) * 2));
     
     if (level > 80) {
       status = 'optimal';
@@ -239,20 +238,20 @@ class UsgsErosApiService {
         analysis: {
           ndvi: {
             current: 0.5 + Math.random() * 0.3,
-            trend: 'stable' as 'stable',
-            health: 'good' as 'good'
+            trend: 'stable' as const,
+            health: 'good' as const
           },
           landUse: {
             type: 'أراضي زراعية',
             confidence: 0.8,
-            change: 'stable' as 'stable'
+            change: 'stable' as const
           },
           soilMoisture: {
             level: 65 + Math.random() * 20,
-            status: 'adequate' as 'adequate'
+            status: 'adequate' as const
           },
           cropHealth: {
-            overall: 'good' as 'good',
+            overall: 'good' as const,
             stressFactors: [],
             growthStage: 'نمو متوسط'
           }

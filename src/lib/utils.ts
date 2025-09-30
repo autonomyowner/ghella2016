@@ -474,7 +474,7 @@ export const typeGuards = {
   isString: (value: any): value is string => typeof value === 'string',
   isNumber: (value: any): value is number => typeof value === 'number' && !isNaN(value),
   isBoolean: (value: any): value is boolean => typeof value === 'boolean',
-  isFunction: (value: any): value is Function => typeof value === 'function',
+  isFunction: (value: any): value is (...args: any[]) => any => typeof value === 'function',
   isObject: (value: any): value is object => typeof value === 'object' && value !== null,
   isArray: (value: any): value is any[] => Array.isArray(value),
   isDate: (value: any): value is Date => value instanceof Date,

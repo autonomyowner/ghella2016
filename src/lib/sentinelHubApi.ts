@@ -114,7 +114,7 @@ class SentinelHubApiService {
   // Analyze vegetation health
   analyzeVegetationHealth(ndvi: number): any {
     let health: 'excellent' | 'good' | 'fair' | 'poor';
-    let stressFactors: string[] = [];
+    const stressFactors: string[] = [];
     
     if (ndvi > 0.7) {
       health = 'excellent';

@@ -58,26 +58,6 @@ export default function NewExpertPage() {
   const [newService, setNewService] = useState('');
   const [newLanguage, setNewLanguage] = useState('');
 
-
-  // Check authentication
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
-          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خبراء جدد</p>
-          <button
-            onClick={() => router.push('/auth/login')}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
-          >
-            تسجيل الدخول
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -98,6 +78,7 @@ export default function NewExpertPage() {
       reader.readAsDataURL(file);
     }
   }, []);
+
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
     setLoading(true);
@@ -161,6 +142,118 @@ export default function NewExpertPage() {
       setLoading(false);
     }
   };
+
+  // Helper functions for managing arrays
+  const addCertification = () => {
+    if (newCertification.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        certifications: [...prev.certifications, newCertification.trim()]
+      }));
+      setNewCertification('');
+    }
+  };
+
+  const removeCertification = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addService = () => {
+    if (newService.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        services_offered: [...prev.services_offered, newService.trim()]
+      }));
+      setNewService('');
+    }
+  };
+
+  const removeService = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      services_offered: prev.services_offered.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addLanguage = () => {
+    if (newLanguage.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        languages: [...prev.languages, newLanguage.trim()]
+      }));
+      setNewLanguage('');
+    }
+  };
+
+  const removeLanguage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      languages: prev.languages.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Helper functions for form validation
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (step >= 1) {
+      if (!formData.name.trim()) newErrors.name = 'الاسم مطلوب';
+      if (!formData.title.trim()) newErrors.title = 'المسمى الوظيفي مطلوب';
+      if (!formData.specialization) newErrors.specialization = 'التخصص مطلوب';
+      if (!formData.bio.trim()) newErrors.bio = 'النبذة التعريفية مطلوبة';
+    }
+    
+    if (step >= 2) {
+      if (formData.years_of_experience < 0) newErrors.years_of_experience = 'سنوات الخبرة يجب أن تكون رقماً موجباً';
+      if (!formData.education.trim()) newErrors.education = 'المؤهل التعليمي مطلوب';
+      if (!formData.location.trim()) newErrors.location = 'الموقع مطلوب';
+    }
+    
+    if (step >= 3) {
+      if (!formData.email.trim()) newErrors.email = 'البريد الإلكتروني مطلوب';
+      if (!formData.phone.trim()) newErrors.phone = 'رقم الهاتف مطلوب';
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (formData.email && !emailRegex.test(formData.email)) {
+        newErrors.email = 'صيغة البريد الإلكتروني غير صحيحة';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Navigation handlers
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, 4));
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  // Check authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">يجب تسجيل الدخول</h2>
+          <p className="text-gray-600 mb-6">يجب عليك تسجيل الدخول لإضافة خبراء جدد</p>
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors text-white"
+          >
+            تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Step content renderer
   const renderStepContent = () => {
@@ -550,99 +643,6 @@ export default function NewExpertPage() {
       default:
         return null;
     }
-  };
-
-  // Helper functions for form validation
-  const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (step >= 1) {
-      if (!formData.name.trim()) newErrors.name = 'الاسم مطلوب';
-      if (!formData.title.trim()) newErrors.title = 'المسمى الوظيفي مطلوب';
-      if (!formData.specialization) newErrors.specialization = 'التخصص مطلوب';
-      if (!formData.bio.trim()) newErrors.bio = 'النبذة التعريفية مطلوبة';
-    }
-    
-    if (step >= 2) {
-      if (formData.years_of_experience < 0) newErrors.years_of_experience = 'سنوات الخبرة يجب أن تكون رقماً موجباً';
-      if (!formData.education.trim()) newErrors.education = 'المؤهل التعليمي مطلوب';
-      if (!formData.location.trim()) newErrors.location = 'الموقع مطلوب';
-    }
-    
-    if (step >= 3) {
-      if (!formData.email.trim()) newErrors.email = 'البريد الإلكتروني مطلوب';
-      if (!formData.phone.trim()) newErrors.phone = 'رقم الهاتف مطلوب';
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (formData.email && !emailRegex.test(formData.email)) {
-        newErrors.email = 'صيغة البريد الإلكتروني غير صحيحة';
-      }
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Navigation handlers
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
-    }
-  };
-
-  const handlePrevious = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  // Helper functions for managing arrays
-  const addCertification = () => {
-    if (newCertification.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        certifications: [...prev.certifications, newCertification.trim()]
-      }));
-      setNewCertification('');
-    }
-  };
-
-  const removeCertification = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      certifications: prev.certifications.filter((_, i) => i !== index)
-    }));
-  };
-
-  const addService = () => {
-    if (newService.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        services_offered: [...prev.services_offered, newService.trim()]
-      }));
-      setNewService('');
-    }
-  };
-
-  const removeService = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      services_offered: prev.services_offered.filter((_, i) => i !== index)
-    }));
-  };
-
-  const addLanguage = () => {
-    if (newLanguage.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        languages: [...prev.languages, newLanguage.trim()]
-      }));
-      setNewLanguage('');
-    }
-  };
-
-  const removeLanguage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      languages: prev.languages.filter((_, i) => i !== index)
-    }));
   };
 
   // Steps configuration
