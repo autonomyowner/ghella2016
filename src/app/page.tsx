@@ -187,16 +187,16 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen min-w-[320px] mx-auto bg-gradient-to-br from-green-900 to-gray-900 text-white">
+    <div className="full-screen-container bg-gradient-to-br from-green-900 to-gray-900 text-white">
       {/* Hero Section with Optimized Video Background */}
-      <div id="hero" className="relative h-screen w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden max-w-none">
+      <div id="hero" className="hero-section">
         <video 
           autoPlay 
           loop 
           playsInline 
           muted
           preload="metadata"
-          className="object-cover w-screen h-full absolute top-0 left-0 z-0 min-w-full min-h-full"
+          className="video-background"
           onLoadedData={() => {
             setVideoLoaded(true);
             // Video loaded, remove loading state
@@ -218,11 +218,9 @@ export default function HomePage() {
         {/* Fallback background image when video fails */}
         {!videoLoaded && (
           <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+            className="video-background bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: 'url(/assets/field.gif)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundImage: 'url(/assets/field.gif)'
             }}
           />
         )}
