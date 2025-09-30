@@ -14,53 +14,15 @@ export const withTimeout = <T>(
 
 // Specific timeout wrappers for common operations
 export const withQueryTimeout = <T>(promise: Promise<T>): Promise<T> => {
-  return withTimeout(promise, 10000, 'Database query timed out');
+  return withTimeout(promise, 15000, 'Database query timed out');
 };
 
 export const withAuthTimeout = <T>(promise: Promise<T>): Promise<T> => {
-  return withTimeout(promise, 15000, 'Authentication timed out');
+  return withTimeout(promise, 20000, 'Authentication timed out');
 };
 
 export const withInsertTimeout = <T>(promise: Promise<T>): Promise<T> => {
-  return withTimeout(promise, 15000, 'Insert operation timed out');
-};
-
-// Retry logic for failed operations
-export const withRetry = async <T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 3,
-  delayMs: number = 1000
-): Promise<T> => {
-  let lastError: Error;
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error as Error;
-      console.warn(`Attempt ${attempt} failed:`, error);
-      
-      if (attempt < maxRetries) {
-        console.log(`Retrying in ${delayMs}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-        delayMs *= 2; // Exponential backoff
-      }
-    }
-  }
-  
-  throw lastError!;
-};
-
-// Combined timeout and retry wrapper
-export const withTimeoutAndRetry = <T>(
-  operation: () => Promise<T>,
-  timeoutMs: number = 10000,
-  maxRetries: number = 2
-): Promise<T> => {
-  return withRetry(
-    () => withTimeout(operation(), timeoutMs, 'Operation timed out'),
-    maxRetries
-  );
+  return withTimeout(promise, 30000, 'Insert operation timed out');
 };
 
 // Utility to check if operation is taking too long

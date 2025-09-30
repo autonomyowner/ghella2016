@@ -159,12 +159,19 @@ export default function MarketplacePage() {
 
   const loadLandSection = async () => {
     try {
-      const { data, error } = await supabase
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timed out')), 10000)
+      );
+
+      const queryPromise = supabase
         .from('land_listings')
-        .select('*')
+        .select('id, title, location, price, area, created_at, user_id')
         .eq('is_available', true)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (!error && data) {
         setSections(prev => prev.map(section => 
@@ -172,20 +179,41 @@ export default function MarketplacePage() {
             ? { ...section, items: data.map(item => ({ ...item, type: 'land' as const })), loading: false }
             : section
         ));
+      } else if (error) {
+        console.error('Error fetching land_listings records:', error);
+        // Set empty state to prevent UI issues
+        setSections(prev => prev.map(section => 
+          section.title === 'الأراضي الزراعية' 
+            ? { ...section, items: [], loading: false }
+            : section
+        ));
       }
     } catch (error) {
-      console.error('Error loading land section:', error);
+      console.error('Error fetching land_listings records:', error);
+      // Set empty state to prevent UI issues
+      setSections(prev => prev.map(section => 
+        section.title === 'الأراضي الزراعية' 
+          ? { ...section, items: [], loading: false }
+          : section
+      ));
     }
   };
 
   const loadNurserySection = async () => {
     try {
-      const { data, error } = await supabase
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timed out')), 10000)
+      );
+
+      const queryPromise = supabase
         .from('nurseries')
-        .select('*')
+        .select('id, name, location, price, created_at, user_id')
         .eq('is_available', true)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (!error && data) {
         setSections(prev => prev.map(section => 
@@ -193,20 +221,39 @@ export default function MarketplacePage() {
             ? { ...section, items: data.map(item => ({ ...item, type: 'nursery' as const })), loading: false }
             : section
         ));
+      } else if (error) {
+        console.error('Error loading nursery section:', error);
+        setSections(prev => prev.map(section => 
+          section.title === 'الشتلات والمشاتل' 
+            ? { ...section, items: [], loading: false }
+            : section
+        ));
       }
     } catch (error) {
       console.error('Error loading nursery section:', error);
+      setSections(prev => prev.map(section => 
+        section.title === 'الشتلات والمشاتل' 
+          ? { ...section, items: [], loading: false }
+          : section
+      ));
     }
   };
 
   const loadEquipmentSection = async () => {
     try {
-      const { data, error } = await supabase
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timed out')), 10000)
+      );
+
+      const queryPromise = supabase
         .from('equipment')
-        .select('*')
+        .select('id, name, location, price, created_at, user_id')
         .eq('is_available', true)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (!error && data) {
         setSections(prev => prev.map(section => 
@@ -214,20 +261,39 @@ export default function MarketplacePage() {
             ? { ...section, items: data.map(item => ({ ...item, type: 'equipment' as const })), loading: false }
             : section
         ));
+      } else if (error) {
+        console.error('Error loading equipment section:', error);
+        setSections(prev => prev.map(section => 
+          section.title === 'المعدات الزراعية' 
+            ? { ...section, items: [], loading: false }
+            : section
+        ));
       }
     } catch (error) {
       console.error('Error loading equipment section:', error);
+      setSections(prev => prev.map(section => 
+        section.title === 'المعدات الزراعية' 
+          ? { ...section, items: [], loading: false }
+          : section
+      ));
     }
   };
 
   const loadAnimalSection = async () => {
     try {
-      const { data, error } = await supabase
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timed out')), 10000)
+      );
+
+      const queryPromise = supabase
         .from('animal_listings')
-        .select('*')
+        .select('id, name, location, price, created_at, user_id')
         .eq('is_available', true)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (!error && data) {
         setSections(prev => prev.map(section => 
@@ -235,20 +301,39 @@ export default function MarketplacePage() {
             ? { ...section, items: data.map(item => ({ ...item, type: 'animal' as const })), loading: false }
             : section
         ));
+      } else if (error) {
+        console.error('Error loading animal section:', error);
+        setSections(prev => prev.map(section => 
+          section.title === 'الحيوانات' 
+            ? { ...section, items: [], loading: false }
+            : section
+        ));
       }
     } catch (error) {
       console.error('Error loading animal section:', error);
+      setSections(prev => prev.map(section => 
+        section.title === 'الحيوانات' 
+          ? { ...section, items: [], loading: false }
+          : section
+      ));
     }
   };
 
   const loadVegetableSection = async () => {
     try {
-      const { data, error } = await supabase
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timed out')), 10000)
+      );
+
+      const queryPromise = supabase
         .from('vegetables')
-        .select('*')
+        .select('id, name, location, price, created_at, user_id')
         .eq('is_available', true)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (!error && data) {
         setSections(prev => prev.map(section => 
@@ -256,9 +341,21 @@ export default function MarketplacePage() {
             ? { ...section, items: data.map(item => ({ ...item, type: 'vegetable' as const })), loading: false }
             : section
         ));
+      } else if (error) {
+        console.error('Error loading vegetable section:', error);
+        setSections(prev => prev.map(section => 
+          section.title === 'الخضروات والفواكه' 
+            ? { ...section, items: [], loading: false }
+            : section
+        ));
       }
     } catch (error) {
       console.error('Error loading vegetable section:', error);
+      setSections(prev => prev.map(section => 
+        section.title === 'الخضروات والفواكه' 
+          ? { ...section, items: [], loading: false }
+          : section
+      ));
     }
   };
 
@@ -367,12 +464,18 @@ export default function MarketplacePage() {
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       {/* Item Image */}
-                      <div className="relative h-32 overflow-hidden">
+                      <div className="relative h-32 overflow-hidden min-h-[128px]">
                         <img
                           src={getItemImage(item)}
                           alt={item.title}
                           className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                           loading="lazy"
+                          width={300}
+                          height={128}
+                          style={{ aspectRatio: '300/128' }}
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.png';
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 group-hover:via-black/30 transition-all duration-300"></div>
                         

@@ -8,7 +8,6 @@ import CLSOptimizer from '@/components/CLSOptimizer';
 import PreloadOptimizer from '@/components/PreloadOptimizer';
 import AnimationOptimizer from '@/components/AnimationOptimizer';
 import AggressiveCLSPrevention from '@/components/AggressiveCLSPrevention';
-import PerformanceOptimizer from '@/components/PerformanceOptimizer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -120,23 +119,21 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <PerformanceOptimizer>
-          <AggressiveCLSPrevention>
-            <CLSOptimizer>
-              <PreloadOptimizer>
-                <AnimationOptimizer>
-                  <HydrationSuppressor>
-                    <MobileOptimizedInterface>
-                      <ClientLayout>
-                        {children}
-                      </ClientLayout>
-                    </MobileOptimizedInterface>
-                  </HydrationSuppressor>
-                </AnimationOptimizer>
-              </PreloadOptimizer>
-            </CLSOptimizer>
-          </AggressiveCLSPrevention>
-        </PerformanceOptimizer>
+        <AggressiveCLSPrevention>
+          <CLSOptimizer>
+            <PreloadOptimizer>
+              <AnimationOptimizer>
+                <HydrationSuppressor>
+                  <MobileOptimizedInterface>
+                    <ClientLayout>
+                      {children}
+                    </ClientLayout>
+                  </MobileOptimizedInterface>
+                </HydrationSuppressor>
+              </AnimationOptimizer>
+            </PreloadOptimizer>
+          </CLSOptimizer>
+        </AggressiveCLSPrevention>
       </body>
     </html>
   );

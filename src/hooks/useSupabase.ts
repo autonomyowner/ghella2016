@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment, LandListing, Category, Profile } from '@/types/database.types'
 import { supabase } from '@/lib/supabase/supabaseClient'
-import { withInsertTimeout, createProgressTracker, withQueryTimeout, withTimeoutAndRetry } from '@/lib/supabase/timeoutWrapper'
+import { withInsertTimeout, createProgressTracker, withQueryTimeout } from '@/lib/supabase/timeoutWrapper'
 
 // Hook for user profile management
 export function useProfile() {
@@ -484,26 +484,15 @@ export function useUserLandListings() {
       setLoading(true)
       setError(null)
 
-      // Use retry logic with timeout
-      const { data, error } = await withTimeoutAndRetry(
-        () => supabase
-          .from('land_listings')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        10000, // 10 second timeout
-        2 // 2 retries
-      );
+      const landRef = supabase.from('land_listings');
+      const q = supabase.from('land_listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      const querySnapshot = await q.select();
 
-      if (error) {
-        throw error;
-      }
+      const data = querySnapshot.data as LandListing[];
 
-      setLandListings(data || []);
+      setLandListings(data);
     } catch (err) {
-      console.error('Error fetching land_listings records:', err);
-      setError('حدث خطأ في تحميل الأراضي');
-      setLandListings([]);
+      setError('حدث خطأ في تحميل الأراضي')
     } finally {
       setLoading(false)
     }
@@ -585,15 +574,13 @@ export function useSupabaseData() {
         throw new Error('No active session found. Please log in again.');
       }
 
-      const { data: resultData, error } = await withTimeoutAndRetry(
-        () => supabase
-          .from(table)
-          .insert([recordData])
-          .select()
-          .single(),
-        15000, // 15 second timeout
-        2 // 2 retries
-      );
+      const insertPromise = supabase
+        .from(table)
+        .insert([recordData])
+        .select()
+        .single();
+
+      const { data: resultData, error } = await withInsertTimeout(insertPromise as any);
 
       const elapsed = progressTracker.getElapsed();
       console.log(`${table} insert completed in ${elapsed}ms`);
