@@ -1,138 +1,204 @@
+# Build and cache folders
+/.next/
+/.swc/
+/out/
+
 # Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-node_modules/
-.next/
-dist/
-.env
-.vscode/
-*.log
-coverage/
+/node_modules
 
-# Next.js
-.next/
-out/
-build/
-dist/
-
-# Production
-/build
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env
+# Environment variables
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
 
-# Vercel
-.vercel
+# IDE and local files
+/.cursor/
+*.backup
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-Thumbs.db
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Firebase
-.firebase/
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
-
-# Supabase
-.supabase/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Cursor MCP config (ignore sensitive MCP files)
-.cursor/
-
-# Development environment file
-.env.development
+# Development scripts, logs, and temporary files
+1235464654.pub
+add-equipment-data.md
+ADMIN_LOADING_FIX.md
+ADMIN_MCP_SETUP.md
+ADMIN_PANEL_COMPLETE.md
+ADMIN_SETUP_GUIDE.md
+ADVANCED_PERFORMANCE_OPTIMIZATION.md
+apply-messages-tables-fixed.sql
+AUTH_FIXES_SUMMARY.md
+BACKEND_INTEGRATION_STATUS.md
+BROWSER_CACHE_FIX.md
+CACHE_FIX_GUIDE.md
+check-and-fix-database.sql
+check-equipment-structure.sql
+check-land-rls.sql
+check-land-schema.sql
+check-tables.js
+check-vegetables-constraint.sql
+check-vegetables-quantity.sql
+check-vegetables-rls.sql
+clear-all-marketplaces.sql
+clear-animals-marketplace.sql
+clear-test-data.sql
+create-admin-tables.sql
+create-admin-user.js
+create-messages-tables.sql
+create-missing-communication-tables.sql
+create-missing-tables.sql
+create-only-missing-tables.sql
+create-remaining-tables.sql
+create-test-user.sql
+create-vegetables-table.sql
+create-website-settings-table.sql
+database-setup.sql
+debug-equipment-insert.sql
+debug-equipment-posting.sql
+debug-vegetables-insert.sql
+delete-specific-animals.sql
+DEPLOYMENT_FIXES.md
+disable-rls-permanent.sql
+disable-triggers-temp.sql
+elghella-agritech.html
+EMAIL_SETUP_GUIDE.md
+error.txt
+eslint.config.mjs
+eslint.config.mjs.backup
+FINAL_STATUS.md
+FIX_GUIDE.md
+fix-admin-user-type.sql
+fix-admin-user.sql
+fix-all-errors.sql
+fix-all-rls.sql
+fix-equipment-actual-schema.sql
+fix-equipment-constraints.sql
+fix-equipment-contact-phone.sql
+fix-equipment-rls.sql
+fix-equipment-schema-simple.sql
+fix-equipment-schema.sql
+fix-equipment-simple.sql
+fix-equipment-table-simple.sql
+fix-equipment-table.sql
+fix-land-area-size.sql
+fix-land-contact-phone.sql
+fix-land-rls-policies.sql
+fix-land-rls.sql
+fix-land-vegetables.sql
+fix-nurseries-contact-phone.sql
+fix-rls-proper.sql
+fix-rls-simple.sql
+fix-vegetables-contact-columns.sql
+fix-vegetables-contact-phone.sql
+fix-vegetables-quantity-final.sql
+fix-vegetables-quantity-simple.sql
+fix-vegetables-quantity-type.sql
+fix-vegetables-rls-proper.sql
+fix-vegetables-rls-temp.sql
+fix-vegetables-rls.sql
+fix-vegetables-table-complete.sql
+fix-vegetables-table.sql
+generate-types.js
+get-category-ids.sql
+h origin main
+h origin test-updates
+HEADER_IMPROVEMENTS.md
+HOT_RELOAD_FIX.md
+IMPROVEMENTS_SUMMARY.md
+insert-equipment-data.js
+LAND_MARKETPLACE_SETUP.md
+LIVE_LAND_INTELLIGENCE_TOOL.md
+MAP_ACCURACY_IMPROVEMENTS.md
+MARKETPLACE_SYNC_STATUS.md
+MCP_FIXED_STATUS.md
+MCP_SETUP.md
+MCP_UPGRADE_COMPLETE.md
+mcp-admin-panel.js
+mcp-email-manager.js
+mcp-file-manager.js
+mcp-gibsonai-fixed.js
+mcp-gibsonai-simple.js
+mcp-gibsonai.js
+mcp-simple.js
+mcp-supabase-fixed.js
+mcp-supabase-working.js
+mcp-supabase.js
+mcp-web-scraper.js
+MIGRATION_SUMMARY.md
+NON_CODER_ADMIN_GUIDE.md
+PERFORMANCE_FIXES.md
+PERFORMANCE_OPTIMIZATION_GUIDE.md
+PERFORMANCE_OPTIMIZATION_SUMMARY.md
+PERFORMANCE_OPTIMIZATIONS.md
+PREMIUM_UPGRADE_GUIDE.md
+PROFESSIONAL_UPGRADE_GUIDE.md
+query-profiles.js
+query-users.js
+quick-fix-land.sql
+quick-vegetables-fix.sql
+REAL_TIME_DATA_ACCESS.md
+REAL_TIME_SETTINGS_SETUP.md
+REAL_TIME_SETUP.md
+real-time-data.js
+real-time-monitor.js
+run-sample-data.sql
+sample-animal-data.sql
+sample-equipment-data.sql
+sample-expert-data.sql
+sample-land-data.sql
+SETUP_COMPLETE.md
+setup-missing-tables.sql
+setup-supabase-marketplace.js
+setup-test-users.js
+simple-test-equipment.sql
+SOCIAL_LOGIN_SETUP.md
+SOCIAL_MEDIA_UPGRADE_GUIDE.md
+STORAGE_POLICIES_MANUAL.md
+STORAGE_SETUP_GUIDE.md
+SUPABASE_MIGRATION_COMPLETE.md
+SUPABASE_MIGRATION_GUIDE.md
+SUPABASE_SETUP_GUIDE.md
+supabase-clean-schema.sql
+supabase-complete-setup-easy.sql
+supabase-complete-setup.sql
+supabase-marketplace-schema.sql
+supabase-sample-data.sql
+supabase-setup.md
+supabase-simple-schema.sql
+supabase-storage-policies.sql
+supabase-storage-setup-fixed.sql
+supabase-storage-setup.sql
+supabase-storage-simple-policies.sql
+supabase-storage-simple.sql
+tatus
+test-actual-equipment.sql
+test-database-setup.sql
+test-direct-insert.sql
+test-equipment-data.js
+test-equipment-fix.md
+test-equipment-form-fix.md
+test-equipment-form-simplified.md
+test-equipment-images-fix.md
+test-equipment-phone-display.md
+test-equipment-structure.sql
+test-header-marketplace-icon.md
+test-homepage-livestock-market.md
+test-land-data.sql
+test-land-database-fix.md
+test-land-insert.sql
+test-land-phone-debug.md
+test-land-phone-display.md
+test-land-phone-field.md
+test-nurseries-controlled-inputs-fix.md
+test-nurseries-form-simplified.md
+test-nurseries-phone-display.md
+test-nurseries-phone-field.md
+test-supabase-connection.js
+test-vegetables-constraints.sql
+test-vegetables-insert.sql
+test-vegetables-phone-display.md
+ULTRA_PERFORMANCE_OPTIMIZATION.md
+update-homepage-text.sql
+update-social-media-sql.sql
+update-website-settings-table.sql
+VEGETABLES_CONSTRAINT_FIX.md
+VEGETABLES_MARKETPLACE_FIX.md
+VEGETABLES_RLS_FIX.md
+VERCEL_DEPLOYMENT_GUIDE.md
+VERCEL_FAVICON_SETUP.md

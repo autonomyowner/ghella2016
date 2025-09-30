@@ -1,5 +1,0 @@
-[33m7bab94fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtest-updates[m[33m, [m[1;31morigin/test-updates[m[33m)[m Fix TypeScript errors: Framer Motion tags, conditional rendering, and signup function calls
-[33m509fc5cb[m Fix TypeScript syntax error in lazyLoader.ts
-[33m0ca71a4f[m Major updates: Admin panel, MCP integration, email services, and enhanced features
-[33m40baa45f[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m  Performance Optimization: 4-Step Speed Improvement Plan
-[33mfb1fa631[m Fix Supabase key error in API route - Use centralized Supabase client - Remove environment variable dependency during build
