@@ -80,11 +80,11 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "img-src 'self' data: https:",
-              "style-src 'self' 'unsafe-inline'",
-              "font-src 'self' data:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
               // No 'unsafe-eval' in production
               "script-src 'self' 'unsafe-inline'",
-              `connect-src 'self' ${supabaseUrl} https://*.supabase.co`,
+              `connect-src 'self' ws: wss: ${supabaseUrl} https://*.supabase.co`,
               "frame-ancestors 'none'",
             ].filter(Boolean).join('; '),
           }]
@@ -94,10 +94,10 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "img-src 'self' data: blob: https:",
-              "style-src 'self' 'unsafe-inline'",
-              "font-src 'self' data:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
-              "connect-src 'self' ws: wss: http: https: data: blob: https://*.supabase.co",
+              `connect-src 'self' ws: wss: http: https: data: blob: ${supabaseUrl} https://*.supabase.co`,
               "frame-ancestors 'none'",
             ].join('; '),
           }]),
