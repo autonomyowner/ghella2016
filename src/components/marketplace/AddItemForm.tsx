@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { motion } from 'framer-motion';
 import { addMarketplaceItem, uploadImage } from '@/lib/marketplaceService';
 import Image from 'next/image';
@@ -11,6 +12,7 @@ interface AddItemFormProps {
 }
 
 export default function AddItemForm({ onSuccess, onCancel }: AddItemFormProps) {
+  const { user } = useSupabaseAuth();
   const [formData, setFormData] = useState({
     name: '',
     category: 'products' as const,
@@ -106,6 +108,13 @@ export default function AddItemForm({ onSuccess, onCancel }: AddItemFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Require authentication
+      if (!user) {
+        alert('يجب تسجيل الدخول لإضافة منتج في السوق');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Convert uploaded images to base64 for storage
       const uploadedImageUrls = imagePreviewUrls.length > 0 ? imagePreviewUrls : [];
 
@@ -128,7 +137,7 @@ export default function AddItemForm({ onSuccess, onCancel }: AddItemFormProps) {
         stock: parseInt(formData.stock),
         image: imagePreviewUrls[0] || '📦', // Use first image as main image
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        seller_id: 'current-user', // In real app, get from auth context
+        seller_id: user.id,
         seller_name: formData.seller_name,
         is_active: true,
         images: uploadedImageUrls, // Store all image URLs as base64

@@ -129,6 +129,11 @@ self.addEventListener('fetch', (event) => {
 function getCachingStrategy(request) {
   const url = new URL(request.url);
   
+  // Always bypass Next.js build assets to prevent MIME/type mismatches
+  if (url.pathname.startsWith('/_next/')) {
+    return CACHE_STRATEGIES.NETWORK_ONLY;
+  }
+
   // Static assets (CSS, JS, fonts)
   if (url.pathname.match(/\.(css|js|woff|woff2|ttf|eot)$/i)) {
     return CACHE_STRATEGIES.STATIC_FIRST;

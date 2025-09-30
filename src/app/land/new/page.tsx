@@ -10,7 +10,7 @@ import Image from 'next/image';
 const AddLandPage: React.FC = () => {
   const router = useRouter();
   const { user } = useSupabaseAuth();
-  const { addLand } = useSupabaseData();
+  const { addLand, uploadFile } = useSupabaseData();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
@@ -47,52 +47,35 @@ const AddLandPage: React.FC = () => {
     setError(null);
   };
 
-  // Helper function to convert image to base64
-  const convertImageToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-      reader.onerror = () => {
-        reject(new Error('Failed to convert image to base64'));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
+  // Upload images to Supabase Storage and return public URLs (faster and avoids huge payloads)
   const uploadImages = async (): Promise<string[]> => {
     if (!files || files.length === 0) return [];
 
-    const imageUrls: string[] = [];
+    const urls: string[] = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
+
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         throw new Error(`الصورة ${file.name} كبيرة جداً. الحد الأقصى 5 ميجابايت`);
       }
-
       // Validate file type
       if (!file.type.startsWith('image/')) {
         throw new Error(`${file.name} ليس ملف صورة صالح`);
       }
 
       try {
-        // Convert image to base64 instead of uploading to Firebase Storage
-        const base64String = await convertImageToBase64(file);
-        imageUrls.push(base64String);
-        console.log('Image converted to base64 successfully');
-      } catch (error) {
-        console.error('Error converting image:', error);
-        // If conversion fails, use a placeholder image
-        imageUrls.push('/placeholder-image.jpg');
-        console.log('Using placeholder image due to conversion failure');
+        const path = `land/${user?.id}/${Date.now()}-${i}-${file.name}`;
+        const publicUrl = await uploadFile(file, path);
+        urls.push(publicUrl);
+      } catch (err) {
+        console.error('Failed to upload image, using placeholder:', err);
+        urls.push('/placeholder-image.jpg');
       }
     }
 
-    return imageUrls;
+    return urls;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

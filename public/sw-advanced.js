@@ -1,7 +1,8 @@
 // Advanced Service Worker for Elghella Marketplace
 // Version: 2.0.0
 
-const CACHE_NAME = 'elghella-v2';
+// Bump the cache version to force clients to install the new service worker
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = 'elghella-static-v2';
 const DYNAMIC_CACHE = 'elghella-dynamic-v2';
 const IMAGE_CACHE = 'elghella-images-v2';
@@ -141,6 +142,11 @@ self.addEventListener('fetch', (event) => {
 function getCacheStrategy(request) {
   const url = new URL(request.url);
   
+  // Always bypass Next.js build assets to prevent MIME/type mismatches
+  if (url.pathname.startsWith('/_next/')) {
+    return CACHE_STRATEGIES.NETWORK_ONLY;
+  }
+
   // Skip caching for authentication-related requests
   if (url.pathname.includes('/auth/') || 
       url.href.includes('supabase') || 
@@ -164,8 +170,9 @@ function getCacheStrategy(request) {
   }
   
   // HTML pages
+  // Always fetch HTML from the network to prevent serving stale pages.
   if (request.headers.get('accept')?.includes('text/html')) {
-    return CACHE_STRATEGIES.NETWORK_FIRST;
+    return CACHE_STRATEGIES.NETWORK_ONLY;
   }
   
   // Default to network first

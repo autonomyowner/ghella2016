@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext'
 import { Equipment, LandListing, Category, Profile } from '@/types/database.types'
 import { supabase } from '@/lib/supabase/supabaseClient'
-import { withInsertTimeout, createProgressTracker } from '@/lib/supabase/timeoutWrapper'
+import { withInsertTimeout, createProgressTracker, withQueryTimeout } from '@/lib/supabase/timeoutWrapper'
 
 // Hook for user profile management
 export function useProfile() {
@@ -112,7 +112,7 @@ export function useEquipment() {
         query = query.eq('condition', filters.condition);
       }
 
-      const { data, error: supabaseError } = await query;
+      const { data, error: supabaseError } = await withQueryTimeout(query as any);
 
       if (supabaseError) {
         console.error('❌ Supabase query error:', supabaseError);
@@ -574,11 +574,13 @@ export function useSupabaseData() {
         throw new Error('No active session found. Please log in again.');
       }
 
-      const { data: resultData, error } = await supabase
+      const insertPromise = supabase
         .from(table)
         .insert([recordData])
         .select()
         .single();
+
+      const { data: resultData, error } = await withInsertTimeout(insertPromise as any);
 
       const elapsed = progressTracker.getElapsed();
       console.log(`${table} insert completed in ${elapsed}ms`);
@@ -707,7 +709,7 @@ export function useSupabaseData() {
         });
       }
 
-      const { data, error } = await query;
+      const { data, error } = await withQueryTimeout(query as any);
       if (error) throw error;
 
       let filteredData = data || [];

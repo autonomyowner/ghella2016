@@ -1,4 +1,8 @@
+// Restricted to non-production environments
 'use client';
+if (process.env.NEXT_PUBLIC_APP_ENV === 'production') {
+  throw new Error('This route is disabled in production.');
+}
 
 import React, { useState } from 'react';
 

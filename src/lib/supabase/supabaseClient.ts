@@ -1,15 +1,21 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Fallback to hardcoded values if env vars not set
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://puvmqdnvofbtmqpcjmia.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1dm1xZG52b2ZidG1xcGNqbWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5ODc2MDcsImV4cCI6MjA2ODU2MzYwN30.9rLsQz3vi8rU46OqTYHCInVMSGdj5xgZTYZvq7ZBfjY';
+// Require env vars in all environments; never fall back to hardcoded keys
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase environment variables are missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+}
 
 // Singleton pattern to prevent multiple instances
 let supabaseInstance: SupabaseClient | null = null;
 
 export const getSupabaseClient = (): SupabaseClient => {
   if (!supabaseInstance) {
-    console.log('Creating new Supabase client instance...');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Creating new Supabase client instance...');
+    }
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
@@ -31,14 +37,10 @@ export const getSupabaseClient = (): SupabaseClient => {
         schema: 'public',
       },
     });
-    
-    console.log('Supabase client initialized with URL:', supabaseUrl);
-    console.log('Supabase client config:', {
-      url: supabaseUrl,
-      hasKey: !!supabaseAnonKey,
-      keyLength: supabaseAnonKey?.length,
-      usingEnvVars: !!process.env.NEXT_PUBLIC_SUPABASE_URL
-    });
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Supabase client initialized with URL:', supabaseUrl);
+    }
   }
   
   return supabaseInstance;

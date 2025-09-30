@@ -64,28 +64,71 @@ const nextConfig: NextConfig = {
   
   // Optimize caching headers
   async headers() {
+    const isProd = process.env.NODE_ENV === 'production'
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+
+    const commonSecurityHeaders = [
+      {
+        key: 'Cache-Control',
+        // Never cache HTML pages; allow static assets elsewhere to be cached
+        value: 'no-store, no-cache, must-revalidate',
+      },
+      // Add strict CSP only in production to avoid blocking Next dev HMR/react-refresh
+      ...(isProd
+        ? [{
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "img-src 'self' data: https:",
+              "style-src 'self' 'unsafe-inline'",
+              "font-src 'self' data:",
+              // No 'unsafe-eval' in production
+              "script-src 'self' 'unsafe-inline'",
+              `connect-src 'self' ${supabaseUrl} https://*.supabase.co`,
+              "frame-ancestors 'none'",
+            ].filter(Boolean).join('; '),
+          }]
+        : [{
+            // Looser CSP in development to allow webpack/react-refresh (eval, ws)
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "img-src 'self' data: blob: https:",
+              "style-src 'self' 'unsafe-inline'",
+              "font-src 'self' data:",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
+              "connect-src 'self' ws: wss: http: https: data: blob: https://*.supabase.co",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          }]),
+      {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'geolocation=(), microphone=(), camera=(), payment=()',
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'DENY',
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block',
+      },
+      // HSTS only meaningful over HTTPS (production)
+      ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }] : []),
+    ]
+
     return [
       {
         source: '/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            // Never cache HTML pages; allow static assets elsewhere to be cached
-            value: 'no-store, no-cache, must-revalidate',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
+        headers: commonSecurityHeaders,
       },
       {
         source: '/_next/static/(.*)',

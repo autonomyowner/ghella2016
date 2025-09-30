@@ -1,4 +1,7 @@
 'use client';
+if (process.env.NEXT_PUBLIC_APP_ENV === 'production') {
+  throw new Error('This route is disabled in production.');
+}
 
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useState } from 'react';
