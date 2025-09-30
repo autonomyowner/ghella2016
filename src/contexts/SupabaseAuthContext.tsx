@@ -361,12 +361,21 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Sign out
   const signOut = async () => {
     try {
-      await supabase.auth.signOut()
-      setProfile(null)
+      // Manually clear the session from local storage for resilience
+      const sessionKey = 'sb-elghella-auth-auth-token'; // Based on storageKey in supabaseClient
+      localStorage.removeItem(sessionKey);
+      sessionStorage.removeItem(sessionKey); // Also check session storage
+      console.log('Manually cleared Supabase session from storage.');
+
+      await supabase.auth.signOut();
+      setProfile(null);
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('Error signing out:', error);
+      // Even if the server call fails, the local session is cleared, so we can force a reload 
+      // to reflect the signed-out state.
+      window.location.reload();
     }
-  }
+  };
 
   // Update profile
   const updateProfile = async (updates: Partial<Profile>) => {
