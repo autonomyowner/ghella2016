@@ -13,11 +13,22 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase environment variables');
 }
 
-const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+// Only create client if both URL and service key exist
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function POST(request: NextRequest) {
   try {
     console.log('Admin add request received');
+    
+    if (!supabase) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Supabase service role key not configured',
+        message: 'SUPABASE_SERVICE_ROLE_KEY environment variable is required'
+      }, { status: 500 });
+    }
     
     const { email } = await request.json();
     console.log('Email received:', email);
