@@ -14,6 +14,9 @@ export default function CLSOptimizer({ children }: CLSOptimizerProps) {
     const preventLayoutShift = () => {
       const images = document.querySelectorAll('img')
       images.forEach((img) => {
+        if ((img as HTMLElement).closest('.leaflet-container')) {
+          return
+        }
         if (!img.hasAttribute('width') || !img.hasAttribute('height')) {
           // Set default dimensions to prevent CLS
           img.style.width = img.style.width || '100%'

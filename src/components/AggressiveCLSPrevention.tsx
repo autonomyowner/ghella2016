@@ -15,6 +15,9 @@ export default function AggressiveCLSPrevention({ children }: AggressiveCLSPreve
       // Set explicit dimensions for all images
       const images = document.querySelectorAll('img')
       images.forEach((img) => {
+        if ((img as HTMLElement).closest('.leaflet-container')) {
+          return
+        }
         if (!img.hasAttribute('width') || !img.hasAttribute('height')) {
           img.style.width = '100%'
           img.style.height = 'auto'
